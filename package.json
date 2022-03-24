@@ -46,6 +46,8 @@
     },
     "dependencies": {
         "@types/ramda": "^0.27.34",
+        "mongodb": "^4.4.1",
+        "mongoose": "^6.2.8",
         "ramda": "^0.27.1",
         "typescript-is": "^0.17.0"
     }
