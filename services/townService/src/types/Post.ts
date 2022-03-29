@@ -5,6 +5,7 @@ const PostSchema = new mongoose.Schema({
     title: String,
     postContent: String,
     ownerID: String,
+    townID: String,
     isVisible: Boolean,
     postTime: Date,
     updateTime: Date,
@@ -12,13 +13,9 @@ const PostSchema = new mongoose.Schema({
     coordinates: {
         x: Number,
         y: Number 
-    }
-
+    },
+    comments: [String]
 });
-
-PostSchema.add({
-    posts: [PostSchema]
-})
 
 const Post = mongoose.model("Post", PostSchema);
 
