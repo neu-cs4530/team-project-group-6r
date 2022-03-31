@@ -14,7 +14,7 @@ const PostSchema = new mongoose.Schema({
         x: Number,
         y: Number 
     },
-    comments: [String]
+    comments: [String] //this should be IDs
 });
 
 const Post = mongoose.model("Post", PostSchema);

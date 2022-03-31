@@ -9,6 +9,6 @@ const CommentSchema = new mongoose.Schema({
     comments: [String]
 });
 
-const File = mongoose.model("Comment", CommentSchema);
+const Comment = mongoose.model("Comment", CommentSchema);
 
-export { File };
+export { Comment };
