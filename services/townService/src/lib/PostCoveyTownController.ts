@@ -1,9 +1,9 @@
 import PlayerSession from '../types/PlayerSession';
 import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
-import PostController from './PostController';
-import Post from '../types/Post';
-import Comment from '../types/Comment';
+import PostController from './DatabaseController';
+import Post from '../types/TownPost';
+import Comment from '../types/TownComment';
 
 export default class PostCoveyTownController extends CoveyTownController {
     // Owner
