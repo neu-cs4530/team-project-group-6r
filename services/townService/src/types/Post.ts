@@ -14,7 +14,11 @@ const PostSchema = new mongoose.Schema({
         x: Number,
         y: Number 
     },
-    comments: [String] //this should be IDs
+    comments: [String], //this should be IDs
+    file: {
+        data: Buffer,
+        contentType: String
+    }
 });
 
 const Post = mongoose.model("Post", PostSchema);
