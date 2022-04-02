@@ -1,4 +1,4 @@
-import { TownJoinResponse } from "./CoveyTownRequestHandlers";
+import { TownJoinResponse, TownCreateRequest, TownDeleteRequest } from "./CoveyTownRequestHandlers";
 import Player from "../types/Player";
 import Post from "../types/Post";
 import Comment from "../types/Comment";
@@ -12,16 +12,29 @@ export interface PostTownJoinResponse extends TownJoinResponse {
     posts: String[];
 }
 
+export interface PostTownUpdateRequest extends TownCreateRequest {
+    username: String;
+}
+
+export interface PostTwonDeleteRequest extends TownDeleteRequest {
+    username: String;
+}
+
 export interface PostUpdateRequest {
     coveyTown: string;
     sessionToken: string;
     post: Post;
 }
 
-export interface CommentUpdateReqest {
+export interface CommentUpdateRequest {
     coveyTown: string;
     sessionToken: string;
     comment: Comment;
+}
+
+export interface AdminstratorUpdateRequest {
+    sessionToken: string;
+    player: Player;
 }
 
 export interface PostRequest {
@@ -37,9 +50,4 @@ export interface PostIdsResponse {
 export interface PostContentResponse {
     post: Post;
     comments: Comment[];
-}
-
-export interface AdminstratorRequest {
-    sessionToken: string;
-    player: Player;
 }
