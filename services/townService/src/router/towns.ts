@@ -11,9 +11,10 @@ import {
   townUpdateHandler,
 } from '../requestHandlers/CoveyTownRequestHandlers';
 import { logError } from '../Utils';
-import { Post } from '../types/Post';
+import { Post } from '../types/MongoPost';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
+
   /*
     Gets list of posts in town.
   */

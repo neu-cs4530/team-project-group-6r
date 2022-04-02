@@ -5,14 +5,27 @@ import mongoose from 'mongoose';
 import { AddressInfo } from 'net';
 import addTownRoutes from './router/towns';
 import CoveyTownsStore from './lib/CoveyTownsStore';
+import multer from 'multer';
+import GridFsStorage from 'multer-gridfs-storage';
+import Grid from 'gridfs-stream';
+import methodOverride from 'method-override';
+import bodyParser from 'body-parser';
+import path from 'path';
+import crypto from 'crypto';
+
 
 const app = Express();
 app.use(CORS());
+app.use(bodyParser.json());
+app.use(methodOverride('_method'));
+app.set('view engine', 'ejs');
 const server = http.createServer(app);
-
 
 const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
+
+let gfs;
+
 
 addTownRoutes(server, app)
 
