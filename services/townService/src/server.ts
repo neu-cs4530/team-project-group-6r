@@ -6,7 +6,7 @@ import { AddressInfo } from 'net';
 import addTownRoutes from './router/towns';
 import CoveyTownsStore from './lib/CoveyTownsStore';
 import multer from 'multer';
-import GridFsStorage from 'multer-gridfs-storage';
+import { GridFsStorage } from 'multer-gridfs-storage';
 import Grid from 'gridfs-stream';
 import methodOverride from 'method-override';
 import bodyParser from 'body-parser';
@@ -26,12 +26,38 @@ const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?ret
 const conn = mongoose.createConnection(uri);
 //mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
 
+
+//init gfs
 let gfs;
 
+conn.once('open', () => {
+  gfs = Grid(conn.db, mongoose.mongo);
+  gfs.collection('uploads')
+})
+
+// create storage engine
+const storage = new GridFsStorage({
+  url: uri,
+  file: (_req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          filename: filename,
+          bucketName: 'uploads'
+        };
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+const upload = multer({ storage });
 
 
-
-addTownRoutes(server, app)
+addTownRoutes(server, app, upload);
 
 server.listen(process.env.PORT || 8081, () => {
   const address = server.address() as AddressInfo;

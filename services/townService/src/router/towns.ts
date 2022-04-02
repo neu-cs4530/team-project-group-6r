@@ -11,9 +11,14 @@ import {
   townUpdateHandler,
 } from '../requestHandlers/CoveyTownRequestHandlers';
 import { logError } from '../Utils';
-import { Post } from '../types/MongoPost';
+import { Post } from '../schemas/MongoPost';
+import { Multer } from 'multer';
 
-export default function addTownRoutes(http: Server, app: Express): io.Server {
+export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
+
+  app.post('/towns/:townID/hehe', upload.single('file'), async (req, res) => {
+    res.json({ file: req.file });
+  })
 
   /*
     Gets list of posts in town.
