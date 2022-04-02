@@ -22,9 +22,13 @@ app.set('view engine', 'ejs');
 const server = http.createServer(app);
 
 const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
-mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
+
+const conn = mongoose.createConnection(uri);
+//mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
 
 let gfs;
+
+
 
 
 addTownRoutes(server, app)
