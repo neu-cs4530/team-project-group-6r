@@ -13,11 +13,17 @@ import {
 import { logError } from '../Utils';
 import { Post } from '../schemas/MongoPost';
 import { Multer } from 'multer';
+import { gfs } from '../server';
 
 export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
 
   app.post('/towns/:townID/hehe', upload.single('file'), async (req, res) => {
     res.json({ file: req.file });
+    console.log(req.file);
+  })
+
+  app.get('/files', (req, res) => {
+    gfs.find().toArray()
   })
 
   /*

@@ -28,7 +28,7 @@ const conn = mongoose.createConnection(uri);
 
 
 //init gfs
-let gfs;
+let gfs: Grid.Grid;
 
 conn.once('open', () => {
   gfs = Grid(conn.db, mongoose.mongo);
@@ -68,3 +68,5 @@ server.listen(process.env.PORT || 8081, () => {
       .createTown(process.env.DEMO_TOWN_ID, false);
   }
 });
+
+export { gfs };
