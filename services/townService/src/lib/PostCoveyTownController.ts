@@ -12,6 +12,7 @@ export default class PostCoveyTownController extends CoveyTownController {
     private _administrators: string[];
     // Post Controller
     private _postController: PostController;
+
     // TODO: set up a setinterval that deletes the expired posts
 
     // Add
@@ -66,6 +67,12 @@ export default class PostCoveyTownController extends CoveyTownController {
 
 
     addAdministrator(session: PlayerSession, player: Player): boolean {
+        // Access control
+        // Add adminstrator
+        // Invoke
+    }
+
+    removeAdministrator(session: PlayerSession, player: Player): boolean {
         // Access control
         // Add adminstrator
         // Invoke
