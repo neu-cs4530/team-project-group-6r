@@ -10,8 +10,12 @@ const app = Express();
 app.use(CORS());
 const server = http.createServer(app);
 
+<<<<<<< Updated upstream
 
 const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
+=======
+const uri = 'mongodb+srv://Ezra:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
+>>>>>>> Stashed changes
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
 
 addTownRoutes(server, app)
@@ -25,3 +29,5 @@ server.listen(process.env.PORT || 8081, () => {
       .createTown(process.env.DEMO_TOWN_ID, false);
   }
 });
+
+export {server};
