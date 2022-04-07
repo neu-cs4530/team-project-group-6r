@@ -13,18 +13,65 @@ import {
 import { logError } from '../Utils';
 import { Post } from '../schemas/MongoPost';
 import { Multer } from 'multer';
-import { gfs } from '../server';
+import { gfs, gridfsBucket } from '../server';
 
 export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
 
-  app.post('/towns/:townID/hehe', upload.single('file'), async (req, res) => {
+  //post a file
+  app.post('/upload', upload.single('file'), async (req, res) => {
     res.json({ file: req.file });
     console.log(req.file);
   })
 
-  app.get('/files', (req, res) => {
-    gfs.find().toArray()
+  //get all files
+  app.get('/files', (_req, res) => {
+    gfs.files.find().toArray((_err, files) => {
+      //Check if files
+      if(!files || files.length == 0) {
+        return res.status(404).json({
+          err: 'No files exist'
+        });
+      }
+
+      return res.json(files);
+    })
   })
+
+  //get one file
+  app.get('/files/:filename', (req, res) => {
+    gfs.files.findOne({filename: req.params.filename}, (_err, file) => {
+      if(!file || file.length == 0) {
+        return res.status(404).json({
+          err: 'No file exist'
+        });
+      }
+
+      return res.json(file);
+    })
+  })
+
+  //get image
+  app.get('/image/:filename', (req, res) => {
+    gfs.files.findOne({filename: req.params.filename}, (_err, file) => {
+      if(!file || file.length == 0) {
+        return res.status(404).json({
+          err: 'No file exist'
+        });
+      }
+
+      //check image
+      if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
+        const readStream = gridfsBucket.openDownloadStreamByName(file.filename);
+        readStream.pipe(res);
+      } else{
+        return res.status(404).json({
+          err: 'Not an image'
+        });
+      }
+
+      return res.json(file);
+    })
+  });
 
   /*
     Gets list of posts in town.

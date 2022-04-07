@@ -12,6 +12,7 @@ import methodOverride from 'method-override';
 import bodyParser from 'body-parser';
 import path from 'path';
 import crypto from 'crypto';
+import { GridFSBucket } from 'mongodb';
 
 
 const app = Express();
@@ -26,11 +27,14 @@ const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?ret
 const conn = mongoose.createConnection(uri);
 //mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
 
-
-//init gfs
 let gfs: Grid.Grid;
+let gridfsBucket: GridFSBucket;
 
 conn.once('open', () => {
+  gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'uploads'
+  });
+
   gfs = Grid(conn.db, mongoose.mongo);
   gfs.collection('uploads')
 })
@@ -69,4 +73,4 @@ server.listen(process.env.PORT || 8081, () => {
   }
 });
 
-export { gfs };
+export { gfs, gridfsBucket };
