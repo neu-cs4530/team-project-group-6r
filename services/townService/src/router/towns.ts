@@ -50,26 +50,24 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
     })
   })
 
-  //get image
+  //get and stream image
   app.get('/image/:filename', (req, res) => {
     gfs.files.findOne({filename: req.params.filename}, (_err, file) => {
       if(!file || file.length == 0) {
-        return res.status(404).json({
+        res.status(404).json({
           err: 'No file exist'
         });
+      } else {
+        //check image
+        if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
+          const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
+          readStream.pipe(res);
+        } else{
+          res.status(404).json({
+            err: 'Not an image'
+          });
+        }
       }
-
-      //check image
-      if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
-        const readStream = gridfsBucket.openDownloadStreamByName(file.filename);
-        readStream.pipe(res);
-      } else{
-        return res.status(404).json({
-          err: 'Not an image'
-        });
-      }
-
-      return res.json(file);
     })
   });
 
