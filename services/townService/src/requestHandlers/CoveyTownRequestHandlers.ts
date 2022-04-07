@@ -5,7 +5,6 @@ import { ChatMessage, CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import { ConversationAreaCreateRequest, ServerConversationArea } from '../client/TownsServiceClient';
-import { SubscribeRulesList } from 'twilio/lib/rest/video/v1/room/roomParticipant/roomParticipantSubscribeRule';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -82,8 +81,6 @@ export interface TownUpdateRequest {
   friendlyName?: string;
   isPubliclyListed?: boolean;
 }
-
-
 
 /**
  * Envelope that wraps any response from the server

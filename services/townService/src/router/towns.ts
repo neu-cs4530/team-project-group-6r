@@ -10,87 +10,14 @@ import {
   townSubscriptionHandler,
   townUpdateHandler,
 } from '../requestHandlers/CoveyTownRequestHandlers';
+import {
+  postCreateHandler, postDeleteHandler, postGetHandler, postGetIdInTownHandler, postUpdateHandler,
+} from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
-import { Post } from '../types/MongoPost';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
 
-  /*
-    Gets list of posts in town.
-  */
-  app.get('/towns/:townID/posts', express.json(), async (_req, res) => {
-    const posts = await Post.find({});
-
-    try {
-      res.status(StatusCodes.OK).json(posts);
-    } catch (err) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  });
-
-  app.get('/towns/:townID/post/:postID', express.json(), async (req, res) => {
-    const post = await Post.findById(req.params.postID);
-
-    try {
-      res.status(StatusCodes.OK).json(post);
-    } catch (err) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  });
-
-  app.post('/towns/:townID/post', express.json(), async (req, res) => {
-    const post = new Post(req.body);
-    console.log(post);
-
-    try {
-      post.save();
-      res.status(StatusCodes.OK).json(post);
-    } catch (err) {
-      logError(err);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  });
-
-  app.patch('/towns/:townID/post/:postID', express.json(), async (req, res) => {
-    try {
-      const post = await Post.findByIdAndUpdate(req.params.postID, req.body);
-      console.log(req.body)
-      res.status(StatusCodes.OK).json(post);
-    } catch (err) {
-      logError(err);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  })
-
-  app.delete('/towns/:townID/post/:postID', express.json(), async (req, res) => {
-    try {
-      const post = await Post.findByIdAndDelete(req.params.postID);
-
-      if (!post) {
-        res.status(StatusCodes.NOT_FOUND)
-          .json({message: "Specified post not found"});
-      }
-      res.status(StatusCodes.OK).json(post);
-    } catch (err) {
-      logError(err);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  })
+  
 
   /*
    * Create a new session (aka join a town)
@@ -196,6 +123,106 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
       });
       res.status(StatusCodes.OK)
         .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+   * Creates a post
+   */
+  app.post('/towns/:townID/post', express.json(), async (req, res) => {
+    try {
+      const result = await postCreateHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        post: req.body.post,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+   * Get a post
+   */
+   app.get('/towns/:townID/post/:postID', express.json(), async (req, res) => {
+    try {
+      const result = await postGetHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+   * Get all post ID's in town.
+   */
+   app.get('/towns/:townID/post', express.json(), async (req, res) => {
+    try {
+      const result = await postGetIdInTownHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+   * Delete a post
+   */
+   app.delete('/towns/:townID/post/:postID', express.json(), async (req, res) => {
+    try {
+      const result = await postDeleteHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+   * Update a post
+   */
+   app.patch('/towns/:townID/post/:postID', express.json(), async (req, res) => {
+    try {
+      const result = await postUpdateHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID,
+        post: req.body.post,
+      });
+      res.status(StatusCodes.OK).json(result);
     } catch (err) {
       logError(err);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR)
