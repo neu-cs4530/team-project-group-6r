@@ -41,6 +41,19 @@ export interface CommentCreateRequest {
     comment : Comment
 }
 
+export interface CommentGetRequest {
+    coveyTownID : string,
+    sessionToken : string,
+    commentID : string
+}
+
+export interface CommentUpdateRequest {
+    coveyTownID : string,
+    sessionToken : string,
+    commentID : string,
+    comment : Comment
+}
+
 const postTownController = new PostCoveyTownController("testTown", true);
 
 export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post>> {
@@ -114,6 +127,42 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
 export async function commentCreateHandler(_requestData : CommentCreateRequest): Promise<ResponseEnvelope<Comment>> {
     const comment = _requestData.comment;
     const result = await postTownController.createComment(comment);
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function commentGetHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
+    
+    const commentID = _requestData.commentID;
+    const result = await postTownController.getComment(commentID);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function commentDeleteHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
+    const commentID = _requestData.commentID;
+    const result = await postTownController.deleteComment(commentID);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function commentUpdateHandler(_requestData : CommentUpdateRequest) : Promise<ResponseEnvelope<Comment>> {
+    const commentID = _requestData.commentID;
+    const comment = _requestData.comment;
+
+    const result = await postTownController.updateComment(commentID, comment);
+
     return {
         isOK: true,
         response: result,

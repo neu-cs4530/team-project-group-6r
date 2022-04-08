@@ -1,4 +1,5 @@
 import { Post } from "../../types/PostTown/post";
+import { Comment } from "../../types/PostTown/comment";
 import mongoose from 'mongoose';
 import { PostSchema } from "../../schemas/MongoPost";
 import { CommentSchema } from "../../schemas/MongoComment";
@@ -49,13 +50,18 @@ export default class DatabaseController {
         return await insertComment.save();
     }
 
-    async deletePost(coveyTownID : string, postID : string) : Promise<any> {
-        const model = mongoose.model("post", PostSchema, coveyTownID);
-        return await model.findByIdAndDelete(postID);
+    async getComment(coveyTownID : string, commentID : string) : Promise<any> {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        return await model.findById(commentID);
     }
 
-    async updatePost(coveyTownID : string, postID : string, post : Post) : Promise<any> {
-        const model = mongoose.model("post", PostSchema, coveyTownID);
-        return await model.findByIdAndUpdate(postID, post, {new : true});
+    async deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        return await model.findByIdAndDelete(commentID);
+    }
+
+    async updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<any> {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        return await model.findByIdAndUpdate(commentID, comment, {new : true});
     }
 }
