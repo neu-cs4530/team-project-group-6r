@@ -10,4 +10,4 @@ const CommentSchema = new mongoose.Schema({
 });
 
 
-export { CommentSchema };
+export { CommentSchema }; 
