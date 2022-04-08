@@ -1,7 +1,7 @@
 import { Post } from "../../types/PostTown/post";
 import mongoose from 'mongoose';
 import { PostSchema } from "../../schemas/MongoPost";
-import { ResponseEnvelope } from "../../client/TownsServiceClient";
+import { CommentSchema } from "../../schemas/MongoComment";
 
 export default class DatabaseController {
     private static _instance : DatabaseController;
@@ -26,10 +26,27 @@ export default class DatabaseController {
         return await model.findById(postID);
     }
 
-    async getPostIdInTown(coveyTownID : string) : Promise<any> {
+    async getAllPostInTown(coveyTownID : string) : Promise<any> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         console.log(coveyTownID)
         return await model.find({});
+    }
+
+    async deletePost(coveyTownID : string, postID : string) : Promise<any> {
+        const model = mongoose.model("post", PostSchema, coveyTownID);
+        return await model.findByIdAndDelete(postID);
+    }
+
+    async updatePost(coveyTownID : string, postID : string, post : Post) : Promise<any> {
+        const model = mongoose.model("post", PostSchema, coveyTownID);
+        return await model.findByIdAndUpdate(postID, post, {new : true});
+    }
+
+    async createComment(coveyTownID : string, comment : Comment) : Promise<Comment> {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        const insertComment = new model(comment);
+
+        return await insertComment.save();
     }
 
     async deletePost(coveyTownID : string, postID : string) : Promise<any> {

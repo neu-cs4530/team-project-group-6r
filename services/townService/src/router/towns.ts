@@ -11,7 +11,7 @@ import {
   townUpdateHandler,
 } from '../requestHandlers/CoveyTownRequestHandlers';
 import {
-  postCreateHandler, postDeleteHandler, postGetHandler, postGetIdInTownHandler, postUpdateHandler,
+  postCreateHandler, postDeleteHandler, postGetAllInTownHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
 
@@ -177,7 +177,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
    */
    app.get('/towns/:townID/post', express.json(), async (req, res) => {
     try {
-      const result = await postGetIdInTownHandler({
+      const result = await postGetAllInTownHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken
       });
@@ -221,6 +221,26 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         sessionToken: req.body.sessionToken,
         postID: req.params.postID,
         post: req.body.post,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+   * Create a comment
+   */
+   app.post('/towns/:townID/comment', express.json(), async (req, res) => {
+    try {
+      const result = await commentCreateHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        comment: req.body.comment,
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {

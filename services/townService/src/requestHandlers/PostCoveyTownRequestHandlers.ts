@@ -1,5 +1,6 @@
 import PostCoveyTownController from "../lib/PostTown/PostCoveyTownController";
-import {Post} from "../types/PostTown/post";
+import { Post } from "../types/PostTown/post";
+import { Comment } from "../types/PostTown/comment";
 
 /**
  * Envelope that wraps any response from the server
@@ -14,10 +15,6 @@ export interface PostCreateRequest {
     coveyTownID : string,
     sessionToken : string,
     post : Post
-}
-
-export interface PostCreateResponse {
-    postID: Post;
 }
 
 export interface PostGetRequest {
@@ -36,6 +33,12 @@ export interface PostUpdateRequest {
     sessionToken : string,
     postID : string,
     post : Post
+}
+
+export interface CommentCreateRequest {
+    coveyTownID: string,
+    sessionToken: string,
+    comment : Comment
 }
 
 const postTownController = new PostCoveyTownController("testTown", true);
@@ -73,9 +76,9 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
     };
 }
 
-export async function postGetIdInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
+export async function postGetAllInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
     const townID = _requestData.coveyTownID;
-    const result : string[] = await postTownController.getPostIdInTown();
+    const result : string[] = await postTownController.getAllPostInTown();
 
     return {
         isOK: true,
@@ -101,6 +104,16 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
 
     const result = await postTownController.updatePost(postID, post);
 
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function commentCreateHandler(_requestData : CommentCreateRequest): Promise<ResponseEnvelope<Comment>> {
+    const comment = _requestData.comment;
+    const result = await postTownController.createComment(comment);
     return {
         isOK: true,
         response: result,

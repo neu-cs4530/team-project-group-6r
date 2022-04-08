@@ -2,7 +2,6 @@ import { nanoid } from 'nanoid';
 import CoveyTownController from '../CoveyTownController';
 import {Post} from "../../types/PostTown/post";
 import DatabaseController from './DatabaseController';
-import { ResponseEnvelope } from '../../requestHandlers/CoveyTownRequestHandlers';
 
 export default class PostCoveyTownController extends CoveyTownController {
     // Owner
@@ -33,9 +32,9 @@ export default class PostCoveyTownController extends CoveyTownController {
         return result;
     }
 
-    async getPostIdInTown() : Promise<string[]> {
+    async getAllPostInTown() : Promise<string[]> {
         const databaseController = DatabaseController.getInstance();
-        const result : string[] = await databaseController.getPostIdInTown(this.coveyTownID);
+        const result : string[] = await databaseController.getAllPostInTown(this.coveyTownID);
 
         return result;
     }
@@ -50,6 +49,13 @@ export default class PostCoveyTownController extends CoveyTownController {
     async updatePost(postID : string, post : Post) : Promise<Post> {
         const databaseController = DatabaseController.getInstance();
         const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
+
+        return result;
+    }
+
+    async createComment(comment : Comment) : Promise<Comment> {
+        const databaseController = DatabaseController.getInstance();
+        const result:Comment = await databaseController.createComment(this.coveyTownID, comment);
 
         return result;
     }
