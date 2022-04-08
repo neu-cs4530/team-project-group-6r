@@ -1,13 +1,9 @@
-import mongoose from "mongoose";
-
-const CommentSchema = new mongoose.Schema({
+export type Comment = {
+    _id?: String,
     rootPostID: String,
     parentCommentID: String,
     ownerID: String,
     commentContent: String,
     isDeleted: Boolean,
     comments: [String]
-});
-
-
-export { CommentSchema };
+};
