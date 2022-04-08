@@ -6,8 +6,8 @@ const CommentSchema = new mongoose.Schema({
     ownerID: String,
     commentContent: String,
     isDeleted: Boolean,
-    comments: [String]
-});
+    comments: { type: [String], default: [] }
+}, { timestamps: true });
 
 
 export { CommentSchema }; 

@@ -1,11 +1,14 @@
-export type Post = {
-    _id?: String,
-    title: String,
-    postContent: String,
-    ownerID: String,
-    isVisible: Boolean,
+export interface Post {
+    _id?: string,
+    title: string,
+    postContent: string,
+    ownerID: string,
+    isVisible: boolean,
+    comments?: string[],
     coordinates: {
-        x: Number,
-        y: Number,
-    }
+        x: number,
+        y: number,
+    },
+    createdAt?: Date,
+    updatedAt?: Date
 }

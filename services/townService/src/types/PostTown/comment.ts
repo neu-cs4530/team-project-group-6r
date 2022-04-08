@@ -1,9 +1,11 @@
-export type Comment = {
-    _id?: String,
-    rootPostID: String,
-    parentCommentID: String,
-    ownerID: String,
-    commentContent: String,
-    isDeleted: Boolean,
-    comments: [String]
+export interface Comment {
+    _id?: string,
+    rootPostID: string,
+    parentCommentID: string,
+    ownerID: string,
+    commentContent: string,
+    isDeleted: boolean,
+    comments?: string[],
+    createdAt? : Date,
+    updatedAt? : Date
 };

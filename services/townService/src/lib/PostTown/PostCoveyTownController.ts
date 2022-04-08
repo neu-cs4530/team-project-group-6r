@@ -49,6 +49,7 @@ export default class PostCoveyTownController extends CoveyTownController {
     async deletePost(postID : string) : Promise<Post> {
         const databaseController = DatabaseController.getInstance();
         const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+        await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
         return result;
     }
@@ -70,7 +71,16 @@ export default class PostCoveyTownController extends CoveyTownController {
         //censor
         comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
         const result : Comment = await databaseController.createComment(this.coveyTownID, comment);
+        //should I type cast like this, if I decide to check for string 
+        //then that means the whole thing needs to be refactored
+        const createdCommentID : string = result._id!;
 
+        if (comment.parentCommentID === '') {
+            await databaseController.addCommentToRootPost(this.coveyTownID, comment.rootPostID, createdCommentID);
+        } else {
+            await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
+        }
+        
         return result;
     }
 
