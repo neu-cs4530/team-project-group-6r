@@ -15,16 +15,24 @@ export default class DatabaseController {
         return DatabaseController._instance;
     }
 
-    async createPost(coveyTownID : string, post : Post) : Promise<Post> {
+    async createPost(coveyTownID : string, post : Post) : Promise<any> {
+        try {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         const insertPost = new model(post);
 
         return await insertPost.save();
+        } catch(err) {
+            return await err;
+        }
     }
 
     async getPost(coveyTownID : string, postID : string) : Promise<any> {
+        try {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findById(postID);
+        } catch (err) {
+            return await err;
+        }
     }
 
     async getAllPostInTown(coveyTownID : string) : Promise<any> {
