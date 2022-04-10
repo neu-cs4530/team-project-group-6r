@@ -9,6 +9,8 @@ import useConversationAreas from '../../hooks/useConversationAreas';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import usePlayerMovement from '../../hooks/usePlayerMovement';
 import usePlayersInTown from '../../hooks/usePlayersInTown';
+// TODO
+import usePosts from '../../hooks/usePosts';
 import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
@@ -263,6 +265,7 @@ class CoveyGameScene extends Phaser.Scene {
       if (this.postKey.isDown) {
         const tileXY = this.worldLayer.worldToTileXY(body.x, body.y);
         this.worldLayer.putTileAt(11414, tileXY.x + 1, tileXY.y + 1);
+        console.log(tileXY);
       }
 
       const primaryDirection = this.getNewMovementDirection();
@@ -693,6 +696,8 @@ export default function WorldMap(): JSX.Element {
   const [newConversation, setNewConversation] = useState<ConversationArea>();
   const playerMovementCallbacks = usePlayerMovement();
   const players = usePlayersInTown();
+  // TODO
+  const posts = usePosts();
 
   useEffect(() => {
     const config = {

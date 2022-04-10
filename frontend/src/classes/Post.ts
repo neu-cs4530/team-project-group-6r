@@ -1,7 +1,7 @@
 import Comment, { ServerComment } from './Comment';
 
-
 export type ServerPost = {
+    id: string,
     title: string,
     postContent: string,
     ownerID: string,
@@ -22,7 +22,48 @@ export type Coordinate = {
     y: number;
 }
 
+export const dummyPosts: ServerPost[] = [
+    {
+        "coordinates": {
+            "x": 48,
+            "y": 35,
+        },
+        "comments": [],
+        "id": "624ea8cc6e50c406f87af212",
+        "title": "Post 0",
+        "postContent": "fuck you cheng xi tsou cai ni maa de bi",
+        "ownerID": "test",
+        "isVisible": true,
+    },
+    {
+        "coordinates": {
+            "x": 40,
+            "y": 35,
+        },
+        "comments": [],
+        "id": "624e4ac5ae40e056287afe11",
+        "title": "Post 1",
+        "postContent": "fuck you cheng xi tsou cai ni maa de bi",
+        "ownerID": "test",
+        "isVisible": true,
+    },
+    {
+        "coordinates": {
+            "x": 42,
+            "y": 30,
+        },
+        "comments": [],
+        "id": "891ec8s56ea0c0c6f8736e71",
+        "title": "Post 2",
+        "postContent": "fuck you cheng xi tsou cai ni maa de bi",
+        "ownerID": "test",
+        "isVisible": true,
+    }
+]
+
 export default class Post {
+    private _id: string;
+
     private _title: string;
 
     private _postContent: string;
@@ -41,7 +82,10 @@ export default class Post {
 
     private _listeners: PostListener[] = [];
 
-    constructor(title: string, postContent: string, ownerID: string, isVisible: boolean, coordinate: Coordinate, comments?: string[], createAt?: Date, updateAt?: Date) {
+    constructor(id: string, title: string, postContent: string,
+        ownerID: string, isVisible: boolean, coordinate: Coordinate,
+        comments?: string[], createAt?: Date, updateAt?: Date) {
+        this._id = id;
         this._title = title;
         this._postContent = postContent;
         this._ownerID = ownerID;
@@ -50,6 +94,10 @@ export default class Post {
         this._coordinates = coordinate;
         this._createAt = createAt;
         this._updateAt = updateAt;
+    }
+
+    get id() {
+        return this._id;
     }
 
     get title() {
@@ -86,6 +134,7 @@ export default class Post {
 
     toServerPost(): ServerPost {
         return {
+            id: this._id,
             title: this._title,
             postContent: this._postContent,
             ownerID: this._ownerID,
@@ -107,6 +156,7 @@ export default class Post {
 
     static fromServerPost(serverPost: ServerPost): Post {
         const ret = new Post(
+            serverPost.id,
             serverPost.title,
             serverPost.postContent,
             serverPost.ownerID,
