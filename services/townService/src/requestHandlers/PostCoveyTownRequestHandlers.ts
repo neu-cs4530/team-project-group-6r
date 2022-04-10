@@ -94,7 +94,6 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
 }
 
 export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
-    const townID = _requestData.coveyTownID;
     const result : string[] = await postTownController.getAllPostInTown();
 
     return {
@@ -105,7 +104,6 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRe
 }
 
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
-    console.log(postTownController?.getSessionByToken(_requestData.sessionToken));
     if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
         return {
           isOK: false, 
