@@ -2,6 +2,8 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
+import { ServerPost } from './Post';
+import { ServerComment } from './Comment';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -101,6 +103,49 @@ export type CoveyTownInfo = {
   maximumOccupancy: number
 };
 
+export interface PostCreateRequest {
+  coveyTownID : string,
+  sessionToken : string,
+  post : ServerPost,
+}
+
+export interface PostGetRequest {
+  coveyTownID : string,
+  sessionToken : string,
+  postID : string
+}
+
+export interface PostGetIdInTownRequest {
+  coveyTownID : string,
+  sessionToken : string
+}
+
+export interface PostUpdateRequest {
+  coveyTownID : string,
+  sessionToken : string,
+  postID : string,
+  post : ServerPost,
+}
+
+export interface CommentCreateRequest {
+  coveyTownID: string,
+  sessionToken: string,
+  comment : ServerComment,
+}
+
+export interface CommentGetRequest {
+  coveyTownID : string,
+  sessionToken : string,
+  commentID : string
+}
+
+export interface CommentUpdateRequest {
+  coveyTownID : string,
+  sessionToken : string,
+  commentID : string,
+  comment : ServerComment,
+}
+
 export default class TownsServiceClient {
   private _axios: AxiosInstance;
 
@@ -156,4 +201,5 @@ export default class TownsServiceClient {
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
+  // TODO: Support post/comment crud 
 }

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import React, { useEffect, useMemo, useState } from 'react';
 import BoundingBox from '../../classes/BoundingBox';
 import ConversationArea from '../../classes/ConversationArea';
+import Post from '../../classes/Post';
 import Player, { ServerPlayer, UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useConversationAreas from '../../hooks/useConversationAreas';
@@ -23,6 +24,13 @@ type ConversationGameObjects = {
   conversationArea?: ConversationArea;
 };
 
+type PostGameObjects = {
+  titleText: Phaser.GameObjects.Text;
+  sprite: Phaser.GameObjects.Sprite;
+  title: string;
+  post?: Post;
+}
+
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -36,6 +44,16 @@ class CoveyGameScene extends Phaser.Scene {
   private conversationAreas: ConversationGameObjects[] = [];
 
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys[] = [];
+
+  // TODO
+  private postKey!: Phaser.Input.Keyboard.Key;
+
+  // TODO
+  private worldLayer!: Phaser.Tilemaps.TilemapLayer;
+
+  // TODO
+  private posts: PostGameObjects[] = [];
+
 
   /*
    * A "captured" key doesn't send events to the browser - they are trapped by Phaser
@@ -232,7 +250,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (this.paused) {
       return;
     }
-    if (this.player && this.cursors) {
+    if (this.player && this.cursors && this.postKey) {
       const speed = 175;
 
       const prevVelocity = this.player.sprite.body.velocity.clone();
@@ -240,6 +258,12 @@ class CoveyGameScene extends Phaser.Scene {
 
       // Stop any previous movement from the last frame
       body.setVelocity(0);
+
+      // TODO: Drop physical tile
+      if (this.postKey.isDown) {
+        const tileXY = this.worldLayer.worldToTileXY(body.x, body.y);
+        this.worldLayer.putTileAt(11414, tileXY.x + 1, tileXY.y + 1);
+      }
 
       const primaryDirection = this.getNewMovementDirection();
       switch (primaryDirection) {
@@ -343,8 +367,8 @@ class CoveyGameScene extends Phaser.Scene {
     wallsLayer.setCollisionByProperty({ collides: true });
     onTheWallsLayer.setCollisionByProperty({ collides: true });
 
-    const worldLayer = map.createLayer('World', tileset, 0, 0);
-    worldLayer.setCollisionByProperty({ collides: true });
+    this.worldLayer = map.createLayer('World', tileset, 0, 0);
+    this.worldLayer.setCollisionByProperty({ collides: true });
     const aboveLayer = map.createLayer('Above Player', tileset, 0, 0);
     aboveLayer.setCollisionByProperty({ collides: true });
 
@@ -353,16 +377,23 @@ class CoveyGameScene extends Phaser.Scene {
      Here, we want the "Above Player" layer to sit on top of the player, so we explicitly give
      it a depth. Higher depths will sit on top of lower depth objects.
      */
-    worldLayer.setDepth(5);
+    this.worldLayer.setDepth(5);
     aboveLayer.setDepth(10);
     veryAboveLayer.setDepth(15);
 
     // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
-    // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
+    // collision shapes. In the tmx file, there's wan object layer with a point named "Spawn Point"
     const spawnPoint = (map.findObject(
       'Objects',
       obj => obj.name === 'Spawn Point',
     ) as unknown) as Phaser.GameObjects.Components.Transform;
+
+    // map.putTileAtWorldXY(11414, spawnPoint.x, spawnPoint.y);
+    // worldLayer.putTileAtWorldXY(11414, spawnPoint.x, spawnPoint.y);
+    // worldLayer.putTileAtWorldXY(11230, spawnPoint.x - 1, spawnPoint.y);
+    // worldLayer.putTileAtWorldXY(11330, spawnPoint.x - 2, spawnPoint.y);
+    // worldLayer.putTileAtWorldXY(11430, spawnPoint.x - 2, spawnPoint.y - 1);
+    // worldLayer.putTileAtWorldXY(11360, spawnPoint.x - 1, spawnPoint.y - 1);
 
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects', { name: 'transporter' });
@@ -436,6 +467,7 @@ class CoveyGameScene extends Phaser.Scene {
     });
 
     const cursorKeys = this.input.keyboard.createCursorKeys();
+    this.postKey = this.input.keyboard.addKey('P');
     this.cursors.push(cursorKeys);
     this.cursors.push(
       this.input.keyboard.addKeys(
@@ -453,7 +485,7 @@ class CoveyGameScene extends Phaser.Scene {
         {
           up: Phaser.Input.Keyboard.KeyCodes.H,
           down: Phaser.Input.Keyboard.KeyCodes.J,
-          left: Phaser.Input.Keyboard.KeyCodes.K,
+          left: Phaser.Input.Keyboard.KeyCodes.K, 
           right: Phaser.Input.Keyboard.KeyCodes.L,
         },
         false,
@@ -541,7 +573,7 @@ class CoveyGameScene extends Phaser.Scene {
     });
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
-    this.physics.add.collider(sprite, worldLayer);
+    this.physics.add.collider(sprite, this.worldLayer);
     this.physics.add.collider(sprite, wallsLayer);
     this.physics.add.collider(sprite, aboveLayer);
     this.physics.add.collider(sprite, onTheWallsLayer);
