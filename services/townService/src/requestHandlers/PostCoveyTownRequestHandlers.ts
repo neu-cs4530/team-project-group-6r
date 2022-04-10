@@ -1,6 +1,7 @@
 import PostCoveyTownController from "../lib/PostTown/PostCoveyTownController";
 import { Post } from "../types/PostTown/post";
 import { Comment } from "../types/PostTown/comment";
+import { HighriskSpecialPrefixInstance } from "twilio/lib/rest/voice/v1/dialingPermissions/country/highriskSpecialPrefix";
 
 /**
  * Envelope that wraps any response from the server
