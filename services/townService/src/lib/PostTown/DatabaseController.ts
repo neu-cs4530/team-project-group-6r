@@ -3,6 +3,7 @@ import { Comment } from "../../types/PostTown/comment";
 import mongoose from 'mongoose';
 import { PostSchema } from "../../schemas/MongoPost";
 import { CommentSchema } from "../../schemas/MongoComment";
+import { gfs, gridfsBucket } from "../../server";
 
 export default class DatabaseController {
     private static _instance : DatabaseController;
@@ -78,5 +79,15 @@ export default class DatabaseController {
     async addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findByIdAndUpdate(parentCommentID, { $push: {comments: createdCommentID}} );
+    }
+
+    async getFile(fileID: string) {
+        const obj_id = new mongoose.Types.ObjectId(fileID);
+        return await gfs.files.findOne({_id: obj_id});
+    }
+
+    async deleteFile(fileID: string) {
+        const obj_id = new mongoose.Types.ObjectId(fileID);
+        return await gridfsBucket.delete(obj_id);
     }
 }

@@ -15,6 +15,8 @@ import {
   commentDeleteHandler,
   commentGetHandler,
   commentUpdateHandler,
+  fileDeleteHandler,
+  fileGetHandler,
   postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
@@ -320,12 +322,20 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
 
   //post a file
   app.post('/upload', upload.single('file'), async (req, res) => {
-    res.json({ file: req.file });
-    console.log(req.file);
+    try {
+      res.json({file: req.file });
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
   })
 
   //get all files
-  app.get('/files', (_req, res) => {
+  app.get('/files', async (_req, res) => {
+
     gfs.files.find().toArray((_err, files) => {
       //Check if files
       if(!files || files.length == 0) {
@@ -336,24 +346,27 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
 
       return res.json(files);
     })
-  })
+  }) 
 
   //get one file
-  app.get('/files/:id', (req, res) => {
-    const obj_id = new mongoose.Types.ObjectId(req.params.id)
-    gfs.files.findOne({_id: obj_id}, (_err, file) => {
-      if(!file || file.length == 0) {
-        return res.status(404).json({
-          err: 'No file exist'
+  app.get('/towns/:townID/files/:id', async (req, res) => {
+    try {
+      const result = await fileGetHandler({
+        coveyTownID: req.params.townID,
+        fileID: req.params.id,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
         });
-      }
-
-      return res.json(file);
-    })
+    }
   })
 
   //get and stream image
-  app.get('/image/:id', (req, res) => {
+  app.get('/image/:id', async (req, res) => {
     const obj_id = new mongoose.Types.ObjectId(req.params.id)
     gfs.files.findOne({_id: obj_id}, (_err, file) => {
       if(!file || file.length == 0) {
@@ -375,17 +388,32 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   });
 
   //delete image
-  app.delete('/files/:id', (req, res) => {
-    const obj_id = new mongoose.Types.ObjectId(req.params.id);
+  app.delete('/towns/:townID/files/:id', async (req, res) => {
     try {
-      gridfsBucket.delete(obj_id);
-      return res.status(StatusCodes.OK).json(obj_id);
+      const result = await fileDeleteHandler({
+        coveyTownID: req.params.townID,
+        fileID: req.params.id,
+      });
+      res.status(StatusCodes.OK).json(result);
     } catch (err) {
-      return res.status(404).json({
-        err: 'File not found'
-      })
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
     }
-  });
+  })
+  // app.delete('/files/:id', async (req, res) => {
+  //   const obj_id = new mongoose.Types.ObjectId(req.params.id);
+  //   try {
+  //     gridfsBucket.delete(obj_id);
+  //     return res.status(StatusCodes.OK).json(obj_id);
+  //   } catch (err) {
+  //     return res.status(404).json({
+  //       err: 'File not found'
+  //     })
+  //   }
+  // });
 
   const socketServer = new io.Server(http, { cors: { origin: '*' } });
   socketServer.on('connection', townSubscriptionHandler);

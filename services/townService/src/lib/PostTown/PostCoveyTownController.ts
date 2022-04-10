@@ -137,4 +137,18 @@ export default class PostCoveyTownController extends CoveyTownController {
         //isn't this terrible
         throw Error('Incorrect post owner');
     }
+
+    async getFile(fileID : string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+        const result : any = await databaseController.getFile(fileID)
+
+        return result;
+    }
+
+    async deleteFile(fileID : string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+        const result : any = await databaseController.deleteFile(fileID)
+
+        return result;
+    }
 }

@@ -57,6 +57,11 @@ export interface CommentUpdateRequest {
     comment : Comment
 }
 
+export interface FileGetRequest {
+    coveyTownID : string,
+    fileID : string
+}
+
 const postTownController = new PostCoveyTownController("testTown", true);
 postTownController.addPlayer(new Player('test'));
 
@@ -175,6 +180,28 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
     const comment = _requestData.comment;
 
     const result = await postTownController.updateComment(commentID, comment, _requestData.sessionToken);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function fileGetHandler(_requestData : FileGetRequest) : Promise<ResponseEnvelope<any>> {
+    const fileID = _requestData.fileID;
+    const result = await postTownController.getFile(fileID);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function fileDeleteHandler(_requestData : FileGetRequest) : Promise<ResponseEnvelope<any>> {
+    const fileID = _requestData.fileID;
+    const result = await postTownController.deleteFile(fileID);
 
     return {
         isOK: true,
