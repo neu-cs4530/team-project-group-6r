@@ -1,6 +1,9 @@
 import PostCoveyTownController from "../lib/PostTown/PostCoveyTownController";
 import { Post } from "../types/PostTown/post";
 import { Comment } from "../types/PostTown/comment";
+import PlayerSession from "../types/PlayerSession";
+import CoveyTownsStore from "../lib/CoveyTownsStore";
+import Player from "../types/Player";
 
 /**
  * Envelope that wraps any response from the server
@@ -55,6 +58,7 @@ export interface CommentUpdateRequest {
 }
 
 const postTownController = new PostCoveyTownController("testTown", true);
+postTownController.addPlayer(new Player('test'));
 
 export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post>> {
     // const townsStore = PostCoveyTownStore.getInstance();
@@ -89,8 +93,7 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
     };
 }
 
-export async function postGetAllInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
-    const townID = _requestData.coveyTownID;
+export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
     const result : string[] = await postTownController.getAllPostInTown();
 
     return {
@@ -101,8 +104,16 @@ export async function postGetAllInTownHandler(_requestData : PostGetIdInTownRequ
 }
 
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
-    const postID = _requestData.postID;
-    const result = await postTownController.deletePost(postID);
+    if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
+        return {
+          isOK: false, 
+          response: undefined, 
+          message: `Unable to delete post with post ID ${_requestData.postID} in town ${_requestData.coveyTownID}`,
+        };
+    }
+
+    const postID: string = _requestData.postID;
+    const result = await postTownController.deletePost(postID, _requestData.sessionToken);
 
     return {
         isOK: true,
@@ -115,7 +126,7 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
     const postID = _requestData.postID;
     const post = _requestData.post;
 
-    const result = await postTownController.updatePost(postID, post);
+    const result = await postTownController.updatePost(postID, post, _requestData.sessionToken);
 
     return {
         isOK: true,
@@ -148,7 +159,7 @@ export async function commentGetHandler(_requestData : CommentGetRequest) : Prom
 
 export async function commentDeleteHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
     const commentID = _requestData.commentID;
-    const result = await postTownController.deleteComment(commentID);
+    const result = await postTownController.deleteComment(commentID, _requestData.sessionToken);
 
     return {
         isOK: true,
@@ -161,7 +172,7 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
     const commentID = _requestData.commentID;
     const comment = _requestData.comment;
 
-    const result = await postTownController.updateComment(commentID, comment);
+    const result = await postTownController.updateComment(commentID, comment, _requestData.sessionToken);
 
     return {
         isOK: true,

@@ -51,6 +51,11 @@ export default class DatabaseController {
         return await model.findByIdAndUpdate(postID, post, {new : true});
     }
 
+    async addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string) {
+        const model = mongoose.model("post", PostSchema, coveyTownID);
+        return await model.findByIdAndUpdate(rootPostID, { $push: {comments: createdCommentID}} );
+    }
+
     async createComment(coveyTownID : string, comment : Comment) : Promise<Comment> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         const insertComment = new model(comment);
@@ -65,11 +70,21 @@ export default class DatabaseController {
 
     async deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
-        return await model.findByIdAndDelete(commentID);
+        return await model.findByIdAndUpdate(commentID, { $set: {isDeleted: true} }, {new: true});
+    }
+
+    async deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        await model.deleteMany({ rootPostID: postID })
     }
 
     async updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
-        return await model.findByIdAndUpdate(commentID, comment, {new : true});
+        return await model.findByIdAndUpdate(commentID, comment, {new: true});
+    }
+
+    async addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        return await model.findByIdAndUpdate(parentCommentID, { $push: {comments: createdCommentID}} );
     }
 }

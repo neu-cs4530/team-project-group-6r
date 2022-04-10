@@ -15,7 +15,7 @@ import {
   commentDeleteHandler,
   commentGetHandler,
   commentUpdateHandler,
-  postCreateHandler, postDeleteHandler, postGetAllInTownHandler, postGetHandler, postUpdateHandler,
+  postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
 
@@ -179,9 +179,9 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
    * Get all post ID's in town.
    */
-   app.get('/towns/:townID/post', express.json(), async (req, res) => {
+   app.get('/towns/:townID/posts', express.json(), async (req, res) => {
     try {
-      const result = await postGetAllInTownHandler({
+      const result = await postGetAllIDInTownHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken
       });

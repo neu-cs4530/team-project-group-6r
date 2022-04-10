@@ -3,6 +3,7 @@ import { Post } from "../../types/PostTown/post";
 import { Comment } from "../../types/PostTown/comment";
 import DatabaseController from './DatabaseController';
 import Filter from 'bad-words';
+import PlayerSession from '../../types/PlayerSession';
 
 export default class PostCoveyTownController extends CoveyTownController {
     // Owner
@@ -46,22 +47,39 @@ export default class PostCoveyTownController extends CoveyTownController {
         return result;
     }
 
-    async deletePost(postID : string) : Promise<Post> {
-        const databaseController = DatabaseController.getInstance();
-        const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+    async deletePost(postID : string, token : string) : Promise<Post> {
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const post: Post = await databaseController.getPost(this.coveyTownID, postID);
+        
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
+        
+        if (post.ownerID === playerID) {
+            const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+            await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
-        return result;
+            return result;
+        }
+
+        //isn't this terrible
+        throw Error('Incorrect post owner');
     }
 
-    async updatePost(postID : string, post : Post) : Promise<Post> {
-        const databaseController = DatabaseController.getInstance();
+    async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
 
-        //censor
-        post.postContent = this.filter.clean(post.postContent.valueOf());
-        post.title = this.filter.clean(post.title.valueOf());
-        const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
+        
+        if (postToUpdate.ownerID === playerID) {
+            //censor
+            post.postContent = this.filter.clean(post.postContent.valueOf());
+            post.title = this.filter.clean(post.title.valueOf());
+            const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
 
-        return result;
+            return result;
+        }
+
+        throw Error('Incorrect post owner');
     }
 
     async createComment(comment : Comment) : Promise<Comment> {
@@ -70,7 +88,16 @@ export default class PostCoveyTownController extends CoveyTownController {
         //censor
         comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
         const result : Comment = await databaseController.createComment(this.coveyTownID, comment);
+        //should I type cast like this, if I decide to check for string 
+        //then that means the whole thing needs to be refactored
+        const createdCommentID : string = result._id!;
 
+        if (comment.parentCommentID === '') {
+            await databaseController.addCommentToRootPost(this.coveyTownID, comment.rootPostID, createdCommentID);
+        } else {
+            await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
+        }
+        
         return result;
     }
 
@@ -81,20 +108,37 @@ export default class PostCoveyTownController extends CoveyTownController {
         return result;
     }
 
-    async deleteComment(commentID : string) : Promise<Comment> {
-        const databaseController = DatabaseController.getInstance();
-        const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
+    async deleteComment(commentID : string, token : string) : Promise<Comment> {
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
+        
+        if (comment.ownerID === playerID) {
+            const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
 
-        return result;
+            return result;
+        }
+
+        //isn't this terrible
+        throw Error('Incorrect post owner'); 
     }
 
-    async updateComment(commentID : string, comment : Comment) : Promise<Comment> {
-        const databaseController = DatabaseController.getInstance();
+    async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
 
-        //censor
-        comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
-        const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
+        
+        if (commentToUpdate.ownerID === playerID) {
+            //censor
+            comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
+            const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+            
+            return result;
+        }
 
-        return result;
+        //isn't this terrible
+        throw Error('Incorrect post owner');
     }
 }

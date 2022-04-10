@@ -5,10 +5,11 @@ const PostSchema = new mongoose.Schema({
     postContent: String,
     ownerID: String,
     isVisible: Boolean,
+    comments: { type: [String], default: [] },
     coordinates: {
         x: Number,
         y: Number 
     }
-});
+}, { timestamps: true });
 
 export { PostSchema }
