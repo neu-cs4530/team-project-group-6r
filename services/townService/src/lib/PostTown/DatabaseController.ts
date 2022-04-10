@@ -29,7 +29,7 @@ export default class DatabaseController {
     async getPost(coveyTownID : string, postID : string) : Promise<any> {
         try {
         const model = mongoose.model("post", PostSchema, coveyTownID);
-        return await model.findById(postID);
+        return await model.findById(new mongoose.Types.ObjectId(postID));
         } catch (err) {
             return await err;
         }
