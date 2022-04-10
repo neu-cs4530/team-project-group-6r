@@ -18,10 +18,11 @@ import {
   postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
+import { Multer } from 'multer';
+import { gfs, gridfsBucket } from '../server';
+import mongoose from 'mongoose';
 
-export default function addTownRoutes(http: Server, app: Express): io.Server {
-
-  
+export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
 
   /*
    * Create a new session (aka join a town)
@@ -314,6 +315,75 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         .json({
           message: 'Internal server error, please see log in server for more details',
         });
+    }
+  });
+
+  //post a file
+  app.post('/upload', upload.single('file'), async (req, res) => {
+    res.json({ file: req.file });
+    console.log(req.file);
+  })
+
+  //get all files
+  app.get('/files', (_req, res) => {
+    gfs.files.find().toArray((_err, files) => {
+      //Check if files
+      if(!files || files.length == 0) {
+        return res.status(404).json({
+          err: 'No files exist'
+        });
+      }
+
+      return res.json(files);
+    })
+  })
+
+  //get one file
+  app.get('/files/:id', (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id)
+    gfs.files.findOne({_id: obj_id}, (_err, file) => {
+      if(!file || file.length == 0) {
+        return res.status(404).json({
+          err: 'No file exist'
+        });
+      }
+
+      return res.json(file);
+    })
+  })
+
+  //get and stream image
+  app.get('/image/:id', (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id)
+    gfs.files.findOne({_id: obj_id}, (_err, file) => {
+      if(!file || file.length == 0) {
+        res.status(404).json({
+          err: 'No file exist'
+        });
+      } else {
+        //check image
+        if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
+          const readStream = gridfsBucket.openDownloadStream(obj_id);
+          readStream.pipe(res);
+        } else{
+          res.status(404).json({
+            err: 'Not an image'
+          });
+        }
+      }
+    })
+  });
+
+  //delete image
+  app.delete('/files/:id', (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id);
+    try {
+      gridfsBucket.delete(obj_id);
+      return res.status(StatusCodes.OK).json(obj_id);
+    } catch (err) {
+      return res.status(404).json({
+        err: 'File not found'
+      })
     }
   });
 
