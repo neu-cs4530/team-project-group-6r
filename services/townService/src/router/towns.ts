@@ -14,6 +14,7 @@ import { logError } from '../Utils';
 import { Post } from '../schemas/MongoPost';
 import { Multer } from 'multer';
 import { gfs, gridfsBucket } from '../server';
+import mongoose from 'mongoose';
 
 export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
 
@@ -38,8 +39,9 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   })
 
   //get one file
-  app.get('/files/:filename', (req, res) => {
-    gfs.files.findOne({filename: req.params.filename}, (_err, file) => {
+  app.get('/files/:id', (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id)
+    gfs.files.findOne({_id: obj_id}, (_err, file) => {
       if(!file || file.length == 0) {
         return res.status(404).json({
           err: 'No file exist'
@@ -51,8 +53,9 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   })
 
   //get and stream image
-  app.get('/image/:filename', (req, res) => {
-    gfs.files.findOne({filename: req.params.filename}, (_err, file) => {
+  app.get('/image/:id', (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id)
+    gfs.files.findOne({_id: obj_id}, (_err, file) => {
       if(!file || file.length == 0) {
         res.status(404).json({
           err: 'No file exist'
@@ -60,7 +63,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
       } else {
         //check image
         if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
-          const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
+          const readStream = gridfsBucket.openDownloadStream(obj_id);
           readStream.pipe(res);
         } else{
           res.status(404).json({
@@ -69,6 +72,21 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         }
       }
     })
+  });
+
+
+
+  //delete image
+  app.delete('/files/:id', (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id);
+    try {
+      gridfsBucket.delete(obj_id);
+      return res.status(StatusCodes.OK).json(obj_id);
+    } catch (err) {
+      return res.status(404).json({
+        err: 'File not found'
+      })
+    }
   });
 
   /*
