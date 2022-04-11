@@ -5,6 +5,10 @@ import PlayerSession from "../types/PlayerSession";
 import CoveyTownsStore from "../lib/CoveyTownsStore";
 import Player from "../types/Player";
 
+//always put your global field at the top of the class
+const postTownController = new PostCoveyTownController("testTown", true);
+postTownController.addPlayer(new Player('test'));
+
 /**
  * Envelope that wraps any response from the server
  */
@@ -57,8 +61,19 @@ export interface CommentUpdateRequest {
     comment : Comment
 }
 
-const postTownController = new PostCoveyTownController("testTown", true);
-postTownController.addPlayer(new Player('test'));
+/**
+ * Returns the default response to the town password being entered
+ * @param result What covey returns if the password is correct or incorrect
+ * @returns The response to the user if the password is correct or incorrect
+ */
+function postHandlerPWResponse(result:any):ResponseEnvelope<any> {
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
 
 export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post>> {
     // const townsStore = PostCoveyTownStore.getInstance();
@@ -74,11 +89,7 @@ export async function postCreateHandler(_requestData : PostCreateRequest): Promi
 
     const post = _requestData.post;
     const result = await postTownController.createPost(post);
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
 }
 
 export async function postGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
@@ -86,21 +97,13 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
     const postID = _requestData.postID;
     const result = await postTownController.getPost(postID);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
 }
 
 export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
     const result : string[] = await postTownController.getAllPostInTown();
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
 }
 
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
@@ -115,11 +118,7 @@ export async function postDeleteHandler(_requestData : PostGetRequest) : Promise
     const postID: string = _requestData.postID;
     const result = await postTownController.deletePost(postID, _requestData.sessionToken);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
 }
 
 export async function postUpdateHandler(_requestData : PostUpdateRequest) : Promise<ResponseEnvelope<Post>> {
@@ -128,21 +127,13 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
 
     const result = await postTownController.updatePost(postID, post, _requestData.sessionToken);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
 }
 
 export async function commentCreateHandler(_requestData : CommentCreateRequest): Promise<ResponseEnvelope<Comment>> {
     const comment = _requestData.comment;
     const result = await postTownController.createComment(comment);
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
 }
 
 export async function commentGetHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
@@ -150,22 +141,16 @@ export async function commentGetHandler(_requestData : CommentGetRequest) : Prom
     const commentID = _requestData.commentID;
     const result = await postTownController.getComment(commentID);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
+
 }
 
 export async function commentDeleteHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
     const commentID = _requestData.commentID;
     const result = await postTownController.deleteComment(commentID, _requestData.sessionToken);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
+
 }
 
 export async function commentUpdateHandler(_requestData : CommentUpdateRequest) : Promise<ResponseEnvelope<Comment>> {
@@ -174,31 +159,22 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
 
     const result = await postTownController.updateComment(commentID, comment, _requestData.sessionToken);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
+
 }
 
 export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
     const postID = _requestData.postID;
     const result = await postTownController.getFile(postID);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
+
 }
 
 export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
     const postID = _requestData.postID;
     const result = await postTownController.deleteFile(postID, _requestData.sessionToken);
 
-    return {
-        isOK: true,
-        response: result,
-        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
-    };
+    return postHandlerPWResponse(result);
+
 }

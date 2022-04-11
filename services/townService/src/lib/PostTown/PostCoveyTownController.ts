@@ -3,7 +3,6 @@ import { Post } from "../../types/PostTown/post";
 import { Comment } from "../../types/PostTown/comment";
 import DatabaseController from './DatabaseController';
 import Filter from 'bad-words';
-import PlayerSession from '../../types/PlayerSession';
 
 export default class PostCoveyTownController extends CoveyTownController {
     // Owner
@@ -12,10 +11,13 @@ export default class PostCoveyTownController extends CoveyTownController {
     // private _administrators: string[];
 
     private filter : Filter;
+    private databaseController:DatabaseController;
 
     constructor(friendlyName: string, isPubliclyListed: boolean) {
         super(friendlyName, isPubliclyListed);
         this.filter = new Filter();
+        this.databaseController = DatabaseController.getInstance();
+
     }
 
     // Add
@@ -23,42 +25,39 @@ export default class PostCoveyTownController extends CoveyTownController {
         // Area collision?
         // Create the post
         // Invoke the listener
-        const databaseController = DatabaseController.getInstance();
 
         //censor
         post.postContent = this.filter.clean(post.postContent.valueOf());
         post.title = this.filter.clean(post.title.valueOf());
-        const result = await databaseController.createPost(this.coveyTownID, post);
+        const result = await this.databaseController.createPost(this.coveyTownID, post);
 
         return result;
     }
 
+    //this function and a few others can just be one liners
     async getPost(postID : string) : Promise<Post> {
-        const databaseController = DatabaseController.getInstance();
-        const result : Post = await databaseController.getPost(this.coveyTownID, postID);
+       // const result : Post = await this.databaseController.getPost(this.coveyTownID, postID);
 
-        return result;
+        return await this.databaseController.getPost(this.coveyTownID, postID);
     }
 
     async getAllPostInTown() : Promise<string[]> {
-        const databaseController = DatabaseController.getInstance();
-        const result : string[] = await databaseController.getAllPostInTown(this.coveyTownID);
+       // const result : string[] = await this.databaseController.getAllPostInTown(this.coveyTownID);
 
-        return result;
+        return await this.databaseController.getAllPostInTown(this.coveyTownID);
     }
 
     async deletePost(postID : string, token : string) : Promise<Post> {
-        const databaseController: DatabaseController = DatabaseController.getInstance();
-        const post: Post = await databaseController.getPost(this.coveyTownID, postID);
+        const post: Post = await this.databaseController.getPost(this.coveyTownID, postID);
         
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
         if (post.ownerID === playerID) {
-            const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
-            await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
+            const result : Post = await this.databaseController.deletePost(this.coveyTownID, postID);
+            await this.databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
             if (post.fileID) {
-                await databaseController.deleteFile(post.fileID);
+                await this.databaseController.deleteFile(post.fileID);
             }
 
             return result;
@@ -69,8 +68,7 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
-        const databaseController: DatabaseController = DatabaseController.getInstance();
-        const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+        const postToUpdate: Post = await this.databaseController.getPost(this.coveyTownID, postID);
 
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
@@ -78,7 +76,7 @@ export default class PostCoveyTownController extends CoveyTownController {
             //censor
             post.postContent = this.filter.clean(post.postContent.valueOf());
             post.title = this.filter.clean(post.title.valueOf());
-            const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
+            const result : Post = await this.databaseController.updatePost(this.coveyTownID, postID, post);
 
             return result;
         }
@@ -87,41 +85,38 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async createComment(comment : Comment) : Promise<Comment> {
-        const databaseController = DatabaseController.getInstance();
 
         //censor
         comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
-        const result : Comment = await databaseController.createComment(this.coveyTownID, comment);
+        const result : Comment = await this.databaseController.createComment(this.coveyTownID, comment);
         //should I type cast like this, if I decide to check for string 
         //then that means the whole thing needs to be refactored
         const createdCommentID : string = result._id!;
 
         if (comment.parentCommentID === '') {
-            await databaseController.addCommentToRootPost(this.coveyTownID, comment.rootPostID, createdCommentID);
+            await this.databaseController.addCommentToRootPost(this.coveyTownID, comment.rootPostID, createdCommentID);
         } else {
-            await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
+            await this.databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
         }
         
         return result;
     }
 
     async getComment(commentID : string) : Promise<Comment> {
-        const databaseController = DatabaseController.getInstance();
-        const result : Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        //const result : Comment = await this.databaseController.getComment(this.coveyTownID, commentID);
 
-        return result;
+        return await this.databaseController.getComment(this.coveyTownID, commentID);
     }
 
     async deleteComment(commentID : string, token : string) : Promise<Comment> {
-        const databaseController: DatabaseController = DatabaseController.getInstance();
-        const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        const comment: Comment = await this.databaseController.getComment(this.coveyTownID, commentID);
         
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
         if (comment.ownerID === playerID) {
-            const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
+            // const result : Comment = await this.databaseController.deleteComment(this.coveyTownID, commentID);
 
-            return result;
+            return await this.databaseController.deleteComment(this.coveyTownID, commentID);
         }
 
         //isn't this terrible
@@ -129,17 +124,16 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
-        const databaseController: DatabaseController = DatabaseController.getInstance();
-        const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        const commentToUpdate: Comment = await this.databaseController.getComment(this.coveyTownID, commentID);
 
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
         if (commentToUpdate.ownerID === playerID) {
             //censor
             comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
-            const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+            // const result : Comment = await this.databaseController.updateComment(this.coveyTownID, commentID, comment);
             
-            return result;
+            return await this.databaseController.updateComment(this.coveyTownID, commentID, comment);
         }
 
         //isn't this terrible
@@ -147,20 +141,17 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async getFile(postID : string) : Promise<any> {
-        const databaseController = DatabaseController.getInstance();
-        const result : any = await databaseController.getFile(postID)
-
-        return result;
+        //const result : any = await this.databaseController.getFile(postID)
+        return await this.databaseController.getFile(postID);
     }
 
     async deleteFile(postID : string, token: string) : Promise<any> {
-        const databaseController = DatabaseController.getInstance();
-        const post : Post = await databaseController.getPost(this.coveyTownID, postID);
+        const post : Post = await this.databaseController.getPost(this.coveyTownID, postID);
         const playerID: string = this.getSessionByToken(token)!.player.userName;
 
         if (post.ownerID === playerID && post.fileID) {
-            const result : any = await databaseController.deleteFile(post.fileID);
-            return result;
+            //const result : any = await this.databaseController.deleteFile(post.fileID);
+            return await this.databaseController.deleteFile(post.fileID);
         }
 
         throw Error('Incorrect post owner/No file found');
