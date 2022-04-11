@@ -1,3 +1,6 @@
+/**
+ * A Post is a feature that allows a user to add any type of file to a town, with some added text
+ */
 export interface Post {
     _id?: string,
     title: string,
