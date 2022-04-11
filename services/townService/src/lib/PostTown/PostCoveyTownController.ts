@@ -21,6 +21,11 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     // Add
+    /**
+     * Creates a post in covey town
+     * @param post The post we want to make
+     * @returns The result of adding the post to our database
+     */
     async createPost(post : Post) : Promise<Post> {
         // Area collision?
         // Create the post
@@ -35,18 +40,33 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     //this function and a few others can just be one liners
+    /**
+     * Gets a post from coveytown
+     * @param postID The id of the post we want to get
+     * @returns The result of pulling the post from our database
+     */
     async getPost(postID : string) : Promise<Post> {
        // const result : Post = await this.databaseController.getPost(this.coveyTownID, postID);
 
         return await this.databaseController.getPost(this.coveyTownID, postID);
     }
 
+    /**
+     * Gets all the posts from coveytown
+     * @returns The result of pulling all posts from our database
+     */
     async getAllPostInTown() : Promise<string[]> {
        // const result : string[] = await this.databaseController.getAllPostInTown(this.coveyTownID);
 
         return await this.databaseController.getAllPostInTown(this.coveyTownID);
     }
 
+    /**
+     * Deletes a post from coveytown
+     * @param postID The id of the post we want to delete
+     * @param token The playersession token of the player who wants to delete their post
+     * @returns The result of deleting the post from our database
+     */
     async deletePost(postID : string, token : string) : Promise<Post> {
         const post: Post = await this.databaseController.getPost(this.coveyTownID, postID);
         
@@ -67,6 +87,13 @@ export default class PostCoveyTownController extends CoveyTownController {
         throw Error('Incorrect post owner');
     }
 
+    /**
+     * Updates a post in coveytown
+     * @param postID The id of the post we're updating
+     * @param post The updated version of the post
+     * @param token the player token of the player updating their post
+     * @returns The result of updating the post in the database
+     */
     async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
         const postToUpdate: Post = await this.databaseController.getPost(this.coveyTownID, postID);
 
@@ -84,6 +111,11 @@ export default class PostCoveyTownController extends CoveyTownController {
         throw Error('Incorrect post owner');
     }
 
+    /**
+     * Creates a comment in covey town
+     * @param comment The comment we want to make
+     * @returns The result of adding the comment to our database
+     */
     async createComment(comment : Comment) : Promise<Comment> {
 
         //censor
@@ -102,12 +134,23 @@ export default class PostCoveyTownController extends CoveyTownController {
         return result;
     }
 
+    /**
+     * Gets a comment from coveytown
+     * @param commentID The id of the comment we want to get
+     * @returns The result of pulling the comment from our database
+     */
     async getComment(commentID : string) : Promise<Comment> {
         //const result : Comment = await this.databaseController.getComment(this.coveyTownID, commentID);
 
         return await this.databaseController.getComment(this.coveyTownID, commentID);
     }
 
+    /**
+     * Deletes a comment from coveytown
+     * @param commentID The id of the comment we want to delete
+     * @param token The playersession token of the player who wants to delete their comment
+     * @returns The result of deleting the comment from our database
+     */
     async deleteComment(commentID : string, token : string) : Promise<Comment> {
         const comment: Comment = await this.databaseController.getComment(this.coveyTownID, commentID);
         
@@ -123,6 +166,13 @@ export default class PostCoveyTownController extends CoveyTownController {
         throw Error('Incorrect post owner'); 
     }
 
+    /**
+     * Updates a comment in coveytown
+     * @param commentID The id of the comment we're updating
+     * @param comment The updated version of the comment
+     * @param token the player token of the player updating their comment
+     * @returns The result of updating the comment in the database
+     */
     async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
         const commentToUpdate: Comment = await this.databaseController.getComment(this.coveyTownID, commentID);
 
@@ -140,11 +190,22 @@ export default class PostCoveyTownController extends CoveyTownController {
         throw Error('Incorrect post owner');
     }
 
+    /**
+     * Gets the file attached to a post
+     * @param postID The id of the post we want the file from
+     * @returns The result of getting the file from our database
+     */
     async getFile(postID : string) : Promise<any> {
         //const result : any = await this.databaseController.getFile(postID)
         return await this.databaseController.getFile(postID);
     }
 
+    /**
+     * Deletes a file attached to a post
+     * @param postID The id of the post we want to delete the file from
+     * @param token The playertoken of the player who wants to delete their file
+     * @returns The result of deleting the file from our database
+     */
     async deleteFile(postID : string, token: string) : Promise<any> {
         const post : Post = await this.databaseController.getPost(this.coveyTownID, postID);
         const playerID: string = this.getSessionByToken(token)!.player.userName;

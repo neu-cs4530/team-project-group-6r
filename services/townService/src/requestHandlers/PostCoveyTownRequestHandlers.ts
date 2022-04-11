@@ -18,23 +18,35 @@ export interface ResponseEnvelope<T> {
     response?: T;
 }
 
+/**
+ * Structure to create a post in the server
+ */
 export interface PostCreateRequest {
     coveyTownID : string,
     sessionToken : string,
     post : Post
 }
 
+/**
+ * Structure to get a post from the server
+ */
 export interface PostGetRequest {
     coveyTownID : string,
     sessionToken : string,
     postID : string
 }
 
+/**
+ * Structure to get a post's id from the server
+ */
 export interface PostGetIdInTownRequest {
     coveyTownID : string,
     sessionToken : string
 }
 
+/**
+ * Structure to update a post in the server
+ */
 export interface PostUpdateRequest {
     coveyTownID : string,
     sessionToken : string,
@@ -42,18 +54,27 @@ export interface PostUpdateRequest {
     post : Post
 }
 
+/**
+ * Structure to create a comment in the server
+ */
 export interface CommentCreateRequest {
     coveyTownID: string,
     sessionToken: string,
     comment : Comment
 }
 
+/**
+ * Structure to get a comment from the server
+ */
 export interface CommentGetRequest {
     coveyTownID : string,
     sessionToken : string,
     commentID : string
 }
 
+/**
+ * Structure to update a comment in the server
+ */
 export interface CommentUpdateRequest {
     coveyTownID : string,
     sessionToken : string,
@@ -75,6 +96,11 @@ function postHandlerPWResponse(result:any):ResponseEnvelope<any> {
 }
 
 
+/**
+ * Creates a response handler for when a post is created
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post>> {
     // const townsStore = PostCoveyTownStore.getInstance();
     // const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
@@ -92,6 +118,11 @@ export async function postCreateHandler(_requestData : PostCreateRequest): Promi
     return postHandlerPWResponse(result);
 }
 
+/**
+ * Creates a response handler for when a post needs to be pulled
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function postGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
     
     const postID = _requestData.postID;
@@ -100,12 +131,22 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
     return postHandlerPWResponse(result);
 }
 
+/**
+ * Creates a response handler for when all posts are pulled
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[]>> {
     const result : string[] = await postTownController.getAllPostInTown();
 
     return postHandlerPWResponse(result);
 }
 
+/**
+ * Creates a response handler for when a post is deleted
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
     if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
         return {
@@ -121,6 +162,11 @@ export async function postDeleteHandler(_requestData : PostGetRequest) : Promise
     return postHandlerPWResponse(result);
 }
 
+/**
+ * Creates a response handler for when a post is updated
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function postUpdateHandler(_requestData : PostUpdateRequest) : Promise<ResponseEnvelope<Post>> {
     const postID = _requestData.postID;
     const post = _requestData.post;
@@ -130,12 +176,22 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
     return postHandlerPWResponse(result);
 }
 
+/**
+ * Creates a response handler for when a comment is created
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function commentCreateHandler(_requestData : CommentCreateRequest): Promise<ResponseEnvelope<Comment>> {
     const comment = _requestData.comment;
     const result = await postTownController.createComment(comment);
     return postHandlerPWResponse(result);
 }
 
+/**
+ * Creates a response handler for when a comment is pulled
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function commentGetHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
     
     const commentID = _requestData.commentID;
@@ -145,6 +201,11 @@ export async function commentGetHandler(_requestData : CommentGetRequest) : Prom
 
 }
 
+/**
+ * Creates a response handler for when a comment is deleted
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function commentDeleteHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment>> {
     const commentID = _requestData.commentID;
     const result = await postTownController.deleteComment(commentID, _requestData.sessionToken);
@@ -153,6 +214,11 @@ export async function commentDeleteHandler(_requestData : CommentGetRequest) : P
 
 }
 
+/**
+ * Creates a response handler for when a comment is updated
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function commentUpdateHandler(_requestData : CommentUpdateRequest) : Promise<ResponseEnvelope<Comment>> {
     const commentID = _requestData.commentID;
     const comment = _requestData.comment;
@@ -163,6 +229,11 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
 
 }
 
+/**
+ * Creates a response handler for when a file is pulled
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
     const postID = _requestData.postID;
     const result = await postTownController.getFile(postID);
@@ -171,6 +242,11 @@ export async function fileGetHandler(_requestData : PostGetRequest) : Promise<Re
 
 }
 
+/**
+ * Creates a response handler for when a file is deleted
+ * @param _requestData The towns data
+ * @returns The result of the handler
+ */
 export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
     const postID = _requestData.postID;
     const result = await postTownController.deleteFile(postID, _requestData.sessionToken);
