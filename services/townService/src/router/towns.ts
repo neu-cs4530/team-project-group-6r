@@ -333,20 +333,20 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
     }
   })
 
-  //get all files
-  // app.get('/files', async (_req, res) => {
+  //get all files (test route)
+  app.get('/files', async (_req, res) => {
 
-  //   gfs.files.find().toArray((_err, files) => {
-  //     //Check if files
-  //     if(!files || files.length == 0) {
-  //       return res.status(404).json({
-  //         err: 'No files exist'
-  //       });
-  //     }
+    gfs.files.find().toArray((_err, files) => {
+      //Check if files
+      if(!files || files.length == 0) {
+        return res.status(404).json({
+          err: 'No files exist'
+        });
+      }
 
-  //     return res.json(files);
-  //   })
-  // }) 
+      return res.json(files);
+    })
+  }) 
 
   //get one file
   app.get('/towns/:townID/files/:postID', async (req, res) => {
@@ -366,7 +366,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
     }
   })
 
-  //get and stream image
+  //get and stream image (test route)
   app.get('/image/:id', async (req, res) => {
     const obj_id = new mongoose.Types.ObjectId(req.params.id)
     gfs.files.findOne({_id: obj_id}, (_err, file) => {
@@ -388,7 +388,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
     })
   });
 
-  //delete image
+  //delete file
   app.delete('/towns/:townID/files/:postID', async (req, res) => {
     try {
       const result = await fileDeleteHandler({
