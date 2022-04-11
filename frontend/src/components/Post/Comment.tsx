@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack, Text, Box, HStack, Flex, Button } from "@chakra-ui/react";
+import { VStack, Text, Box, HStack, Flex, Button, Textarea } from "@chakra-ui/react";
 
 interface CommentProps {
     depth: number,
@@ -29,6 +29,10 @@ export default function Comments({ depth }: CommentProps): JSX.Element {
                                 <Button size='xs'>Hide</Button>
                                 <Button size='xs'>Delete</Button>
                             </HStack>
+                            <Textarea height='100'
+                                resize='none'
+                                placeholder='What are your thoughts?' />
+                            <Button alignSelf='end'>Comment</Button>
                         </VStack>
                     </HStack>
                 </Flex>
