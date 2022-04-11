@@ -14,18 +14,16 @@ export default function Comments({ depth }: CommentProps): JSX.Element {
     return (
         <HStack align='start' width='500px'>
             {createMargin(depth)}
-            <Box>
+            <Box width='100%'>
                 <Text fontSize='xs'>
-                    Commented by u/Your Mom 5 hours ago
+                    Commented by <Text display='inline' color='cyan.500'> u/Your Mom</Text> 5 hours ago
                 </Text>
-                <Flex>
-                    <HStack>
-                        <Box height='100%' width='16px'>
-                            <Box height='100%' borderRight='2px solid' borderRightColor='rgba(128, 128, 128, 0.5)' />
-                        </Box>
-                        <VStack>
+                <Flex width='100%'>
+                    <HStack width='100%'>
+                        <Box height='100%' width='16px' borderRight='2px solid' borderRightColor='rgba(128, 128, 128, 0.5)' />
+                        <VStack width='100%' align='start'>
                             <Text fontSize='sm' fontFamily='Arial' >Hey, I am your mom, and you are not my baby.</Text>
-                            <HStack align='start' width='100%'>
+                            <HStack justify='end' width='100%'>
                                 <Button size='xs'>Reply</Button>
                                 <Button size='xs'>Edit</Button>
                                 <Button size='xs'>Hide</Button>

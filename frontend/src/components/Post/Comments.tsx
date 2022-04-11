@@ -8,7 +8,8 @@ export default function Comments(): JSX.Element {
             overflow='scroll'
             overflowX='hidden'
             divider={<StackDivider borderColor='gray.200' />}
-            space='5'>
+            space='5'
+            paddingRight='5px'>
             <Comment depth={0} />
             <Comment depth={1} />
             <Comment depth={2} />
