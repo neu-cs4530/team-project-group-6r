@@ -105,14 +105,14 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRe
 }
 
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
-    console.log(postTownController?.getSessionByToken(_requestData.sessionToken));
-    if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
-        return {
-          isOK: false, 
-          response: undefined, 
-          message: `Unable to delete post with post ID ${_requestData.postID} in town ${_requestData.coveyTownID}`,
-        };
-    }
+    // console.log(postTownController?.getSessionByToken(_requestData.sessionToken));
+    // if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
+    //     return {
+    //       isOK: false, 
+    //       response: undefined, 
+    //       message: `Unable to delete post with post ID ${_requestData.postID} in town ${_requestData.coveyTownID}`,
+    //     };
+    // }
 
     const postID: string = _requestData.postID;
     const result = await postTownController.deletePost(postID, _requestData.sessionToken);

@@ -49,13 +49,17 @@ export default class PostCoveyTownController extends CoveyTownController {
 
     async deletePost(postID : string, token : string) : Promise<Post> {
         const databaseController = DatabaseController.getInstance();
-        const post = await databaseController.getPost(this.coveyTownID, postID);
+        const post: Post = await databaseController.getPost(this.coveyTownID, postID);
         
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
         if (post.ownerID === playerID) {
             const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
             await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
+
+            if (post.fileID) {
+                await databaseController.deleteFile(post.fileID);
+            }
 
             return result;
         }
