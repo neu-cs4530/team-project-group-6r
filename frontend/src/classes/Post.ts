@@ -82,6 +82,10 @@ export default class Post {
 
     private _listeners: PostListener[] = [];
 
+    public sprite?: Phaser.GameObjects.Sprite;
+
+    public label?: Phaser.GameObjects.Text;
+
     constructor(id: string, title: string, postContent: string,
         ownerID: string, isVisible: boolean, coordinate: Coordinate,
         comments?: string[], createAt?: Date, updateAt?: Date) {
@@ -152,6 +156,22 @@ export default class Post {
 
     removeListener(listener: PostListener) {
         this._listeners = this._listeners.filter(eachListener => eachListener !== listener);
+    }
+
+    copy() : Post{
+        const ret = new Post(
+            this._id,
+            this._title,
+            this._postContent,
+            this._ownerID,
+            this._isVisible,
+            {...this._coordinates},
+            this._comments?.concat([]),
+            this._createAt,
+            this._updateAt,
+        );
+        this._listeners.forEach(listener => ret.addListener(listener));
+        return ret;
     }
 
     static fromServerPost(serverPost: ServerPost): Post {

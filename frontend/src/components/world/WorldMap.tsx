@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import React, { useEffect, useMemo, useState } from 'react';
 import BoundingBox from '../../classes/BoundingBox';
 import ConversationArea from '../../classes/ConversationArea';
-import Post from '../../classes/Post';
+import Post, { Coordinate } from '../../classes/Post';
 import Player, { ServerPlayer, UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useConversationAreas from '../../hooks/useConversationAreas';
@@ -14,6 +14,7 @@ import usePosts from '../../hooks/usePosts';
 import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
+import CreatePost from '../Post/CreatePost';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -54,8 +55,10 @@ class CoveyGameScene extends Phaser.Scene {
   private worldLayer!: Phaser.Tilemaps.TilemapLayer;
 
   // TODO
-  private posts: PostGameObjects[] = [];
+  private posts: Post[] = [];
 
+  // TODO
+  private currentPost?: Post;
 
   /*
    * A "captured" key doesn't send events to the browser - they are trapped by Phaser
@@ -110,6 +113,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.image('16_Grocery_store_32x32', '/assets/tilesets/16_Grocery_store_32x32.png');
     this.load.tilemapTiledJSON('map', '/assets/tilemaps/indoors.json');
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
+    this.load.image('comment', '/assets/post/comment.png')
   }
 
   /**
@@ -232,6 +236,65 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  updatePosts(posts: Post[]) {
+    if (!this.ready) {
+      this._onGameReadyListeners.push(() => {
+        this.updatePosts(posts);
+      });
+      return;
+    }
+    posts.forEach(p => {
+      this.updatePost(p);
+    });
+    // Remove removed posts from board
+    const removedPosts = this.posts.filter(
+      post => !posts.find(p => p.id === post.id),
+    );
+    removedPosts.forEach(removedPost => {
+      if (removedPost.sprite) {
+        removedPost.sprite.destroy();
+        removedPost.label?.destroy();
+      }
+    });
+    // Remove removed posts from list
+    if (removedPosts.length) {
+      this.posts = this.posts.filter(
+        post => !removedPosts.find(p => p.id === post.id),
+      );
+    }
+  }
+
+  updatePost(post: Post) {
+    let mPost = this.posts.find(p => p.id === post.id);
+    if (!mPost) {
+      mPost = post.copy();
+      this.posts.push(mPost);
+    }
+    let { sprite } = mPost;
+    if (!sprite) {
+      sprite = this.physics.add
+        .sprite(0, 0, 'comment')
+        .setSize(20, 30)
+        .setOffset(0, 24);
+      const worldXY = this.worldLayer.tileToWorldXY(mPost.coordinate.x, mPost.coordinate.y);
+      sprite.setX(worldXY.x + sprite.displayWidth / 2);
+      sprite.setY(worldXY.y + sprite.displayHeight / 2);
+      sprite.setVisible(true);
+      const label = this.add.text(
+        this.game.scale.width / 2,
+        20,
+        `You've stepped on a post, press 'P' to open:\n\tTitle ${mPost.title}\n\tOwner: ${mPost.ownerId}\n\tComments: ${mPost.comments?.length || 0}\n\tCreated at: ${mPost.createAt}\n\tUpdated at: ${mPost.updateAt}`,
+        { color: '#000000', backgroundColor: '#FFFFFF' },
+      )
+        .setScrollFactor(0)
+        .setDepth(30);
+      label.setVisible(false);
+      label.setX(this.game.scale.width - label.width - 25);
+      mPost.sprite = sprite;
+      mPost.label = label;
+    }
+  }
+
   getNewMovementDirection() {
     if (this.cursors.find(keySet => keySet.left?.isDown)) {
       return 'left';
@@ -260,13 +323,6 @@ class CoveyGameScene extends Phaser.Scene {
 
       // Stop any previous movement from the last frame
       body.setVelocity(0);
-
-      // TODO: Drop physical tile
-      if (this.postKey.isDown) {
-        const tileXY = this.worldLayer.worldToTileXY(body.x, body.y);
-        this.worldLayer.putTileAt(11414, tileXY.x + 1, tileXY.y + 1);
-        console.log(tileXY);
-      }
 
       const primaryDirection = this.getNewMovementDirection();
       switch (primaryDirection) {
@@ -326,7 +382,7 @@ class CoveyGameScene extends Phaser.Scene {
         this.lastLocation.rotation = primaryDirection || 'front';
         this.lastLocation.moving = isMoving;
         if (this.currentConversationArea) {
-          if(this.currentConversationArea.conversationArea){
+          if (this.currentConversationArea.conversationArea) {
             this.lastLocation.conversationLabel = this.currentConversationArea.label;
           }
           if (
@@ -342,7 +398,34 @@ class CoveyGameScene extends Phaser.Scene {
         }
         this.emitMovement(this.lastLocation);
       }
+
+      // Toggling on the post's label
+      const tileXY = this.worldLayer.worldToTileXY(body.x, body.y);
+      const localPost = this.findPostAtTileLocation(tileXY.x, tileXY.y + 1);
+      if (this.currentPost) {
+        if (!localPost || localPost.id !== this.currentPost.id) {
+          this.currentPost.label?.setVisible(false);
+        }
+      } else if (localPost) {
+        localPost.label?.setVisible(true);
+      }
+      this.currentPost = localPost;
+
+      // TODO retrieve a post or create a post
+      // if (this.postKey.isDown) {
+      //     const sprite = this.physics.add
+      //       .sprite(0, 0, 'comment')
+      //       .setSize(20, 30)
+      //       .setOffset(0, 24);
+      //     const worldXY = this.worldLayer.tileToWorldXY(tileXY.x, tileXY.y + 1);
+      //     sprite.setX(worldXY.x + sprite.displayWidth / 2);
+      //     sprite.setY(worldXY.y + sprite.displayHeight / 2);
+      // }
     }
+  }
+
+  findPostAtTileLocation(x: number, y: number): Post | undefined {
+    return this.posts.find(p => p.coordinate.x === x && p.coordinate.y === y);
   }
 
   create() {
@@ -353,7 +436,7 @@ class CoveyGameScene extends Phaser.Scene {
      */
     const tileset = [
       'Room_Builder_32x32',
-      '22_Museum_32x32',
+      '22_Museum_32x32s',
       '5_Classroom_and_library_32x32',
       '12_Kitchen_32x32',
       '1_Generic_32x32',
@@ -390,13 +473,6 @@ class CoveyGameScene extends Phaser.Scene {
       'Objects',
       obj => obj.name === 'Spawn Point',
     ) as unknown) as Phaser.GameObjects.Components.Transform;
-
-    // map.putTileAtWorldXY(11414, spawnPoint.x, spawnPoint.y);
-    // worldLayer.putTileAtWorldXY(11414, spawnPoint.x, spawnPoint.y);
-    // worldLayer.putTileAtWorldXY(11230, spawnPoint.x - 1, spawnPoint.y);
-    // worldLayer.putTileAtWorldXY(11330, spawnPoint.x - 2, spawnPoint.y);
-    // worldLayer.putTileAtWorldXY(11430, spawnPoint.x - 2, spawnPoint.y - 1);
-    // worldLayer.putTileAtWorldXY(11360, spawnPoint.x - 1, spawnPoint.y - 1);
 
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects', { name: 'transporter' });
@@ -488,7 +564,7 @@ class CoveyGameScene extends Phaser.Scene {
         {
           up: Phaser.Input.Keyboard.KeyCodes.H,
           down: Phaser.Input.Keyboard.KeyCodes.J,
-          left: Phaser.Input.Keyboard.KeyCodes.K, 
+          left: Phaser.Input.Keyboard.KeyCodes.K,
           right: Phaser.Input.Keyboard.KeyCodes.L,
         },
         false,
@@ -549,7 +625,7 @@ class CoveyGameScene extends Phaser.Scene {
         if (conv?.conversationArea) {
           this.infoTextBox?.setVisible(false);
           const localLastLocation = this.lastLocation;
-          if(localLastLocation && localLastLocation.conversationLabel !== conv.conversationArea.label){
+          if (localLastLocation && localLastLocation.conversationLabel !== conv.conversationArea.label) {
             localLastLocation.conversationLabel = conv.conversationArea.label;
             this.emitMovement(localLastLocation);
           }
@@ -565,6 +641,7 @@ class CoveyGameScene extends Phaser.Scene {
         }
       },
     );
+    // this.physics.add.overlap()
 
     this.emitMovement({
       rotation: 'front',
@@ -666,7 +743,7 @@ class CoveyGameScene extends Phaser.Scene {
   pause() {
     if (!this.paused) {
       this.paused = true;
-      if(this.player){
+      if (this.player) {
         this.player?.sprite.anims.stop();
         const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(0);
@@ -753,6 +830,10 @@ export default function WorldMap(): JSX.Element {
     gameScene?.updateConversationAreas(conversationAreas);
   }, [conversationAreas, gameScene]);
 
+  useEffect(() => {
+    gameScene?.updatePosts(posts);
+  }, [posts, gameScene]);
+
   const newConversationModalOpen = newConversation !== undefined;
   useEffect(() => {
     if (newConversationModalOpen) {
@@ -786,6 +867,7 @@ export default function WorldMap(): JSX.Element {
       <div id='social-container'>
         <SocialSidebar />
       </div>
+      <CreatePost />
     </div>
   );
 }
