@@ -48,7 +48,7 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async deletePost(postID : string, token : string) : Promise<Post> {
-        const databaseController = DatabaseController.getInstance();
+        const databaseController: DatabaseController = DatabaseController.getInstance();
         const post: Post = await databaseController.getPost(this.coveyTownID, postID);
         
         const playerID: string = this.getSessionByToken(token)!.player.userName;
@@ -69,10 +69,12 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
-        const databaseController = DatabaseController.getInstance();
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
-        if (post.ownerID === playerID) {
+        if (postToUpdate.ownerID === playerID) {
             //censor
             post.postContent = this.filter.clean(post.postContent.valueOf());
             post.title = this.filter.clean(post.title.valueOf());
@@ -111,8 +113,8 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async deleteComment(commentID : string, token : string) : Promise<Comment> {
-        const databaseController = DatabaseController.getInstance();
-        const comment = await databaseController.getComment(this.coveyTownID, commentID);
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
         
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
@@ -127,10 +129,12 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
-        const databaseController = DatabaseController.getInstance();
+        const databaseController: DatabaseController = DatabaseController.getInstance();
+        const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+
         const playerID: string = this.getSessionByToken(token)!.player.userName;
         
-        if (comment.ownerID === playerID) {
+        if (commentToUpdate.ownerID === playerID) {
             //censor
             comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
             const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
