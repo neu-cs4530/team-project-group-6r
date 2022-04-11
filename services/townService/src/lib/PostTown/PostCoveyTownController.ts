@@ -138,17 +138,23 @@ export default class PostCoveyTownController extends CoveyTownController {
         throw Error('Incorrect post owner');
     }
 
-    async getFile(fileID : string) : Promise<any> {
+    async getFile(postID : string) : Promise<any> {
         const databaseController = DatabaseController.getInstance();
-        const result : any = await databaseController.getFile(fileID)
+        const result : any = await databaseController.getFile(postID)
 
         return result;
     }
 
-    async deleteFile(fileID : string) : Promise<any> {
+    async deleteFile(postID : string, token: string) : Promise<any> {
         const databaseController = DatabaseController.getInstance();
-        const result : any = await databaseController.deleteFile(fileID)
+        const post : Post = await databaseController.getPost(this.coveyTownID, postID);
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
 
-        return result;
+        if (post.ownerID === playerID && post.fileID) {
+            const result : any = await databaseController.deleteFile(post.fileID);
+            return result;
+        }
+
+        throw Error('Incorrect post owner/No file found');
     }
 }

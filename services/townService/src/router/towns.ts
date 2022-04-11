@@ -334,26 +334,27 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   })
 
   //get all files
-  app.get('/files', async (_req, res) => {
+  // app.get('/files', async (_req, res) => {
 
-    gfs.files.find().toArray((_err, files) => {
-      //Check if files
-      if(!files || files.length == 0) {
-        return res.status(404).json({
-          err: 'No files exist'
-        });
-      }
+  //   gfs.files.find().toArray((_err, files) => {
+  //     //Check if files
+  //     if(!files || files.length == 0) {
+  //       return res.status(404).json({
+  //         err: 'No files exist'
+  //       });
+  //     }
 
-      return res.json(files);
-    })
-  }) 
+  //     return res.json(files);
+  //   })
+  // }) 
 
   //get one file
-  app.get('/towns/:townID/files/:id', async (req, res) => {
+  app.get('/towns/:townID/files/:postID', async (req, res) => {
     try {
       const result = await fileGetHandler({
         coveyTownID: req.params.townID,
-        fileID: req.params.id,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {
@@ -388,11 +389,12 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   });
 
   //delete image
-  app.delete('/towns/:townID/files/:id', async (req, res) => {
+  app.delete('/towns/:townID/files/:postID', async (req, res) => {
     try {
       const result = await fileDeleteHandler({
         coveyTownID: req.params.townID,
-        fileID: req.params.id,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {

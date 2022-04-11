@@ -57,11 +57,6 @@ export interface CommentUpdateRequest {
     comment : Comment
 }
 
-export interface FileGetRequest {
-    coveyTownID : string,
-    fileID : string
-}
-
 const postTownController = new PostCoveyTownController("testTown", true);
 postTownController.addPlayer(new Player('test'));
 
@@ -188,9 +183,9 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
     };
 }
 
-export async function fileGetHandler(_requestData : FileGetRequest) : Promise<ResponseEnvelope<any>> {
-    const fileID = _requestData.fileID;
-    const result = await postTownController.getFile(fileID);
+export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const postID = _requestData.postID;
+    const result = await postTownController.getFile(postID);
 
     return {
         isOK: true,
@@ -199,9 +194,9 @@ export async function fileGetHandler(_requestData : FileGetRequest) : Promise<Re
     };
 }
 
-export async function fileDeleteHandler(_requestData : FileGetRequest) : Promise<ResponseEnvelope<any>> {
-    const fileID = _requestData.fileID;
-    const result = await postTownController.deleteFile(fileID);
+export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const postID = _requestData.postID;
+    const result = await postTownController.deleteFile(postID, _requestData.sessionToken);
 
     return {
         isOK: true,
