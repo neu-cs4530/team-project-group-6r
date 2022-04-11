@@ -15,6 +15,7 @@ import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
 import CreatePost from '../Post/CreatePost';
+import PostSideBar from '../Post/PostSideBar';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -867,7 +868,7 @@ export default function WorldMap(): JSX.Element {
       <div id='social-container'>
         <SocialSidebar />
       </div>
-      <CreatePost />
+      <PostSideBar />
     </div>
   );
 }
