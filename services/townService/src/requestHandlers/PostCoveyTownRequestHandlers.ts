@@ -180,3 +180,25 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
         message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
     };
 }
+
+export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const postID = _requestData.postID;
+    const result = await postTownController.getFile(postID);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const postID = _requestData.postID;
+    const result = await postTownController.deleteFile(postID, _requestData.sessionToken);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}

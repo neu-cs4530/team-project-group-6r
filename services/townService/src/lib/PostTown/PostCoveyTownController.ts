@@ -57,6 +57,10 @@ export default class PostCoveyTownController extends CoveyTownController {
             const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
             await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
+            if (post.fileID) {
+                await databaseController.deleteFile(post.fileID);
+            }
+
             return result;
         }
 
@@ -140,5 +144,25 @@ export default class PostCoveyTownController extends CoveyTownController {
 
         //isn't this terrible
         throw Error('Incorrect post owner');
+    }
+
+    async getFile(postID : string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+        const result : any = await databaseController.getFile(postID)
+
+        return result;
+    }
+
+    async deleteFile(postID : string, token: string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+        const post : Post = await databaseController.getPost(this.coveyTownID, postID);
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
+
+        if (post.ownerID === playerID && post.fileID) {
+            const result : any = await databaseController.deleteFile(post.fileID);
+            return result;
+        }
+
+        throw Error('Incorrect post owner/No file found');
     }
 }
