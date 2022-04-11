@@ -58,7 +58,7 @@ export default class CoveyTownsStore {
    * @returns the new town controller
    */
   createTown(friendlyName: string, isPubliclyListed: boolean): CoveyTownController {
-    const newTown = new CoveyTownController(friendlyName, isPubliclyListed);
+    const newTown = new PostCoveyTownController(friendlyName, isPubliclyListed);
     this._towns.push(newTown);
     return newTown;
   }

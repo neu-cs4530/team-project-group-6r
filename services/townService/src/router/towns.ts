@@ -18,6 +18,8 @@ import {
   postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
+import DatabaseController from '../lib/PostTown/DatabaseController';
+import { CommentTree, Comment, CommentTest } from '../types/PostTown/comment';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
 
@@ -28,6 +30,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
    */
   app.post('/sessions', express.json(), async (req, res) => {
     try {
+      console.log(4444)
       const result = await townJoinHandler({
         userName: req.body.userName,
         coveyTownID: req.body.coveyTownID,
@@ -299,7 +302,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
    * Update a comment
    */
-   app.patch('/towns/:townID/comment/:commentID', express.json(), async (req, res) => {
+   app.patch('/towns/:townID/comment/:commentID', async (req, res) => {
     try {
       const result = await commentUpdateHandler({
         coveyTownID: req.params.townID,
@@ -316,8 +319,61 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+    
+    app.get('/test/:postID', express.json(), async (req, res) => {
+      try {
+        const db = DatabaseController.getInstance();
+
+        const post = await db.getPost('testID', req.params.postID);
+        const comments: string[] = post.comments!;
+        
+        const commentTree = await constructTree(comments, db);
+        res.send(commentTree);
+      } catch (err) {
+        logError(err);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json({
+            message: 'Internal server error, please see log in server for more details',
+        });
+      }
+    })
+
 
   const socketServer = new io.Server(http, { cors: { origin: '*' } });
   socketServer.on('connection', townSubscriptionHandler);
   return socketServer;
+}
+
+async function constructTree(commentIDs : string[], db : DatabaseController) {
+  const comments = await Promise.all(commentIDs.map(async (id) => {
+    // const comment: Comment = await db.getComment('testID', id);
+    // const ids: string[] = comment.comments!;
+    
+    // const comments: CommentTree[] = await constructTree(ids, db);
+
+    // const tree: CommentTree = {
+    //   comment: comment,
+    //   comments: comments
+    // }
+
+    const comment = await db.getComment('testID', id);
+    const ids = comment.comments;
+    const tree: CommentTest = {
+      _id: comment.id,
+      rootPostID: comment.rootPostID,
+      parentCommentID: comment.parentCommentID,
+      ownerID: comment.ownerID,
+      commentContent: comment.commentContent,
+      isDeleted: comment.isDeleted,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt
+    }
+    tree.comments = await constructTree(ids, db);
+
+    return tree;
+  }))
+
+  console.log(comments)
+
+  return comments;
 }
