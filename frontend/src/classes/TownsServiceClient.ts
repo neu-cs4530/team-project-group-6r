@@ -2,8 +2,33 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
-import { ServerPost } from './Post';
-import { ServerComment } from './Comment';
+import { Coordinate } from './Post';
+
+export type ServerPost = {
+  _id?: string,
+  title: string,
+  postContent: string,
+  ownerID: string,
+  fileID?: string,
+  isVisible: boolean,
+  comments?: string[],
+  coordinates: Coordinate,
+  createdAt?: Date,
+  updatedAt?: Date
+}
+
+export type ServerComment = {
+  _id?: string,
+  rootPostID: string,
+  parentCommentID: string,
+  ownerID: string,
+  commentContent: string,
+  isDeleted: boolean,
+  comments?: ServerComment[],
+  createdAt? : Date,
+  updatedAt? : Date
+}
+
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -36,6 +61,8 @@ export interface TownJoinResponse {
   isPubliclyListed: boolean;
   /** Names and occupants of any existing ConversationAreas */
   conversationAreas: ServerConversationArea[];
+  /** Posts currently active in this town */
+  posts: ServerPost[];
 }
 
 /**
@@ -104,58 +131,58 @@ export type CoveyTownInfo = {
 };
 
 export interface PostCreateRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  post : ServerPost,
+  coveyTownID: string,
+  sessionToken: string,
+  post: ServerPost,
 }
 
 export interface PostGetRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  postID : string
+  coveyTownID: string,
+  sessionToken: string,
+  postID: string
 }
 
 export interface PostDeleteRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  postID : string
+  coveyTownID: string,
+  sessionToken: string,
+  postID: string
 }
 
 export interface PostGetIdInTownRequest {
-  coveyTownID : string,
-  sessionToken : string
+  coveyTownID: string,
+  sessionToken: string
 }
 
 export interface PostUpdateRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  postID : string,
-  post : ServerPost,
+  coveyTownID: string,
+  sessionToken: string,
+  postID: string,
+  post: ServerPost,
 }
 
 export interface CommentCreateRequest {
   coveyTownID: string,
   sessionToken: string,
-  comment : ServerComment,
+  comment: ServerComment,
 }
 
 export interface CommentGetRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  commentID : string
+  coveyTownID: string,
+  sessionToken: string,
+  commentID: string
 }
 
 export interface CommentDeleteRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  commentID : string
+  coveyTownID: string,
+  sessionToken: string,
+  commentID: string
 }
 
 export interface CommentUpdateRequest {
-  coveyTownID : string,
-  sessionToken : string,
-  commentID : string,
-  comment : ServerComment,
+  coveyTownID: string,
+  sessionToken: string,
+  commentID: string,
+  comment: ServerComment,
 }
 
 export default class TownsServiceClient {
@@ -207,14 +234,14 @@ export default class TownsServiceClient {
     const responseWrapper = await this._axios.post('/sessions', requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
-  
-  async createConversation(requestData: ConversationCreateRequest) : Promise<void>{
+
+  async createConversation(requestData: ConversationCreateRequest): Promise<void> {
     const responseWrapper = await this._axios.post(`/towns/${requestData.coveyTownID}/conversationAreas`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
   // TODO: Session Token
-  async createPost(requestData: PostCreateRequest): Promise<void> {
+  async createPost(requestData: PostCreateRequest): Promise<ServerPost> {
     const responseWrapper = await this._axios.post(`/towns/${requestData.coveyTownID}/post`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
@@ -244,7 +271,7 @@ export default class TownsServiceClient {
   }
 
   // TODO: Session Token
-  async createComment(requestData: CommentCreateRequest): Promise<void> {
+  async createComment(requestData: CommentCreateRequest): Promise<ServerComment> {
     const responseWrapper = await this._axios.post(`/towns/${requestData.coveyTownID}/comment`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
@@ -264,6 +291,12 @@ export default class TownsServiceClient {
   // TODO: Session Token
   async editComment(requestData: CommentUpdateRequest): Promise<void> {
     const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`);
+    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
+  }
+
+  // TODO: Session Token
+  async getCommentsByPostID(requestData: PostGetRequest): Promise<ServerComment[]> {
+    const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}/commentTree`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 }

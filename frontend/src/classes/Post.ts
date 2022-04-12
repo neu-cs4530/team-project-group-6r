@@ -1,13 +1,14 @@
 export type ServerPost = {
-    id: string,
+    _id?: string,
     title: string,
     postContent: string,
     ownerID: string,
+    fileID?: string,
     isVisible: boolean,
-    coordinates: Coordinate,
     comments?: string[],
-    createdAt?: string,
-    updatedAt?: string,
+    coordinates: Coordinate,
+    createdAt?: Date,
+    updatedAt?: Date
 }
 
 export type PostListener = {
@@ -27,7 +28,7 @@ export const dummyPosts: ServerPost[] = [
             "y": 35,
         },
         "comments": [],
-        "id": "624ea8cc6e50c406f87af212",
+        "_id": "624ea8cc6e50c406f87af212",
         "title": "Post 0",
         "postContent": "fuck you cheng xi tsou cai ni maa de bi",
         "ownerID": "test",
@@ -39,7 +40,7 @@ export const dummyPosts: ServerPost[] = [
             "y": 35,
         },
         "comments": [],
-        "id": "624e4ac5ae40e056287afe11",
+        "_id": "624e4ac5ae40e056287afe11",
         "title": "Post 1",
         "postContent": "fuck you cheng xi tsou cai ni maa de bi",
         "ownerID": "test",
@@ -51,7 +52,7 @@ export const dummyPosts: ServerPost[] = [
             "y": 30,
         },
         "comments": [],
-        "id": "891ec8s56ea0c0c6f8736e71",
+        "_id": "891ec8s56ea0c0c6f8736e71",
         "title": "Post 2",
         "postContent": "fuck you cheng xi tsou cai ni maa de bi",
         "ownerID": "test",
@@ -60,7 +61,7 @@ export const dummyPosts: ServerPost[] = [
 ]
 
 export default class Post {
-    private _id: string;
+    private _id?: string;
 
     private _title: string;
 
@@ -68,15 +69,17 @@ export default class Post {
 
     private _ownerID: string;
 
+    private _fileID?: string;
+
     private _isVisible: boolean;
 
     private _coordinates: Coordinate;
 
     private _comments?: string[] = [];
 
-    private _createAt?: string;
+    private _createAt?: Date;
 
-    private _updateAt?: string;
+    private _updateAt?: Date;
 
     private _listeners: PostListener[] = [];
 
@@ -84,9 +87,9 @@ export default class Post {
 
     public label?: Phaser.GameObjects.Text;
 
-    constructor(id: string, title: string, postContent: string,
+    constructor(title: string, postContent: string,
         ownerID: string, isVisible: boolean, coordinate: Coordinate,
-        comments?: string[], createAt?: string, updateAt?: string) {
+        comments?: string[], id?: string, fileID?: string, createAt?: Date, updateAt?: Date) {
         this._id = id;
         this._title = title;
         this._postContent = postContent;
@@ -136,7 +139,7 @@ export default class Post {
 
     toServerPost(): ServerPost {
         return {
-            id: this._id,
+            _id: this._id,
             title: this._title,
             postContent: this._postContent,
             ownerID: this._ownerID,
@@ -156,15 +159,16 @@ export default class Post {
         this._listeners = this._listeners.filter(eachListener => eachListener !== listener);
     }
 
-    copy() : Post{
+    copy(): Post {
         const ret = new Post(
-            this._id,
             this._title,
             this._postContent,
             this._ownerID,
             this._isVisible,
-            {...this._coordinates},
+            { ...this._coordinates },
             this._comments?.concat([]),
+            this._id,
+            this._fileID,
             this._createAt,
             this._updateAt,
         );
@@ -174,13 +178,14 @@ export default class Post {
 
     static fromServerPost(serverPost: ServerPost): Post {
         const ret = new Post(
-            serverPost.id,
             serverPost.title,
             serverPost.postContent,
             serverPost.ownerID,
             serverPost.isVisible,
             serverPost.coordinates,
             serverPost.comments,
+            serverPost._id,
+            serverPost.fileID,
             serverPost.createdAt,
             serverPost.updatedAt,
         );
