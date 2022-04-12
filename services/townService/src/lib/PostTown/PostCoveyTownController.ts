@@ -184,6 +184,7 @@ export default class PostCoveyTownController {
 
   async getFile(postID : string) : Promise<any> {
     const databaseController = DatabaseController.getInstance();
+    console.log(this._coveyTownID);
     return databaseController.getFile(postID);
   }
 
