@@ -4,18 +4,30 @@ import { Comment } from "../../types/PostTown/comment";
 import DatabaseController from './DatabaseController';
 import Filter from 'bad-words';
 import PlayerSession from '../../types/PlayerSession';
+import CoveyTownsStore from '../CoveyTownsStore';
 
-export default class PostCoveyTownController extends CoveyTownController {
-    // Owner
-    // private _owner: string;
-    // Administrators
-    // private _administrators: string[];
+export default class PostCoveyTownController {
+
+    get coveyTownID(): string {
+        return this._coveyTownID;
+    }
 
     private filter : Filter;
 
-    constructor(friendlyName: string, isPubliclyListed: boolean) {
-        super(friendlyName, isPubliclyListed);
+    /** The ID of the town * */
+    private readonly _coveyTownID: string;
+
+    /** The owner (creator) of this town * */
+    private readonly _ownerID: string;
+
+    /**  List of moderators that have the same privelage as the owner * */
+    private readonly _moderators: string[];
+
+    constructor(coveyTownID: string, ownerID: string) {
         this.filter = new Filter();
+        this._coveyTownID = coveyTownID;
+        this._ownerID = ownerID;
+        this._moderators = [];
     }
 
     // Add
@@ -50,40 +62,46 @@ export default class PostCoveyTownController extends CoveyTownController {
     async deletePost(postID : string, token : string) : Promise<Post> {
         const databaseController: DatabaseController = DatabaseController.getInstance();
         const post: Post = await databaseController.getPost(this.coveyTownID, postID);
+        const controller = CoveyTownsStore.getInstance().getControllerForTown(this.coveyTownID);
         
-        const playerID: string = this.getSessionByToken(token)!.player.userName;
-        
-        if (post.ownerID === playerID) {
-            const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
-            await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
+        if (controller) {
+            const playerID: string = controller.getSessionByToken(token)!.player.userName;
+            
+            if (post.ownerID === playerID) {
+                const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+                await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
-            if (post.fileID) {
-                await databaseController.deleteFile(post.fileID);
+                if (post.fileID) {
+                    await databaseController.deleteFile(post.fileID);
+                }
+
+                return result;
             }
-
-            return result;
         }
 
         //isn't this terrible
-        throw Error('Incorrect post owner');
+        throw Error('Incorrect post owner/Town doesn\'t exist');
     }
 
     async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
         const databaseController: DatabaseController = DatabaseController.getInstance();
         const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+        const controller = CoveyTownsStore.getInstance().getControllerForTown(this.coveyTownID);
 
-        const playerID: string = this.getSessionByToken(token)!.player.userName;
-        
-        if (postToUpdate.ownerID === playerID) {
-            //censor
-            post.postContent = this.filter.clean(post.postContent.valueOf());
-            post.title = this.filter.clean(post.title.valueOf());
-            const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
+        if (controller) {
+            const playerID: string = controller.getSessionByToken(token)!.player.userName;
+            
+            if (postToUpdate.ownerID === playerID) {
+                //censor
+                post.postContent = this.filter.clean(post.postContent.valueOf());
+                post.title = this.filter.clean(post.title.valueOf());
+                const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
 
-            return result;
+                return result;
+            }
         }
 
-        throw Error('Incorrect post owner');
+        throw Error('Incorrect post owner/ Town doesn\'t exist');
     }
 
     async createComment(comment : Comment) : Promise<Comment> {
@@ -115,13 +133,16 @@ export default class PostCoveyTownController extends CoveyTownController {
     async deleteComment(commentID : string, token : string) : Promise<Comment> {
         const databaseController: DatabaseController = DatabaseController.getInstance();
         const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        const controller = CoveyTownsStore.getInstance().getControllerForTown(this.coveyTownID);
         
-        const playerID: string = this.getSessionByToken(token)!.player.userName;
-        
-        if (comment.ownerID === playerID) {
-            const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
+        if(controller) {
+            const playerID: string = controller.getSessionByToken(token)!.player.userName;
+            
+            if (comment.ownerID === playerID) {
+                const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
 
-            return result;
+                return result;
+            }
         }
 
         //isn't this terrible
@@ -131,15 +152,18 @@ export default class PostCoveyTownController extends CoveyTownController {
     async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
         const databaseController: DatabaseController = DatabaseController.getInstance();
         const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        const controller = CoveyTownsStore.getInstance().getControllerForTown(this.coveyTownID);
 
-        const playerID: string = this.getSessionByToken(token)!.player.userName;
-        
-        if (commentToUpdate.ownerID === playerID) {
-            //censor
-            comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
-            const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+        if(controller) {
+            const playerID: string = controller.getSessionByToken(token)!.player.userName;
             
-            return result;
+            if (commentToUpdate.ownerID === playerID) {
+                //censor
+                comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
+                const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+                
+                return result;
+            }
         }
 
         //isn't this terrible
@@ -156,11 +180,15 @@ export default class PostCoveyTownController extends CoveyTownController {
     async deleteFile(postID : string, token: string) : Promise<any> {
         const databaseController = DatabaseController.getInstance();
         const post : Post = await databaseController.getPost(this.coveyTownID, postID);
-        const playerID: string = this.getSessionByToken(token)!.player.userName;
+        const controller = CoveyTownsStore.getInstance().getControllerForTown(this.coveyTownID);
+        
+        if (controller) {
+            const playerID: string = controller.getSessionByToken(token)!.player.userName;
 
-        if (post.ownerID === playerID && post.fileID) {
-            const result : any = await databaseController.deleteFile(post.fileID);
-            return result;
+            if (post.ownerID === playerID && post.fileID) {
+                const result : any = await databaseController.deleteFile(post.fileID);
+                return result;
+            }
         }
 
         throw Error('Incorrect post owner/No file found');
