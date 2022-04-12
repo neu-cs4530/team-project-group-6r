@@ -15,19 +15,22 @@ import {
   commentDeleteHandler,
   commentGetHandler,
   commentUpdateHandler,
-  postCreateHandler, postDeleteHandler, postGetAllInTownHandler, postGetHandler, postUpdateHandler,
+  fileDeleteHandler,
+  fileGetHandler,
+  postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetCommentTreeHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
+import { Multer } from 'multer';
+import { gfs, gridfsBucket } from '../server';
+import mongoose from 'mongoose';
 
-export default function addTownRoutes(http: Server, app: Express): io.Server {
-
-  
-
+export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
   /*
    * Create a new session (aka join a town)
    */
   app.post('/sessions', express.json(), async (req, res) => {
     try {
+      console.log(4444)
       const result = await townJoinHandler({
         userName: req.body.userName,
         coveyTownID: req.body.coveyTownID,
@@ -96,6 +99,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+  
   /**
    * Update a town
    */
@@ -179,9 +183,9 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
    * Get all post ID's in town.
    */
-   app.get('/towns/:townID/post', express.json(), async (req, res) => {
+   app.get('/towns/:townID/posts', express.json(), async (req, res) => {
     try {
-      const result = await postGetAllInTownHandler({
+      const result = await postGetAllIDInTownHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken
       });
@@ -194,6 +198,27 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+
+  /**
+   * Get comment tree of post.
+   */
+  app.get('/towns/:townID/post/:postID/commentTree', express.json(), async (req, res) => {
+    try {
+      const result = await postGetCommentTreeHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
+      });
+
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+      });
+    }
+  })
 
   /**
    * Delete a post
@@ -316,6 +341,103 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+
+  //post a file
+  app.post('/upload', upload.single('file'), async (req, res) => {
+    try {
+      res.json({file: req.file });
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  })
+
+  //get all files (test route)
+  app.get('/files', async (_req, res) => {
+
+    gfs.files.find().toArray((_err, files) => {
+      //Check if files
+      if(!files || files.length == 0) {
+        return res.status(404).json({
+          err: 'No files exist'
+        });
+      }
+
+      return res.json(files);
+    })
+  }) 
+
+  //get one file
+  app.get('/towns/:townID/files/:postID', async (req, res) => {
+    try {
+      const result = await fileGetHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  })
+
+  //get and stream image (test route)
+  app.get('/image/:id', async (req, res) => {
+    const obj_id = new mongoose.Types.ObjectId(req.params.id)
+    gfs.files.findOne({_id: obj_id}, (_err, file) => {
+      if(!file || file.length == 0) {
+        res.status(404).json({
+          err: 'No file exist'
+        });
+      } else {
+        //check image
+        if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
+          const readStream = gridfsBucket.openDownloadStream(obj_id);
+          readStream.pipe(res);
+        } else{
+          res.status(404).json({
+            err: 'Not an image'
+          });
+        }
+      }
+    })
+  });
+
+  //delete file
+  app.delete('/towns/:townID/files/:postID', async (req, res) => {
+    try {
+      const result = await fileDeleteHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  })
+  // app.delete('/files/:id', async (req, res) => {
+  //   const obj_id = new mongoose.Types.ObjectId(req.params.id);
+  //   try {
+  //     gridfsBucket.delete(obj_id);
+  //     return res.status(StatusCodes.OK).json(obj_id);
+  //   } catch (err) {
+  //     return res.status(404).json({
+  //       err: 'File not found'
+  //     })
+  //   }
+  // });
 
   const socketServer = new io.Server(http, { cors: { origin: '*' } });
   socketServer.on('connection', townSubscriptionHandler);

@@ -5,6 +5,7 @@ import { ChatMessage, CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import { ConversationAreaCreateRequest, ServerConversationArea } from '../client/TownsServiceClient';
+import { Post } from '../types/PostTown/post';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -37,6 +38,8 @@ export interface TownJoinResponse {
   isPubliclyListed: boolean;
   /** Conversation areas currently active in this town */
   conversationAreas: ServerConversationArea[];
+  /** Posts currently active in this town */
+  posts: Post[];
 }
 
 /**
@@ -101,9 +104,9 @@ export interface ResponseEnvelope<T> {
  */
 export async function townJoinHandler(requestData: TownJoinRequest): Promise<ResponseEnvelope<TownJoinResponse>> {
   const townsStore = CoveyTownsStore.getInstance();
-
   const coveyTownController = townsStore.getControllerForTown(requestData.coveyTownID);
-  if (!coveyTownController) {
+  const postTownController = townsStore.getPostControllerForTown(requestData.coveyTownID);
+  if (!coveyTownController || !postTownController) {
     return {
       isOK: false,
       message: 'Error: No such town',
@@ -111,6 +114,8 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
   }
   const newPlayer = new Player(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
+  const posts = await postTownController.getAllPostInTown();
+  console.log(coveyTownController.getSessionByToken(newSession.sessionToken));
   assert(newSession.videoToken);
   return {
     isOK: true,
@@ -122,6 +127,7 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
       friendlyName: coveyTownController.friendlyName,
       isPubliclyListed: coveyTownController.isPubliclyListed,
       conversationAreas: coveyTownController.conversationAreas,
+      posts: posts,
     },
   };
 }

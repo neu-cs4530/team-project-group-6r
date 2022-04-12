@@ -1,19 +1,72 @@
 import Express from 'express';
 import * as http from 'http';
 import CORS from 'cors';
+import mongoose from 'mongoose';
 import { AddressInfo } from 'net';
 import addTownRoutes from './router/towns';
 import CoveyTownsStore from './lib/CoveyTownsStore';
-import mongoose from 'mongoose';
+import multer from 'multer';
+import { GridFsStorage } from 'multer-gridfs-storage';
+import Grid from 'gridfs-stream';
+import methodOverride from 'method-override';
+import bodyParser from 'body-parser';
+import path from 'path';
+import crypto from 'crypto';
+import { GridFSBucket } from 'mongodb';
+
 
 const app = Express();
 app.use(CORS());
+app.use(bodyParser.json());
+app.use(methodOverride('_method'));
+app.set('view engine', 'ejs');
 const server = http.createServer(app);
 
 const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
+
+//const conn = mongoose.createConnection(uri);
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
 
-addTownRoutes(server, app);
+let gfs: Grid.Grid;
+let gridfsBucket: GridFSBucket;
+
+mongoose.connection.once('open', () => {
+  gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    bucketName: 'uploads'
+  });
+
+  gfs = Grid(mongoose.connection.db, mongoose.mongo);
+  gfs.collection('uploads')
+})
+
+// create storage engine
+const storage = new GridFsStorage({
+  url: uri,
+  file: (_req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          filename: filename,
+          bucketName: 'uploads'
+        };
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+const upload = multer({ storage });
+
+
+addTownRoutes(server, app, upload);
+
+const newTown = CoveyTownsStore.getInstance().createTown('ChengTown', true);
+const newPostTown = CoveyTownsStore.getInstance().getPostControllerForTown(newTown.coveyTownID);
+console.log(newTown);
+console.log(newPostTown);
 
 server.listen(process.env.PORT || 8081, () => {
   const address = server.address() as AddressInfo;
@@ -24,3 +77,5 @@ server.listen(process.env.PORT || 8081, () => {
       .createTown(process.env.DEMO_TOWN_ID, false);
   }
 });
+
+export { gfs, gridfsBucket };
