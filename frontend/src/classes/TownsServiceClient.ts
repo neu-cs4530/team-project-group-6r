@@ -1,9 +1,33 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
+// Classes
 import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
-import { ServerPost } from './Post';
-import { ServerComment } from './Comment';
+import { Coordinate } from './Post';
+
+export type ServerPost = {
+  title: string,
+  postContent: string,
+  ownerID: string,
+  isVisible: boolean,
+  coordinates: Coordinate,
+  comments?: string[],
+  createdAt?: string,
+  updatedAt?: string,
+}
+
+export type ServerComment = {
+  commentID: string,
+  rootPostID: string,
+  parentCommentID: string,
+  ownerID: string,
+  commentContent: string,
+  isDeleted: boolean,
+  comments?: string[],
+  createdAt? : Date,
+  updatedAt? : Date,
+}
+
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware

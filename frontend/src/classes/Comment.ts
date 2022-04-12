@@ -1,4 +1,5 @@
 export type ServerComment = {
+    commentID: string,
     rootPostID: string,
     parentCommentID: string,
     ownerID: string,

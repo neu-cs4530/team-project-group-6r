@@ -1,37 +1,53 @@
 import React, { ChangeEvent, useState } from 'react';
 import { VStack, HStack, StackDivider, Input, Textarea, Button, Flex } from '@chakra-ui/react';
+// Class
 import { Coordinate } from '../../classes/Post';
+// API
+import TownsServiceClient from '../../classes/TownsServiceClient';
 
 interface CreatePostProps {
     coordinate: Coordinate;
     username: string
 }
 
-type UserInputs = {
+type CreatePostStates = {
     title: string;
     content: string;
+    committing: boolean;
 }
 
 export default function CreatePost({ coordinate, username }: CreatePostProps): JSX.Element {
-    const [userInputs, setUserInputs] = useState<UserInputs>({
+    const [postStates, setPostStates] = useState<CreatePostStates>({
         title: '',
         content: '',
+        committing: false,
     });
 
     const handleTileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setUserInputs((prev: UserInputs) => ({
+        setPostStates((prev: CreatePostStates) => ({
             ...prev,
             title: e.target.value,
         }));
     }
 
     const handleTextAreaInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        setUserInputs((prev: UserInputs) => ({
+        setPostStates((prev: CreatePostStates) => ({
             ...prev,
             content: e.target.value,
         }));
     }
 
+    const toggleButtonLoading = () => {
+        setPostStates((prev: CreatePostStates) => ({
+            ...prev,
+            committing: !prev.committing,
+        }));
+    }
+
+    const handleCommitButtonClick = async () => {
+        console.log('HERE');
+        toggleButtonLoading();
+    }
 
     // const 
     return (
@@ -64,7 +80,7 @@ export default function CreatePost({ coordinate, username }: CreatePostProps): J
                 <Input
                     placeholder='Title'
                     size='md'
-                    value={userInputs.title}
+                    value={postStates.title}
                     onChange={handleTileInputChange} />
                 <Textarea
                     placeholder='Text (optional)'
@@ -72,14 +88,14 @@ export default function CreatePost({ coordinate, username }: CreatePostProps): J
                     height='250px'
                     width='450px'
                     maxHeight='585px'
-                    value={userInputs.content}
+                    value={postStates.content}
                     onChange={handleTextAreaInputChange} />
             </VStack>
             <Flex
                 width='100%'
                 direction='row'
                 justify='flex-end'>
-                <Button>Commit</Button>
+                <Button isLoading={postStates.committing} loadingText="Committing" onClick={handleCommitButtonClick}>Commit</Button>
             </Flex>
         </VStack>
     );
