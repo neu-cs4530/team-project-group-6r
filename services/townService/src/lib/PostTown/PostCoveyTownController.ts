@@ -52,9 +52,9 @@ export default class PostCoveyTownController {
         return result;
     }
 
-    async getAllPostInTown() : Promise<string[]> {
+    async getAllPostInTown() : Promise<Post[]> {
         const databaseController = DatabaseController.getInstance();
-        const result : string[] = await databaseController.getAllPostInTown(this.coveyTownID);
+        const result : Post[] = await databaseController.getAllPostInTown(this.coveyTownID);
 
         return result;
     }

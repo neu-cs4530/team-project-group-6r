@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { PostSchema } from "../../schemas/MongoPost";
 import { CommentSchema } from "../../schemas/MongoComment";
 import { gfs, gridfsBucket } from "../../server";
+import { DeleteResult } from "mongodb";
 
 export default class DatabaseController {
     private static _instance : DatabaseController;
@@ -23,23 +24,22 @@ export default class DatabaseController {
         return await insertPost.save();
     }
 
-    async getPost(coveyTownID : string, postID : string) : Promise<any> {
+    async getPost(coveyTownID : string, postID : string) : Promise<Post | null> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findById(postID);
     }
 
-    async getAllPostInTown(coveyTownID : string) : Promise<any> {
+    async getAllPostInTown(coveyTownID : string) : Promise<Post[]> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
-        console.log(coveyTownID)
         return await model.find({});
     }
 
-    async deletePost(coveyTownID : string, postID : string) : Promise<any> {
+    async deletePost(coveyTownID : string, postID : string) : Promise<Post | null> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findByIdAndDelete(postID);
     }
 
-    async updatePost(coveyTownID : string, postID : string, post : Post) : Promise<any> {
+    async updatePost(coveyTownID : string, postID : string, post : Post) : Promise<Post | null> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findByIdAndUpdate(postID, post, {new : true});
     }
@@ -56,22 +56,22 @@ export default class DatabaseController {
         return await insertComment.save();
     }
 
-    async getComment(coveyTownID : string, commentID : string) : Promise<any> {
+    async getComment(coveyTownID : string, commentID : string) : Promise<Comment | null> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findById(commentID);
     }
 
-    async deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
+    async deleteComment(coveyTownID : string, commentID : string) : Promise<Comment | null> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findByIdAndUpdate(commentID, { $set: {isDeleted: true} }, {new: true});
     }
 
-    async deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
+    async deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<DeleteResult> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
-        await model.deleteMany({ rootPostID: postID })
+        return await model.deleteMany({ rootPostID: postID });
     }
 
-    async updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<any> {
+    async updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<Comment | null> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findByIdAndUpdate(commentID, comment, {new: true});
     }
@@ -81,12 +81,12 @@ export default class DatabaseController {
         return await model.findByIdAndUpdate(parentCommentID, { $push: {comments: createdCommentID}} );
     }
 
-    async getFile(fileID: string) {
+    async getFile(fileID: string) : Promise<any> {
         const obj_id = new mongoose.Types.ObjectId(fileID);
         return await gfs.files.findOne({_id: obj_id});
     }
 
-    async deleteFile(fileID: string) {
+    async deleteFile(fileID: string): Promise<any> {
         const obj_id = new mongoose.Types.ObjectId(fileID);
         return await gridfsBucket.delete(obj_id);
     }

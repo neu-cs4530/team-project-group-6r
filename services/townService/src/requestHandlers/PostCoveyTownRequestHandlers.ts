@@ -26,7 +26,7 @@ export interface PostGetRequest {
     postID : string
 }
 
-export interface PostGetIdInTownRequest {
+export interface PostGetAllInTownRequest {
     coveyTownID : string,
     sessionToken : string
 }
@@ -57,7 +57,7 @@ export interface CommentUpdateRequest {
     comment : Comment
 }
 
-export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
+export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post | Object>> {
     const townsStore = CoveyTownsStore.getInstance();
     const postTownController = townsStore.getPostControllerForTown(_requestData.coveyTownID);
 
@@ -73,7 +73,7 @@ export async function postCreateHandler(_requestData : PostCreateRequest): Promi
     const result = await postTownController.createPost(post);
     return {
         isOK: true,
-        response: {},
+        response: result,
         message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
     };
 }
@@ -101,7 +101,7 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
 
 }
 
-export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRequest) : Promise<ResponseEnvelope<string[] | Object>> {
+export async function postGetAllIDInTownHandler(_requestData : PostGetAllInTownRequest) : Promise<ResponseEnvelope<Post[] | Object>> {
     const townsStore = CoveyTownsStore.getInstance();
     const postTownController = townsStore.getPostControllerForTown(_requestData.coveyTownID);
 
@@ -109,10 +109,10 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRe
         return {
             isOK: false,
             response: {},
-            message: 'Unable to get all Post IDs in Town.'
+            message: 'Unable to get all Posts in Town.'
         };
     }
-    const result : string[] = await postTownController.getAllPostInTown();
+    const result : Post[] = await postTownController.getAllPostInTown();
 
     return {
         isOK: true,
