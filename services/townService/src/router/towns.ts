@@ -321,7 +321,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
    * Update a comment
    */
-   app.patch('/towns/:townID/comment/:commentID', async (req, res) => {
+   app.patch('/towns/:townID/comment/:commentID', express.json(), async (req, res) => {
     try {
       const result = await commentUpdateHandler({
         coveyTownID: req.params.townID,

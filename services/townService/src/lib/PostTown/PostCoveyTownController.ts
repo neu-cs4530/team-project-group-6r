@@ -3,7 +3,6 @@ import { Post } from "../../types/PostTown/post";
 import { Comment, CommentTree } from "../../types/PostTown/comment";
 import DatabaseController from './DatabaseController';
 import Filter from 'bad-words';
-import PlayerSession from '../../types/PlayerSession';
 
 export default class PostCoveyTownController extends CoveyTownController {
     // Owner

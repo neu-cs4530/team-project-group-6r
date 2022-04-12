@@ -15,7 +15,7 @@ export default class DatabaseController {
         return DatabaseController._instance;
     }
 
-    async createPost(coveyTownID : string, post : Post) : Promise<any> {
+    async createPost(coveyTownID : string, post : Post) : Promise<Post> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         const insertPost = new model(post);
 
