@@ -15,16 +15,13 @@ import {
   commentDeleteHandler,
   commentGetHandler,
   commentUpdateHandler,
-  postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetHandler, postUpdateHandler,
+  postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetCommentTreeHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
 import DatabaseController from '../lib/PostTown/DatabaseController';
-import { CommentTree, Comment, CommentTest } from '../types/PostTown/comment';
+import { CommentTree } from '../types/PostTown/comment';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
-
-  
-
   /*
    * Create a new session (aka join a town)
    */
@@ -99,6 +96,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+  
   /**
    * Update a town
    */
@@ -197,6 +195,27 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+
+  /**
+   * Get comment tree of post.
+   */
+  app.get('/towns/:townID/post/:postID/commentTree', express.json(), async (req, res) => {
+    try {
+      const result = await postGetCommentTreeHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
+      });
+
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+      });
+    }
+  })
 
   /**
    * Delete a post
@@ -319,61 +338,8 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
-    
-    app.get('/test/:postID', express.json(), async (req, res) => {
-      try {
-        const db = DatabaseController.getInstance();
-
-        const post = await db.getPost('testID', req.params.postID);
-        const comments: string[] = post.comments!;
-        
-        const commentTree = await constructTree(comments, db);
-        res.send(commentTree);
-      } catch (err) {
-        logError(err);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-          .json({
-            message: 'Internal server error, please see log in server for more details',
-        });
-      }
-    })
-
 
   const socketServer = new io.Server(http, { cors: { origin: '*' } });
   socketServer.on('connection', townSubscriptionHandler);
   return socketServer;
-}
-
-async function constructTree(commentIDs : string[], db : DatabaseController) {
-  const comments = await Promise.all(commentIDs.map(async (id) => {
-    // const comment: Comment = await db.getComment('testID', id);
-    // const ids: string[] = comment.comments!;
-    
-    // const comments: CommentTree[] = await constructTree(ids, db);
-
-    // const tree: CommentTree = {
-    //   comment: comment,
-    //   comments: comments
-    // }
-
-    const comment = await db.getComment('testID', id);
-    const ids = comment.comments;
-    const tree: CommentTest = {
-      _id: comment.id,
-      rootPostID: comment.rootPostID,
-      parentCommentID: comment.parentCommentID,
-      ownerID: comment.ownerID,
-      commentContent: comment.commentContent,
-      isDeleted: comment.isDeleted,
-      createdAt: comment.createdAt,
-      updatedAt: comment.updatedAt
-    }
-    tree.comments = await constructTree(ids, db);
-
-    return tree;
-  }))
-
-  console.log(comments)
-
-  return comments;
 }

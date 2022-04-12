@@ -1,6 +1,6 @@
 import CoveyTownController from '../CoveyTownController';
 import { Post } from "../../types/PostTown/post";
-import { Comment } from "../../types/PostTown/comment";
+import { Comment, CommentTree } from "../../types/PostTown/comment";
 import DatabaseController from './DatabaseController';
 import Filter from 'bad-words';
 import PlayerSession from '../../types/PlayerSession';
@@ -106,6 +106,50 @@ export default class PostCoveyTownController extends CoveyTownController {
         const result : Comment = await databaseController.getComment(this.coveyTownID, commentID);
 
         return result;
+    }
+
+    private async constructCommentTree(commentIDs : string[]) {
+        const comments = await Promise.all(commentIDs.map(async (id) => {
+          // const comment: Comment = await db.getComment('testID', id);
+          // const ids: string[] = comment.comments!;
+          
+          // const comments: CommentTree[] = await constructTree(ids, db);
+      
+          // const tree: CommentTree = {
+          //   comment: comment,
+          //   comments: comments
+          // }
+            
+          const databaseController = DatabaseController.getInstance();
+          const comment = await databaseController.getComment('testID', id);
+          const commentIDs = comment.comments;
+          const tree: CommentTree = {
+            _id: comment.id,
+            rootPostID: comment.rootPostID,
+            parentCommentID: comment.parentCommentID,
+            ownerID: comment.ownerID,
+            commentContent: comment.commentContent,
+            isDeleted: comment.isDeleted,
+            createdAt: comment.createdAt,
+            updatedAt: comment.updatedAt
+          }
+          tree.comments = await this.constructCommentTree(commentIDs);
+      
+          return tree;
+        }))
+      
+        return comments;
+    }
+
+    async getCommentTree(postID : string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+
+        const post: Post = await databaseController.getPost('testID', postID);
+        const comments: string[] = post.comments!;
+    
+        const result = await this.constructCommentTree(comments);
+
+        return result
     }
 
     async deleteComment(commentID : string, token : string) : Promise<Comment> {

@@ -103,6 +103,16 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRe
     };
 }
 
+export async function postGetCommentTreeHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const result = await postTownController.getCommentTree(_requestData.postID);
+    
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Unable to grab comment tree' : undefined,
+    }
+}
+
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
     if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
         return {
