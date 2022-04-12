@@ -56,6 +56,10 @@ export default class PostCoveyTownController extends CoveyTownController {
             const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
             await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
+            if (post.fileID) {
+                await databaseController.deleteFile(post.fileID);
+            }
+
             return result;
         }
 
@@ -107,7 +111,7 @@ export default class PostCoveyTownController extends CoveyTownController {
         return result;
     }
 
-    private async constructCommentTree(commentIDs : string[]) {
+    private async constructCommentTree(commentIDs : string[]) : Promise<CommentTree[]> {
         const comments = await Promise.all(commentIDs.map(async (id) => {
           // const comment: Comment = await db.getComment('testID', id);
           // const ids: string[] = comment.comments!;
@@ -140,7 +144,7 @@ export default class PostCoveyTownController extends CoveyTownController {
         return comments;
     }
 
-    async getCommentTree(postID : string) : Promise<any> {
+    async getCommentTree(postID : string) : Promise<CommentTree[]> {
         const databaseController = DatabaseController.getInstance();
 
         const post: Post = await databaseController.getPost('testID', postID);
@@ -183,5 +187,25 @@ export default class PostCoveyTownController extends CoveyTownController {
 
         //isn't this terrible
         throw Error('Incorrect post owner');
+    }
+
+    async getFile(postID : string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+        const result : any = await databaseController.getFile(postID)
+
+        return result;
+    }
+
+    async deleteFile(postID : string, token: string) : Promise<any> {
+        const databaseController = DatabaseController.getInstance();
+        const post : Post = await databaseController.getPost(this.coveyTownID, postID);
+        const playerID: string = this.getSessionByToken(token)!.player.userName;
+
+        if (post.ownerID === playerID && post.fileID) {
+            const result : any = await databaseController.deleteFile(post.fileID);
+            return result;
+        }
+
+        throw Error('Incorrect post owner/No file found');
     }
 }

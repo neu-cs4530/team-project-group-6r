@@ -1,6 +1,6 @@
 import PostCoveyTownController from "../lib/PostTown/PostCoveyTownController";
 import { Post } from "../types/PostTown/post";
-import { Comment } from "../types/PostTown/comment";
+import { Comment, CommentTree } from "../types/PostTown/comment";
 import PlayerSession from "../types/PlayerSession";
 import CoveyTownsStore from "../lib/CoveyTownsStore";
 import Player from "../types/Player";
@@ -103,9 +103,9 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRe
     };
 }
 
-export async function postGetCommentTreeHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
-    const result = await postTownController.getCommentTree(_requestData.postID);
-    
+export async function postGetCommentTreeHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<CommentTree[]>> {
+    const result: CommentTree[] = await postTownController.getCommentTree(_requestData.postID);
+
     return {
         isOK: true,
         response: result,
@@ -183,6 +183,28 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
     const comment = _requestData.comment;
 
     const result = await postTownController.updateComment(commentID, comment, _requestData.sessionToken);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const postID = _requestData.postID;
+    const result = await postTownController.getFile(postID);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
+    };
+}
+
+export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+    const postID = _requestData.postID;
+    const result = await postTownController.deleteFile(postID, _requestData.sessionToken);
 
     return {
         isOK: true,
