@@ -24,7 +24,7 @@ export default class DatabaseController {
         return await insertPost.save();
     }
 
-    async getPost(coveyTownID : string, postID : string) : Promise<Post | null> {
+    async getPost(coveyTownID : string, postID : string) : Promise<any> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findById(postID);
     }
@@ -34,12 +34,12 @@ export default class DatabaseController {
         return await model.find({});
     }
 
-    async deletePost(coveyTownID : string, postID : string) : Promise<Post | null> {
+    async deletePost(coveyTownID : string, postID : string) : Promise<any> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findByIdAndDelete(postID);
     }
 
-    async updatePost(coveyTownID : string, postID : string, post : Post) : Promise<Post | null> {
+    async updatePost(coveyTownID : string, postID : string, post : Post) : Promise<any> {
         const model = mongoose.model("post", PostSchema, coveyTownID);
         return await model.findByIdAndUpdate(postID, post, {new : true});
     }
@@ -56,22 +56,22 @@ export default class DatabaseController {
         return await insertComment.save();
     }
 
-    async getComment(coveyTownID : string, commentID : string) : Promise<Comment | null> {
+    async getComment(coveyTownID : string, commentID : string) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findById(commentID);
     }
 
-    async deleteComment(coveyTownID : string, commentID : string) : Promise<Comment | null> {
+    async deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findByIdAndUpdate(commentID, { $set: {isDeleted: true} }, {new: true});
     }
 
-    async deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<DeleteResult> {
+    async deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.deleteMany({ rootPostID: postID });
     }
 
-    async updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<Comment | null> {
+    async updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findByIdAndUpdate(commentID, comment, {new: true});
     }
