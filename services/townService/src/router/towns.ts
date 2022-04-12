@@ -17,7 +17,7 @@ import {
   commentUpdateHandler,
   fileDeleteHandler,
   fileGetHandler,
-  postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetHandler, postUpdateHandler,
+  postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetCommentTreeHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
 import { Multer } from 'multer';
@@ -25,12 +25,12 @@ import { gfs, gridfsBucket } from '../server';
 import mongoose from 'mongoose';
 
 export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
-
   /*
    * Create a new session (aka join a town)
    */
   app.post('/sessions', express.json(), async (req, res) => {
     try {
+      console.log(4444)
       const result = await townJoinHandler({
         userName: req.body.userName,
         coveyTownID: req.body.coveyTownID,
@@ -99,6 +99,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         });
     }
   });
+  
   /**
    * Update a town
    */
@@ -197,6 +198,27 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         });
     }
   });
+
+  /**
+   * Get comment tree of post.
+   */
+  app.get('/towns/:townID/post/:postID/commentTree', express.json(), async (req, res) => {
+    try {
+      const result = await postGetCommentTreeHandler({
+        coveyTownID: req.params.townID,
+        sessionToken: req.body.sessionToken,
+        postID: req.params.postID
+      });
+
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+      });
+    }
+  })
 
   /**
    * Delete a post
