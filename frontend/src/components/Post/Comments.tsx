@@ -1,9 +1,10 @@
 import React from 'react';
 import { VStack, StackDivider } from '@chakra-ui/react';
 import Comment, { CommentType } from './Comment';
+import { ServerComment } from '../../classes/TownsServiceClient';
 
 interface CommentsProps {
-    comments: string[];
+    comments: ServerComment[];
 }
 
 const dummyComments: CommentType[] = [
@@ -125,14 +126,16 @@ const dummyComments: CommentType[] = [
 
 export default function Comments({ comments }: CommentsProps): JSX.Element {
 
-    function buildCommentsRecursive(comment: CommentType, depth: number, accum : JSX.Element[]): void {
-        accum.push(<Comment key={comment._id} comment={comment} depth={depth}/>)
-        comment.comments.forEach(c => buildCommentsRecursive(c, depth + 1, accum));
+    function buildCommentsRecursive(comment: ServerComment, depth: number, accum: JSX.Element[]): void {
+        accum.push(<Comment key={comment._id} comment={comment} depth={depth} />)
+        if (comment.comments) {
+            comment.comments.forEach(c => buildCommentsRecursive(c, depth + 1, accum));
+        }
     }
 
     function buildComments(): JSX.Element[] {
         const result: JSX.Element[] = [];
-        dummyComments.forEach(c => buildCommentsRecursive(c, 0, result));
+        comments.forEach(c => buildCommentsRecursive(c, 0, result));
         return result;
     }
     // Pull the comments 
@@ -141,7 +144,7 @@ export default function Comments({ comments }: CommentsProps): JSX.Element {
     return (
         <VStack
             flex='2'
-            overflow='scroll'
+            overflow='auto'
             overflowX='hidden'
             divider={<StackDivider borderColor='gray.200' />}
             space='5'

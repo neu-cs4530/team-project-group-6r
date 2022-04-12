@@ -426,7 +426,7 @@ class CoveyGameScene extends Phaser.Scene {
 
       const timeNow = Date.now();
       if (this.postKey.isDown && (!this.postKeyTimeout || timeNow - this.postKeyTimeout >= 250)) {
-        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y });
+        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y + 1});
         this.postKeyTimeout = timeNow;
       }
     }

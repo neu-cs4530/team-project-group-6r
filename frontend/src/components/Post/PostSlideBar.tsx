@@ -1,6 +1,4 @@
 import React from 'react';
-// Hooks
-import useCoveyAppState from '../../hooks/useCoveyAppState';
 // Components
 import Post from './Post';
 import PostObj, { Coordinate } from '../../classes/Post';
@@ -34,13 +32,12 @@ export interface PostSlideBarProps {
         
 */
 export default function PostSlideBar({ post, coordinate }: PostSlideBarProps): JSX.Element | null {
-    const { userName } = useCoveyAppState();
 
     if (post) {
-        return <Post post={post} username={userName} />
+        return <Post post={post} />
     } 
     if (coordinate) {
-        return <CreatePost coordinate={coordinate} username={userName} />   
+        return <CreatePost coordinate={coordinate} />   
     }
     return null;
 }

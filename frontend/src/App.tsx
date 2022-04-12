@@ -160,7 +160,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         ConversationArea.fromServerConversationArea(sa),
       );
       // TODO
-      const localPosts = dummyPosts.map(sp => 
+      const localPosts = initData.posts.map(sp => 
         Post.fromServerPost(sp)
       );
       let localNearbyPlayers: Player[] = [];
