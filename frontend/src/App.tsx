@@ -35,6 +35,9 @@ import PlayerMovementContext, { PlayerMovementCallback } from './contexts/Player
 import PlayersInTownContext from './contexts/PlayersInTownContext';
 import VideoContext from './contexts/VideoContext';
 import { CoveyAppState } from './CoveyTypes';
+// TODO
+import PostContext from './contexts/PostContext';
+import Post, { dummyPosts } from './classes/Post';
 
 export const MOVEMENT_UPDATE_DELAY_MS = 0;
 export const CALCULATE_NEARBY_PLAYERS_MOVING_DELAY_MS = 300;
@@ -130,6 +133,8 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [nearbyPlayers, setNearbyPlayers] = useState<Player[]>([]);
   // const [currentLocation, setCurrentLocation] = useState<UserLocation>({moving: false, rotation: 'front', x: 0, y: 0});
   const [conversationAreas, setConversationAreas] = useState<ConversationArea[]>([]);
+  // TODO: setPosts should be called when socket onPostAdded/onPostEditted/onPostDeleted
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
@@ -154,10 +159,17 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       let localConversationAreas = initData.conversationAreas.map(sa =>
         ConversationArea.fromServerConversationArea(sa),
       );
+      // TODO
+      const localPosts = dummyPosts.map(sp => 
+        Post.fromServerPost(sp)
+      );
       let localNearbyPlayers: Player[] = [];
       setPlayersInTown(localPlayers);
       setConversationAreas(localConversationAreas);
       setNearbyPlayers(localNearbyPlayers);
+      // TODO
+      setPosts(localPosts);
+
 
       const recalculateNearbyPlayers = () => {
         const newNearbyPlayers = calculateNearbyPlayers(localPlayers, currentLocation);
@@ -294,7 +306,9 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
             <PlayersInTownContext.Provider value={playersInTown}>
               <NearbyPlayersContext.Provider value={nearbyPlayers}>
                 <ConversationAreasContext.Provider value={conversationAreas}>
-                  {page}
+                  <PostContext.Provider value={posts}>
+                    {page}
+                  </PostContext.Provider>
                 </ConversationAreasContext.Provider>
               </NearbyPlayersContext.Provider>
             </PlayersInTownContext.Provider>

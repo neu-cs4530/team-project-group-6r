@@ -1,16 +1,20 @@
 import Phaser from 'phaser';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import BoundingBox from '../../classes/BoundingBox';
 import ConversationArea from '../../classes/ConversationArea';
+import Post, { Coordinate } from '../../classes/Post';
 import Player, { ServerPlayer, UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useConversationAreas from '../../hooks/useConversationAreas';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import usePlayerMovement from '../../hooks/usePlayerMovement';
 import usePlayersInTown from '../../hooks/usePlayersInTown';
+// TODO
+import usePosts from '../../hooks/usePosts';
 import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
+import PostSlideBar, { PostSlideBarProps } from '../Post/PostSlideBar';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -22,6 +26,13 @@ type ConversationGameObjects = {
   label: string;
   conversationArea?: ConversationArea;
 };
+
+type PostGameObjects = {
+  titleText: Phaser.GameObjects.Text;
+  sprite: Phaser.GameObjects.Sprite;
+  title: string;
+  post?: Post;
+}
 
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
@@ -36,6 +47,23 @@ class CoveyGameScene extends Phaser.Scene {
   private conversationAreas: ConversationGameObjects[] = [];
 
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys[] = [];
+
+  // TODO
+  private postKey!: Phaser.Input.Keyboard.Key;
+
+  private postKeyTimeout?: number;
+
+  // TODO
+  private worldLayer!: Phaser.Tilemaps.TilemapLayer;
+
+  // TODO
+  private posts: Post[] = [];
+
+  // TODO
+  private currentPost?: Post;
+
+  // TODO
+  private postInstructText?: Phaser.GameObjects.Text;
 
   /*
    * A "captured" key doesn't send events to the browser - they are trapped by Phaser
@@ -62,17 +90,22 @@ class CoveyGameScene extends Phaser.Scene {
 
   private _onGameReadyListeners: Callback[] = [];
 
+  // TODO
+  private setPostSlide: (newPost?: Post, newCoordinate?: Coordinate) => void;
+
   constructor(
     video: Video,
     emitMovement: (loc: UserLocation) => void,
     setNewConversation: (conv: ConversationArea) => void,
     myPlayerID: string,
+    setPostSlide: (newPost?: Post, newCoordinate?: Coordinate) => void,
   ) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.myPlayerID = myPlayerID;
     this.setNewConversation = setNewConversation;
+    this.setPostSlide = setPostSlide;
   }
 
   preload() {
@@ -90,6 +123,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.image('16_Grocery_store_32x32', '/assets/tilesets/16_Grocery_store_32x32.png');
     this.load.tilemapTiledJSON('map', '/assets/tilemaps/indoors.json');
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
+    this.load.image('comment', '/assets/post/comment.png')
   }
 
   /**
@@ -212,6 +246,65 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  updatePosts(posts: Post[]) {
+    if (!this.ready) {
+      this._onGameReadyListeners.push(() => {
+        this.updatePosts(posts);
+      });
+      return;
+    }
+    posts.forEach(p => {
+      this.updatePost(p);
+    });
+    // Remove removed posts from board
+    const removedPosts = this.posts.filter(
+      post => !posts.find(p => p.id === post.id),
+    );
+    removedPosts.forEach(removedPost => {
+      if (removedPost.sprite) {
+        removedPost.sprite.destroy();
+        removedPost.label?.destroy();
+      }
+    });
+    // Remove removed posts from list
+    if (removedPosts.length) {
+      this.posts = this.posts.filter(
+        post => !removedPosts.find(p => p.id === post.id),
+      );
+    }
+  }
+
+  updatePost(post: Post) {
+    let mPost = this.posts.find(p => p.id === post.id);
+    if (!mPost) {
+      mPost = post.copy();
+      this.posts.push(mPost);
+    }
+    let { sprite } = mPost;
+    if (!sprite) {
+      sprite = this.physics.add
+        .sprite(0, 0, 'comment')
+        .setSize(20, 30)
+        .setOffset(0, 24);
+      const worldXY = this.worldLayer.tileToWorldXY(mPost.coordinate.x, mPost.coordinate.y);
+      sprite.setX(worldXY.x + sprite.displayWidth / 2);
+      sprite.setY(worldXY.y + sprite.displayHeight / 2);
+      sprite.setVisible(true);
+      const label = this.add.text(
+        this.game.scale.width / 2,
+        20,
+        `You've stepped on a post, press 'P' to open:\n\tTitle ${mPost.title}\n\tOwner: ${mPost.ownerId}\n\tComments: ${mPost.comments?.length || 0}\n\tCreated at: ${mPost.createAt}\n\tUpdated at: ${mPost.updateAt}`,
+        { color: '#000000', backgroundColor: '#FFFFFF' },
+      )
+        .setScrollFactor(0)
+        .setDepth(30);
+      label.setVisible(false);
+      label.setX(this.game.scale.width - label.width - 25);
+      mPost.sprite = sprite;
+      mPost.label = label;
+    }
+  }
+
   getNewMovementDirection() {
     if (this.cursors.find(keySet => keySet.left?.isDown)) {
       return 'left';
@@ -232,7 +325,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (this.paused) {
       return;
     }
-    if (this.player && this.cursors) {
+    if (this.player && this.cursors && this.postKey) {
       const speed = 175;
 
       const prevVelocity = this.player.sprite.body.velocity.clone();
@@ -299,7 +392,7 @@ class CoveyGameScene extends Phaser.Scene {
         this.lastLocation.rotation = primaryDirection || 'front';
         this.lastLocation.moving = isMoving;
         if (this.currentConversationArea) {
-          if(this.currentConversationArea.conversationArea){
+          if (this.currentConversationArea.conversationArea) {
             this.lastLocation.conversationLabel = this.currentConversationArea.label;
           }
           if (
@@ -315,7 +408,32 @@ class CoveyGameScene extends Phaser.Scene {
         }
         this.emitMovement(this.lastLocation);
       }
+
+      // Toggling on the post's label
+      const tileXY = this.worldLayer.worldToTileXY(body.x, body.y);
+      const localPost = this.findPostAtTileLocation(tileXY.x, tileXY.y + 1);
+      if (this.currentPost) {
+        if (!localPost || localPost.id !== this.currentPost.id) {
+          this.currentPost.label?.setVisible(false);
+        }
+      } else if (localPost) {
+        this.postInstructText?.setVisible(false);
+        localPost.label?.setVisible(true);
+      } else {
+        this.postInstructText?.setVisible(true);
+      }
+      this.currentPost = localPost;
+
+      const timeNow = Date.now();
+      if (this.postKey.isDown && (!this.postKeyTimeout || timeNow - this.postKeyTimeout >= 250)) {
+        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y });
+        this.postKeyTimeout = timeNow;
+      }
     }
+  }
+
+  findPostAtTileLocation(x: number, y: number): Post | undefined {
+    return this.posts.find(p => p.coordinate.x === x && p.coordinate.y === y);
   }
 
   create() {
@@ -343,8 +461,8 @@ class CoveyGameScene extends Phaser.Scene {
     wallsLayer.setCollisionByProperty({ collides: true });
     onTheWallsLayer.setCollisionByProperty({ collides: true });
 
-    const worldLayer = map.createLayer('World', tileset, 0, 0);
-    worldLayer.setCollisionByProperty({ collides: true });
+    this.worldLayer = map.createLayer('World', tileset, 0, 0);
+    this.worldLayer.setCollisionByProperty({ collides: true });
     const aboveLayer = map.createLayer('Above Player', tileset, 0, 0);
     aboveLayer.setCollisionByProperty({ collides: true });
 
@@ -353,12 +471,12 @@ class CoveyGameScene extends Phaser.Scene {
      Here, we want the "Above Player" layer to sit on top of the player, so we explicitly give
      it a depth. Higher depths will sit on top of lower depth objects.
      */
-    worldLayer.setDepth(5);
+    this.worldLayer.setDepth(5);
     aboveLayer.setDepth(10);
     veryAboveLayer.setDepth(15);
 
     // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
-    // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
+    // collision shapes. In the tmx file, there's wan object layer with a point named "Spawn Point"
     const spawnPoint = (map.findObject(
       'Objects',
       obj => obj.name === 'Spawn Point',
@@ -435,7 +553,18 @@ class CoveyGameScene extends Phaser.Scene {
       }
     });
 
+    this.postInstructText = this.add.text(
+      this.game.scale.width / 1.78,
+      20,
+      `You've stepped on an empty tile without \na post, press 'P' to create a post`,
+      { color: '#000000', backgroundColor: '#FFFFFF' },
+    )
+      .setScrollFactor(0)
+      .setDepth(30);
+    this.postInstructText.setVisible(true);
+
     const cursorKeys = this.input.keyboard.createCursorKeys();
+    this.postKey = this.input.keyboard.addKey('P');
     this.cursors.push(cursorKeys);
     this.cursors.push(
       this.input.keyboard.addKeys(
@@ -514,7 +643,7 @@ class CoveyGameScene extends Phaser.Scene {
         if (conv?.conversationArea) {
           this.infoTextBox?.setVisible(false);
           const localLastLocation = this.lastLocation;
-          if(localLastLocation && localLastLocation.conversationLabel !== conv.conversationArea.label){
+          if (localLastLocation && localLastLocation.conversationLabel !== conv.conversationArea.label) {
             localLastLocation.conversationLabel = conv.conversationArea.label;
             this.emitMovement(localLastLocation);
           }
@@ -530,6 +659,7 @@ class CoveyGameScene extends Phaser.Scene {
         }
       },
     );
+    // this.physics.add.overlap()
 
     this.emitMovement({
       rotation: 'front',
@@ -541,7 +671,7 @@ class CoveyGameScene extends Phaser.Scene {
     });
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
-    this.physics.add.collider(sprite, worldLayer);
+    this.physics.add.collider(sprite, this.worldLayer);
     this.physics.add.collider(sprite, wallsLayer);
     this.physics.add.collider(sprite, aboveLayer);
     this.physics.add.collider(sprite, onTheWallsLayer);
@@ -631,7 +761,7 @@ class CoveyGameScene extends Phaser.Scene {
   pause() {
     if (!this.paused) {
       this.paused = true;
-      if(this.player){
+      if (this.player) {
         this.player?.sprite.anims.stop();
         const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(0);
@@ -661,6 +791,9 @@ export default function WorldMap(): JSX.Element {
   const [newConversation, setNewConversation] = useState<ConversationArea>();
   const playerMovementCallbacks = usePlayerMovement();
   const players = usePlayersInTown();
+  // TODO
+  const posts = usePosts();
+  const [postSlide, setPostSlide] = useState<PostSlideBarProps>();
 
   useEffect(() => {
     const config = {
@@ -681,9 +814,18 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
+    function postSlideReducer(newPost?: Post, newCoordinate?: Coordinate): void {
+      setPostSlide((state: PostSlideBarProps | undefined) => {
+        if (state?.post || state?.coordinate) {
+          return { post: undefined, coordinate: undefined };
+        }
+        return { post: newPost, coordinate: newCoordinate };
+      })
+    }
+
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, setNewConversation, myPlayerID);
+      const newGameScene = new CoveyGameScene(video, emitMovement, setNewConversation, myPlayerID, postSlideReducer);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -696,7 +838,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, setNewConversation, myPlayerID]);
+  }, [video, emitMovement, setNewConversation, myPlayerID, setPostSlide]);
 
   useEffect(() => {
     const movementDispatcher = (player: ServerPlayer) => {
@@ -715,6 +857,10 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updateConversationAreas(conversationAreas);
   }, [conversationAreas, gameScene]);
+
+  useEffect(() => {
+    gameScene?.updatePosts(posts);
+  }, [posts, gameScene]);
 
   const newConversationModalOpen = newConversation !== undefined;
   useEffect(() => {
@@ -748,6 +894,9 @@ export default function WorldMap(): JSX.Element {
       <div id='map-container' />
       <div id='social-container'>
         <SocialSidebar />
+      </div>
+      <div id='post-container'>
+        <PostSlideBar post={postSlide?.post} coordinate={postSlide?.coordinate} />
       </div>
     </div>
   );
