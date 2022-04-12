@@ -112,7 +112,10 @@ export default class PostCoveyTownController extends CoveyTownController {
     }
 
     private async constructCommentTree(commentIDs : string[]) : Promise<CommentTree[]> {
-        const comments = await Promise.all(commentIDs.map(async (id) => {
+        const databaseController = DatabaseController.getInstance();
+        const comments: Comment[] = await databaseController.getAllComments(this.coveyTownID, commentIDs);
+
+        const commentTree = await Promise.all(comments.map(async (comment: Comment) => {
           // const comment: Comment = await db.getComment('testID', id);
           // const ids: string[] = comment.comments!;
           
@@ -123,11 +126,9 @@ export default class PostCoveyTownController extends CoveyTownController {
           //   comments: comments
           // }
             
-          const databaseController = DatabaseController.getInstance();
-          const comment = await databaseController.getComment('testID', id);
-          const commentIDs = comment.comments;
+          const commentIDs = comment.comments!;
           const tree: CommentTree = {
-            _id: comment.id,
+            _id: comment._id,
             rootPostID: comment.rootPostID,
             parentCommentID: comment.parentCommentID,
             ownerID: comment.ownerID,
@@ -141,7 +142,7 @@ export default class PostCoveyTownController extends CoveyTownController {
           return tree;
         }))
       
-        return comments;
+        return commentTree;
     }
 
     async getCommentTree(postID : string) : Promise<CommentTree[]> {

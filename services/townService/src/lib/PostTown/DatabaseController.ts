@@ -61,6 +61,11 @@ export default class DatabaseController {
         return await model.findById(commentID);
     }
 
+    async getAllComments(coveyTownID : string, commentIDs : string[]) : Promise<Comment[]> {
+        const model = mongoose.model("comment", CommentSchema, coveyTownID);
+        return await model.find({_id: {$in: commentIDs}});
+    }
+
     async deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
         const model = mongoose.model("comment", CommentSchema, coveyTownID);
         return await model.findByIdAndUpdate(commentID, { $set: {isDeleted: true} }, {new: true});
