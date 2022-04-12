@@ -1,6 +1,6 @@
 import PostCoveyTownController from "../lib/PostTown/PostCoveyTownController";
 import { Post } from "../types/PostTown/post";
-import { Comment } from "../types/PostTown/comment";
+import { Comment, CommentTree } from "../types/PostTown/comment";
 import PlayerSession from "../types/PlayerSession";
 import CoveyTownsStore from "../lib/CoveyTownsStore";
 import Player from "../types/Player";
@@ -101,6 +101,16 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetIdInTownRe
         response: result,
         message: !result ? 'Invalid password. Please double check your town update password.' : undefined,
     };
+}
+
+export async function postGetCommentTreeHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<CommentTree[]>> {
+    const result: CommentTree[] = await postTownController.getCommentTree(_requestData.postID);
+
+    return {
+        isOK: true,
+        response: result,
+        message: !result ? 'Unable to grab comment tree' : undefined,
+    }
 }
 
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post>> {
