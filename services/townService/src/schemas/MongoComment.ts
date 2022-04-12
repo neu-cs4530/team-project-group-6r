@@ -9,5 +9,4 @@ const CommentSchema = new mongoose.Schema({
     comments: { type: [String], default: [] }
 }, { timestamps: true });
 
-
 export { CommentSchema }; 
