@@ -1,5 +1,3 @@
-import Comment, { ServerComment } from './Comment';
-
 export type ServerPost = {
     id: string,
     title: string,
@@ -8,8 +6,8 @@ export type ServerPost = {
     isVisible: boolean,
     coordinates: Coordinate,
     comments?: string[],
-    createdAt?: Date,
-    updatedAt?: Date
+    createdAt?: string,
+    updatedAt?: string,
 }
 
 export type PostListener = {
@@ -76,9 +74,9 @@ export default class Post {
 
     private _comments?: string[] = [];
 
-    private _createAt?: Date;
+    private _createAt?: string;
 
-    private _updateAt?: Date;
+    private _updateAt?: string;
 
     private _listeners: PostListener[] = [];
 
@@ -88,7 +86,7 @@ export default class Post {
 
     constructor(id: string, title: string, postContent: string,
         ownerID: string, isVisible: boolean, coordinate: Coordinate,
-        comments?: string[], createAt?: Date, updateAt?: Date) {
+        comments?: string[], createAt?: string, updateAt?: string) {
         this._id = id;
         this._title = title;
         this._postContent = postContent;

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import BoundingBox from '../../classes/BoundingBox';
 import ConversationArea from '../../classes/ConversationArea';
 import Post, { Coordinate } from '../../classes/Post';
@@ -14,8 +14,7 @@ import usePosts from '../../hooks/usePosts';
 import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
-import CreatePost from '../Post/CreatePost';
-import PostSideBar from '../Post/PostSideBar';
+import PostSlideBar, { PostSlideBarProps } from '../Post/PostSlideBar';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -52,6 +51,8 @@ class CoveyGameScene extends Phaser.Scene {
   // TODO
   private postKey!: Phaser.Input.Keyboard.Key;
 
+  private postKeyTimeout?: number;
+
   // TODO
   private worldLayer!: Phaser.Tilemaps.TilemapLayer;
 
@@ -60,6 +61,9 @@ class CoveyGameScene extends Phaser.Scene {
 
   // TODO
   private currentPost?: Post;
+
+  // TODO
+  private postInstructText?: Phaser.GameObjects.Text;
 
   /*
    * A "captured" key doesn't send events to the browser - they are trapped by Phaser
@@ -86,17 +90,22 @@ class CoveyGameScene extends Phaser.Scene {
 
   private _onGameReadyListeners: Callback[] = [];
 
+  // TODO
+  private setPostSlide: (newPost?: Post, newCoordinate?: Coordinate) => void;
+
   constructor(
     video: Video,
     emitMovement: (loc: UserLocation) => void,
     setNewConversation: (conv: ConversationArea) => void,
     myPlayerID: string,
+    setPostSlide: (newPost?: Post, newCoordinate?: Coordinate) => void,
   ) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.myPlayerID = myPlayerID;
     this.setNewConversation = setNewConversation;
+    this.setPostSlide = setPostSlide;
   }
 
   preload() {
@@ -408,20 +417,18 @@ class CoveyGameScene extends Phaser.Scene {
           this.currentPost.label?.setVisible(false);
         }
       } else if (localPost) {
+        this.postInstructText?.setVisible(false);
         localPost.label?.setVisible(true);
+      } else {
+        this.postInstructText?.setVisible(true);
       }
       this.currentPost = localPost;
 
-      // TODO retrieve a post or create a post
-      // if (this.postKey.isDown) {
-      //     const sprite = this.physics.add
-      //       .sprite(0, 0, 'comment')
-      //       .setSize(20, 30)
-      //       .setOffset(0, 24);
-      //     const worldXY = this.worldLayer.tileToWorldXY(tileXY.x, tileXY.y + 1);
-      //     sprite.setX(worldXY.x + sprite.displayWidth / 2);
-      //     sprite.setY(worldXY.y + sprite.displayHeight / 2);
-      // }
+      const timeNow = Date.now();
+      if (this.postKey.isDown && (!this.postKeyTimeout || timeNow - this.postKeyTimeout >= 250)) {
+        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y });
+        this.postKeyTimeout = timeNow;
+      }
     }
   }
 
@@ -437,7 +444,7 @@ class CoveyGameScene extends Phaser.Scene {
      */
     const tileset = [
       'Room_Builder_32x32',
-      '22_Museum_32x32s',
+      '22_Museum_32x32',
       '5_Classroom_and_library_32x32',
       '12_Kitchen_32x32',
       '1_Generic_32x32',
@@ -545,6 +552,16 @@ class CoveyGameScene extends Phaser.Scene {
         });
       }
     });
+
+    this.postInstructText = this.add.text(
+      this.game.scale.width / 1.78,
+      20,
+      `You've stepped on an empty tile without \na post, press 'P' to create a post`,
+      { color: '#000000', backgroundColor: '#FFFFFF' },
+    )
+      .setScrollFactor(0)
+      .setDepth(30);
+    this.postInstructText.setVisible(true);
 
     const cursorKeys = this.input.keyboard.createCursorKeys();
     this.postKey = this.input.keyboard.addKey('P');
@@ -776,6 +793,7 @@ export default function WorldMap(): JSX.Element {
   const players = usePlayersInTown();
   // TODO
   const posts = usePosts();
+  const [postSlide, setPostSlide] = useState<PostSlideBarProps>();
 
   useEffect(() => {
     const config = {
@@ -796,9 +814,18 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
+    function postSlideReducer(newPost?: Post, newCoordinate?: Coordinate): void {
+      setPostSlide((state: PostSlideBarProps | undefined) => {
+        if (state?.post || state?.coordinate) {
+          return { post: undefined, coordinate: undefined };
+        }
+        return { post: newPost, coordinate: newCoordinate };
+      })
+    }
+
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, setNewConversation, myPlayerID);
+      const newGameScene = new CoveyGameScene(video, emitMovement, setNewConversation, myPlayerID, postSlideReducer);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -811,7 +838,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, setNewConversation, myPlayerID]);
+  }, [video, emitMovement, setNewConversation, myPlayerID, setPostSlide]);
 
   useEffect(() => {
     const movementDispatcher = (player: ServerPlayer) => {
@@ -868,7 +895,9 @@ export default function WorldMap(): JSX.Element {
       <div id='social-container'>
         <SocialSidebar />
       </div>
-      <PostSideBar />
+      <div id='post-container'>
+        <PostSlideBar post={postSlide?.post} coordinate={postSlide?.coordinate} />
+      </div>
     </div>
   );
 }

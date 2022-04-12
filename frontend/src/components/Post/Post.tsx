@@ -1,35 +1,66 @@
 import React from 'react';
-import { VStack, HStack, Text, Heading, Button, Flex } from '@chakra-ui/react';
+import { VStack, HStack, StackDivider, Text, Heading, Button } from '@chakra-ui/react';
+// Object
+import PostObj from '../../classes/Post';
+// Components
+import CreateComment from './CreateComment';
+import Comments from './Comments';
 
-export default function Post(): JSX.Element {
+interface PostProps {
+    post: PostObj;
+    username: string;
+}
+
+// TODO:
+// Post should be rerender when post is updated through socket
+export default function Post({ post, username }: PostProps): JSX.Element {
+    function calculateHourDifference() : number | string {
+        if (post.createAt) {
+            return Math.round((new Date().getTime() - new Date(post.createAt).getTime()) / 36e5);
+        } 
+        return 'unknown';
+    }
+
     return (
-        <VStack align='start'
-            width='500px'>
-            <Text fontSize='sm'>
-                Posted by u/pulajir 5 hours ago
-            </Text>
-            <Heading as='h4'
-                size='md'>
-                To the people considering NU Bound
-            </Heading>
-            <Text fontSize='md'
-                fontFamily='Arial'>
-                Hello people, I just finished NU Bound in England and wanted top try help provide answers to your questions and give some insight into NU Bound. Ask me about academics, grading, living, traveling or anything else that comes to mind. Fair warning, I didnt have the best time with the academic and administrative side of NU Bound but this will help provide a very honest insight into NU Bound.
-            </Text>
-            <HStack
-                width='100%'>
-                <Text width='115px' fontSize='sm'>
-                    10 Comments
+        <VStack padding={5}
+            height='100%'
+            border='2px'
+            borderWidth='2px'
+            borderColor='gray.500'
+            borderRadius='8px'
+            maxHeight='768px'
+            divider={<StackDivider borderColor='gray.200' />}>
+            <VStack align='start'
+                width='500px'>
+                <Text fontSize='sm'>
+                    `Posted by u/{post.ownerId} · {calculateHourDifference()} hours ago
                 </Text>
-                <Flex
-                    direction='row'
-                    justify='end'
+                <Heading as='h4'
+                    size='md'>
+                    {post.title}
+                </Heading>
+                <Text fontSize='md'
+                    maxHeight='145px'
+                    overflow='auto'
+                    overflowX='hidden'
+                    fontFamily='Arial'
+                    paddingRight='5px'>
+                    {post.postContent}
+                </Text>
+                <HStack
                     width='100%'>
-                    <Button>Delete</Button>
-                    <Button>Hide</Button>
-                    <Button>Edit</Button>
-                </Flex>
-            </HStack>
+                    <Text width='115px' fontSize='sm'>
+                        {`${post.comments?.length || 0} Comments`}
+                    </Text>
+                    <HStack justify='end' width='100%'>
+                        <Button size='sm'>Delete</Button>
+                        <Button size='sm'>Hide</Button>
+                        <Button size='sm'>Edit</Button>
+                    </HStack>
+                </HStack>
+            </VStack>
+            <CreateComment postID={post.id} username={username} />
+            <Comments comments={post.comments || []} />
         </VStack>
     )
 }

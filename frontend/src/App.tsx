@@ -133,7 +133,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [nearbyPlayers, setNearbyPlayers] = useState<Player[]>([]);
   // const [currentLocation, setCurrentLocation] = useState<UserLocation>({moving: false, rotation: 'front', x: 0, y: 0});
   const [conversationAreas, setConversationAreas] = useState<ConversationArea[]>([]);
-  // TODO
+  // TODO: setPosts should be called when socket onPostAdded/onPostEditted/onPostDeleted
   const [posts, setPosts] = useState<Post[]>([]);
 
   const setupGameController = useCallback(
