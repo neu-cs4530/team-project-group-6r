@@ -18,8 +18,6 @@ import {
   postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetCommentTreeHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
-import DatabaseController from '../lib/PostTown/DatabaseController';
-import { CommentTree } from '../types/PostTown/comment';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
