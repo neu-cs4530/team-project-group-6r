@@ -22,7 +22,7 @@ import {
   postCreateHandler, postDeleteHandler, postGetAllIDInTownHandler, postGetCommentTreeHandler, postGetHandler, postUpdateHandler,
 } from '../requestHandlers/PostCoveyTownRequestHandlers';
 import { logError } from '../Utils';
-import { gfs, gridfsBucket } from '../connection';
+import FileConnection from '../connection';
 
 export default function addTownRoutes(http: Server, app: Express, upload: Multer): io.Server {
   /*
@@ -357,6 +357,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
 
   // get all files (test route)
   app.get('/files', async (_req, res) => {
+    const { gfs } = FileConnection.getInstance();
 
     gfs.files.find().toArray((_err, files) => {
       // Check if files
@@ -390,6 +391,8 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
 
   // get and stream image (test route)
   app.get('/image/:id', async (req, res) => {
+    const { gfs } = FileConnection.getInstance();
+    const { gridfsBucket } = FileConnection.getInstance();
     const objId = new mongoose.Types.ObjectId(req.params.id);
     gfs.files.findOne({ _id: objId }, (_err, file) => {
       if (!file || file.length === 0) {

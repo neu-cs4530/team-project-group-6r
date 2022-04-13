@@ -11,7 +11,7 @@ import path from 'path';
 import crypto from 'crypto';
 import CoveyTownsStore from './lib/CoveyTownsStore';
 import addTownRoutes from './router/towns';
-import { initGfsObjects } from './connection';
+import FileConnection from './connection';
 
 
 const app = Express();
@@ -26,7 +26,9 @@ const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?ret
 // const conn = mongoose.createConnection(uri);
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
 
-initGfsObjects();
+mongoose.connection.once('open', () => {
+  FileConnection.createInstance();
+});
 
 // create storage engine
 const storage = new GridFsStorage({

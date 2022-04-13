@@ -1,7 +1,7 @@
 import Filter from 'bad-words';
 import { Post } from '../../types/PostTown/post';
 import { Comment, CommentTree } from '../../types/PostTown/comment';
-import DatabaseController from './DatabaseController';
+import * as databaseController from './DatabaseController';
 
 export default class PostCoveyTownController {
 
@@ -32,7 +32,6 @@ export default class PostCoveyTownController {
     // Area collision?
     // Create the post
     // Invoke the listener
-    const databaseController = DatabaseController.getInstance();
 
     // censor
     post.postContent = this.filter.clean(post.postContent.valueOf());
@@ -43,21 +42,18 @@ export default class PostCoveyTownController {
   }
 
   async getPost(postID : string) : Promise<Post> {
-    const databaseController = DatabaseController.getInstance();
     const result : Post = await databaseController.getPost(this.coveyTownID, postID);
 
     return result;
   }
 
   async getAllPostInTown() : Promise<Post[]> {
-    const databaseController = DatabaseController.getInstance();
     const result : Post[] = await databaseController.getAllPostInTown(this.coveyTownID);
 
     return result;
   }
 
   async deletePost(postID : string, playerID : string) : Promise<Post> {
-    const databaseController: DatabaseController = DatabaseController.getInstance();
     const post: Post = await databaseController.getPost(this.coveyTownID, postID);
            
     if (post.ownerID === playerID) {
@@ -76,7 +72,6 @@ export default class PostCoveyTownController {
   }
 
   async updatePost(postID : string, post : Post, playerID : string) : Promise<Post> {
-    const databaseController: DatabaseController = DatabaseController.getInstance();
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
             
     if (postToUpdate.ownerID === playerID) {
@@ -92,8 +87,6 @@ export default class PostCoveyTownController {
   }
 
   async createComment(comment : Comment) : Promise<Comment> {
-    const databaseController = DatabaseController.getInstance();
-
     // censor
     comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
     const result : Comment = await databaseController.createComment(this.coveyTownID, comment);
@@ -111,14 +104,12 @@ export default class PostCoveyTownController {
   }
 
   async getComment(commentID : string) : Promise<Comment> {
-    const databaseController = DatabaseController.getInstance();
     const result : Comment = await databaseController.getComment(this.coveyTownID, commentID);
 
     return result;
   }
 
   private async constructCommentTree(commentIDs : string[]) : Promise<CommentTree[]> {
-    const databaseController = DatabaseController.getInstance();
     const comments: Comment[] = await databaseController.getAllComments(this.coveyTownID, commentIDs);
 
     const commentTree = await Promise.all(comments.map(async (comment: Comment) => {
@@ -142,8 +133,6 @@ export default class PostCoveyTownController {
   }
 
   async getCommentTree(postID : string) : Promise<CommentTree[]> {
-    const databaseController = DatabaseController.getInstance();
-
     const post: Post = await databaseController.getPost('testID', postID);
     const comments: string[] = post.comments!;
     
@@ -153,7 +142,6 @@ export default class PostCoveyTownController {
   }
 
   async deleteComment(commentID : string, playerID : string) : Promise<Comment> {
-    const databaseController: DatabaseController = DatabaseController.getInstance();
     const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
         
     if (comment.ownerID === playerID) {
@@ -167,7 +155,6 @@ export default class PostCoveyTownController {
   }
 
   async updateComment(commentID : string, comment : Comment, playerID : string) : Promise<Comment> {
-    const databaseController: DatabaseController = DatabaseController.getInstance();
     const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
 
     if (commentToUpdate.ownerID === playerID) {
@@ -183,13 +170,11 @@ export default class PostCoveyTownController {
   }
 
   async getFile(postID : string) : Promise<any> {
-    const databaseController = DatabaseController.getInstance();
     console.log(this._coveyTownID);
     return databaseController.getFile(postID);
   }
 
   async deleteFile(postID : string, playerID: string) : Promise<any> {
-    const databaseController = DatabaseController.getInstance();
     const post : Post = await databaseController.getPost(this.coveyTownID, postID);
     if (post.ownerID === playerID && post.fileID) {
       const result : any = await databaseController.deleteFile(post.fileID);
