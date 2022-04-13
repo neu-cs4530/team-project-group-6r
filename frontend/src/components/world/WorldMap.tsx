@@ -892,12 +892,15 @@ export default function WorldMap(): JSX.Element {
     <div id='app-container'>
       {newConversationModal}
       <div id='map-container' />
-      <div id='social-container'>
-        <SocialSidebar />
-      </div>
       <div id='post-container'>
         <PostSlideBar post={postSlide?.post} coordinate={postSlide?.coordinate} />
       </div>
     </div>
   );
+
+  /*
+      <div id='social-container'>
+        <SocialSidebar />
+      </div>
+  */
 }
