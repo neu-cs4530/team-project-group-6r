@@ -105,8 +105,7 @@ export interface ResponseEnvelope<T> {
 export async function townJoinHandler(requestData: TownJoinRequest): Promise<ResponseEnvelope<TownJoinResponse>> {
   const townsStore = CoveyTownsStore.getInstance();
   const coveyTownController = townsStore.getControllerForTown(requestData.coveyTownID);
-  const postTownController = townsStore.getPostControllerForTown(requestData.coveyTownID);
-  if (!coveyTownController || !postTownController) {
+  if (!coveyTownController) {
     return {
       isOK: false,
       message: 'Error: No such town',
@@ -114,7 +113,7 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
   }
   const newPlayer = new Player(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
-  const posts = await postTownController.getAllPostInTown();
+  const posts = await coveyTownController.postController.getAllPostInTown();
   console.log(coveyTownController.getSessionByToken(newSession.sessionToken));
   assert(newSession.videoToken);
   return {
@@ -127,7 +126,7 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
       friendlyName: coveyTownController.friendlyName,
       isPubliclyListed: coveyTownController.isPubliclyListed,
       conversationAreas: coveyTownController.conversationAreas,
-      posts: posts,
+      posts,
     },
   };
 }

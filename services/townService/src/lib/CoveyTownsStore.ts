@@ -1,6 +1,5 @@
 import CoveyTownController from './CoveyTownController';
 import { CoveyTownList } from '../CoveyTypes';
-import PostCoveyTownController from './PostTown/PostCoveyTownController';
 
 function passwordMatches(provided: string, expected: string): boolean {
   if (provided === expected) {
@@ -16,8 +15,6 @@ export default class CoveyTownsStore {
   private static _instance: CoveyTownsStore;
 
   private _towns: CoveyTownController[] = [];
-
-  private _postTowns: PostCoveyTownController[] = [];
 
   /**
    * Retrieve the singleton CoveyTownsStore.
@@ -41,15 +38,6 @@ export default class CoveyTownsStore {
   }
 
   /**
-   * Given a town ID, fetch the PostCoveyTownController
-   * @param coveyTownID town ID to fetch
-   * @returns the existing town controller, or undefined if there is no such town ID
-   */
-  getPostControllerForTown(coveyTownID: string): PostCoveyTownController | undefined {
-    return this._postTowns.find(town => town.coveyTownID === coveyTownID);
-  }
-
-  /**
    * @returns List of all publicly visible towns
    */
   getTowns(): CoveyTownList {
@@ -70,9 +58,7 @@ export default class CoveyTownsStore {
    */
   createTown(friendlyName: string, isPubliclyListed: boolean): CoveyTownController {
     const newTown = new CoveyTownController(friendlyName, isPubliclyListed);
-    const newPostTown = new PostCoveyTownController(newTown.coveyTownID, 'ownerID');
     this._towns.push(newTown);
-    this._postTowns.push(newPostTown);
     return newTown;
   }
 
@@ -110,10 +96,8 @@ export default class CoveyTownsStore {
    */
   deleteTown(coveyTownID: string, coveyTownPassword: string): boolean {
     const existingTown = this.getControllerForTown(coveyTownID);
-    const existingPostTown = this.getPostControllerForTown(coveyTownID);
-    if (existingTown && existingPostTown && passwordMatches(coveyTownPassword, existingTown.townUpdatePassword)) {
+    if (existingTown && passwordMatches(coveyTownPassword, existingTown.townUpdatePassword)) {
       this._towns = this._towns.filter(town => town !== existingTown);
-      this._postTowns = this._postTowns.filter(town => town !== existingPostTown);
       existingTown.disconnectAllPlayers();
       return true;
     }

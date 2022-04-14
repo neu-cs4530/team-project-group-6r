@@ -1,14 +1,14 @@
 export interface Comment {
-    _id?: string,
-    rootPostID: string,
-    parentCommentID: string,
-    ownerID: string,
-    commentContent: string,
-    isDeleted: boolean,
-    comments?: string[],
-    createdAt? : Date,
-    updatedAt? : Date
-};
+  _id?: string,
+  rootPostID: string,
+  parentCommentID: string,
+  ownerID: string,
+  commentContent: string,
+  isDeleted: boolean,
+  comments?: string[],
+  createdAt? : Date,
+  updatedAt? : Date
+}
 
 // export interface CommentTree {
 //     comment: Comment,
@@ -16,13 +16,13 @@ export interface Comment {
 // };
 
 export interface CommentTree {
-    _id?: string,
-    rootPostID: string,
-    parentCommentID: string,
-    ownerID: string,
-    commentContent: string,
-    isDeleted: boolean,
-    comments?: CommentTree[],
-    createdAt? : Date,
-    updatedAt? : Date
+  _id?: string,
+  rootPostID: string,
+  parentCommentID: string,
+  ownerID: string,
+  commentContent: string,
+  isDeleted: boolean,
+  comments?: CommentTree[],
+  createdAt? : Date,
+  updatedAt? : Date
 }
