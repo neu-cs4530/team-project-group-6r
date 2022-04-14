@@ -32,7 +32,7 @@ jobs:
       - name: Build and test frontend components
         run: cd frontend; npm install
 #   deploy:
-#     if: github.ref == 'refs/heads/master'
+#     if: github.ref == 'refs/heads/deploy'
 #     needs: build-and-test
 #     runs-on: ubuntu-latest
 #     steps:
