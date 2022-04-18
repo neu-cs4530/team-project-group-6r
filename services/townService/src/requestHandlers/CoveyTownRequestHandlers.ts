@@ -233,6 +233,9 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
     onChatMessage(message: ChatMessage){
       socket.emit('chatMessage', message);
     },
+    onPostCreate(post: Post){
+      socket.emit('postCreate', post);
+    },
   };
 }
 
