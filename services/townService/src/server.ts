@@ -54,7 +54,6 @@ addTownRoutes(server, app, upload);
 
 const newTown = CoveyTownsStore.getInstance().createTown('ChengTown', true);
 console.log(newTown);
-console.log(newTown.postController);
 
 server.listen(process.env.PORT || 8081, () => {
   const address = server.address() as AddressInfo;

@@ -2,17 +2,11 @@ import Filter from 'bad-words';
 import { Post } from '../../types/PostTown/post';
 import { Comment, CommentTree } from '../../types/PostTown/comment';
 import * as databaseController from './DatabaseController';
+import CoveyTownController from '../CoveyTownController';
 
-export default class PostCoveyTownController {
-
-  get coveyTownID(): string {
-    return this._coveyTownID;
-  }
+export default class PostCoveyTownController extends CoveyTownController{
 
   private filter : Filter;
-
-  /** The ID of the town * */
-  private readonly _coveyTownID: string;
 
   /** The owner (creator) of this town * */
   private readonly _ownerID: string;
@@ -20,11 +14,11 @@ export default class PostCoveyTownController {
   /**  List of moderators that have the same privelage as the owner * */
   private readonly _moderators: string[];
 
-  constructor(coveyTownID: string, ownerID: string) {
-    this.filter = new Filter();
-    this._coveyTownID = coveyTownID;
+  constructor(friendlyName: string, isPubliclyListed: boolean, ownerID: string) {
+    super(friendlyName, isPubliclyListed);
     this._ownerID = ownerID;
     this._moderators = [];
+    this.filter = new Filter();
   }
 
   // Add
@@ -53,8 +47,9 @@ export default class PostCoveyTownController {
     return result;
   }
 
-  async deletePost(postID : string, playerID : string) : Promise<Post> {
+  async deletePost(postID : string, token : string) : Promise<Post> {
     const post: Post = await databaseController.getPost(this.coveyTownID, postID);
+    const playerID: string  = this.getSessionByToken(token)!.player.userName;
            
     if (post.ownerID === playerID) {
       const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
@@ -71,8 +66,9 @@ export default class PostCoveyTownController {
     throw Error('Incorrect post owner/Town doesn\'t exist');
   }
 
-  async updatePost(postID : string, post : Post, playerID : string) : Promise<Post> {
+  async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+    const playerID: string  = this.getSessionByToken(token)!.player.userName;
             
     if (postToUpdate.ownerID === playerID) {
     // censor
@@ -141,8 +137,9 @@ export default class PostCoveyTownController {
     return result;
   }
 
-  async deleteComment(commentID : string, playerID : string) : Promise<Comment> {
+  async deleteComment(commentID : string, token : string) : Promise<Comment> {
     const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+    const playerID: string  = this.getSessionByToken(token)!.player.userName;
         
     if (comment.ownerID === playerID) {
       const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
@@ -154,8 +151,9 @@ export default class PostCoveyTownController {
     throw Error('Incorrect post owner'); 
   }
 
-  async updateComment(commentID : string, comment : Comment, playerID : string) : Promise<Comment> {
+  async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
     const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+    const playerID: string  = this.getSessionByToken(token)!.player.userName;
 
     if (commentToUpdate.ownerID === playerID) {
     // censor
@@ -170,7 +168,6 @@ export default class PostCoveyTownController {
   }
 
   async getFile(postID : string) : Promise<any> {
-    console.log(this._coveyTownID);
     return databaseController.getFile(postID);
   }
 
