@@ -27,12 +27,16 @@ export default class PostCoveyTownController extends CoveyTownController{
     // Create the post
     // Invoke the listener
 
-    // censor
-    post.postContent = this.filter.clean(post.postContent.valueOf());
-    post.title = this.filter.clean(post.title.valueOf());
-    const result = await databaseController.createPost(this.coveyTownID, post);
-
-    return result;
+    if (post.title) {
+      // censor
+      post.postContent = this.filter.clean(post.postContent.valueOf());
+      post.title = this.filter.clean(post.title.valueOf());
+      const result: Post = await databaseController.createPost(this.coveyTownID, post);
+      this._listeners.forEach(listener => listener.onPostCreate(result));
+      return result;
+    }
+  
+    throw Error('Post must have a title!');
   }
 
   async getPost(postID : string) : Promise<Post> {

@@ -64,7 +64,7 @@ export default class CoveyTownController {
   private _videoClient: IVideoClient = TwilioVideo.getInstance();
 
   /** The list of CoveyTownListeners that are subscribed to events in this town * */
-  private _listeners: CoveyTownListener[] = [];
+  protected _listeners: CoveyTownListener[] = [];
 
   /** The list of currently active ConversationAreas in this town */
   private _conversationAreas: ServerConversationArea[] = [];
