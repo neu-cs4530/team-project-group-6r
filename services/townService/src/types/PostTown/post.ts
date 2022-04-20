@@ -1,5 +1,5 @@
 export interface Post {
-  _id?: string,
+  _id: Object,
   title: string,
   postContent: string,
   ownerID: string,

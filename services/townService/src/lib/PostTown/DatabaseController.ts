@@ -59,6 +59,11 @@ export async function deleteComment(coveyTownID : string, commentID : string) : 
   return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true } }, { new: true });
 }
 
+export async function deleteCommentForTesting(coveyTownID : string, commentID : string) : Promise<any> {
+    const model = mongoose.model('comment', CommentSchema, coveyTownID);
+    return model.findByIdAndDelete(commentID);
+  }
+
 export async function deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
   return model.deleteMany({ rootPostID: postID });

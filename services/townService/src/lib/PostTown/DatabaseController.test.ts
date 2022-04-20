@@ -16,7 +16,6 @@ import mongoose from 'mongoose';
 import CoveyTownsStore from '../CoveyTownsStore';
 import { exit } from 'process';
 
-//this is no go because promises arent being handled at the moment
 describe('The database', () => {
     const id = 'ccc';
     const app = Express();

@@ -154,6 +154,19 @@ export default class PostCoveyTownController {
     throw Error('Incorrect post owner'); 
   }
 
+  async deleteCommentForTesting(commentID : string, playerID : string) : Promise<Comment> {
+    const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+        
+    if (comment.ownerID === playerID) {
+      const result : Comment = await databaseController.deleteCommentForTesting(this.coveyTownID, commentID);
+
+      return result;
+    }
+
+    // isn't this terrible
+    throw Error('Incorrect post owner'); 
+  }
+
   async updateComment(commentID : string, comment : Comment, playerID : string) : Promise<Comment> {
     const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
 
