@@ -1,15 +1,15 @@
 import mongoose from 'mongoose';
 
 const PostSchema = new mongoose.Schema({
-  title: String,
+  title: { type: String, immutable: true },
   postContent: String,
-  ownerID: String,
+  ownerID: { type: String, immutable: true },
   isVisible: Boolean,
   fileID: { type: String, default: '' },
   comments: { type: [String], default: [] },
   coordinates: {
-    x: Number,
-    y: Number, 
+    x: { type: Number, immutable: true },
+    y: { type: Number, immutable: true }, 
   },
 }, { timestamps: true });
 
