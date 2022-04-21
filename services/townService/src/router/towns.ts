@@ -345,14 +345,20 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   // post a file
   app.post('/upload', upload.single('file'), async (req, res) => {
     try {
-      // TODO Fix
-      res.json({ 
-        isOK: true, 
-        response: {
-          fileName: req.file?.originalname,
-          size: req.file?.size,
-        }, 
-      });
+      if (req.file !== undefined) {
+        res.status(StatusCodes.OK).json({
+          isOK: true,
+          response: {
+            fileName: req.file?.originalname,
+            size: req.file?.size,
+          },
+        });
+      } else {
+        res.status(StatusCodes.OK).json({
+          isOK: false,
+          message: 'Failed to upload the file',
+        });
+      }
     } catch (err) {
       logError(err);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -406,7 +412,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         res.status(404).json({
           err: 'No file exist',
         });
-      } else if (file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
+      } else if (file.contentType.startsWith("image/")) {
         const readStream = gridfsBucket.openDownloadStream(objId);
         readStream.pipe(res);
       } else {
