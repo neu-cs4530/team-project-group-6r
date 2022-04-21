@@ -4,7 +4,7 @@ import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, ServerPost } from '../../../classes/TownsServiceClient';
+import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 
 interface ReadPostProps {
@@ -13,7 +13,6 @@ interface ReadPostProps {
 }
 
 type CreatePostStates = {
-    title: string;
     content: string;
     edit: boolean,
 }
@@ -21,7 +20,6 @@ type CreatePostStates = {
 // Post should be rerender when post is updated through socket
 export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.Element {
     const [state, setState] = useState<CreatePostStates>({
-        title: post.title,
         content: post.postContent,
         edit: false,
     });
@@ -47,7 +45,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
 
     const handleEditButtonClick = () => {
         setState(prev => ({
-            title: post.title,
             content: post.postContent,
             edit: !prev.edit,
         }));
@@ -129,8 +126,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             postID: post.id || '',
             post: {
                 ...post.toServerPost(),
-                title: state.title,
-                postContent: state.content,
+                postContent: state.content || '',
             },
         };
         editPost.request(request, editPostCallback, editPostError);
@@ -143,11 +139,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     const postBody = useMemo(() => {
         if (state.edit) {
             return (<>
-                <Input
-                    placeholder='Title'
-                    size='md'
-                    value={state.title}
-                    onChange={({ target }) => handleTextInputChange(target.value, 'title')} />
                 <Textarea
                     placeholder='Text (optional)'
                     resize='vertical'
@@ -172,7 +163,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 {post.postContent}
             </Text>
         </>);
-    }, [post.postContent, post.title, state.content, state.edit, state.title]);
+    }, [post.postContent, post.title, state.content, state.edit]);
 
     return (
         <VStack padding={5}
