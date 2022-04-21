@@ -236,6 +236,12 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
     onPostCreate(post: Post){
       socket.emit('postCreate', post);
     },
+    onPostUpdate(post: Post){
+      socket.emit('postUpdate', post);
+    },
+    onPostDelete(post: Post){
+      socket.emit('postDelete', post);
+    },
   };
 }
 
