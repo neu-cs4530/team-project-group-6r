@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import BoundingBox from '../../classes/BoundingBox';
 import ConversationArea from '../../classes/ConversationArea';
 import Post, { Coordinate } from '../../classes/Post';
@@ -11,10 +11,10 @@ import usePlayerMovement from '../../hooks/usePlayerMovement';
 import usePlayersInTown from '../../hooks/usePlayersInTown';
 // TODO
 import usePosts from '../../hooks/usePosts';
-import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
-import PostSlideBar, { PostSlideBarProps } from '../Post/PostSlideBar';
+import CreatePost from './Post/CreatePost';
+import ReadPost from './Post/ReadPost';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -284,7 +284,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (!sprite) {
       sprite = this.physics.add
         .sprite(0, 0, 'comment')
-        .setSize(20, 30)
+        .setSize(25, 30)
         .setOffset(0, 24);
       const worldXY = this.worldLayer.tileToWorldXY(mPost.coordinate.x, mPost.coordinate.y);
       sprite.setX(worldXY.x + sprite.displayWidth / 2);
@@ -411,12 +411,13 @@ class CoveyGameScene extends Phaser.Scene {
 
       // Toggling on the post's label
       const tileXY = this.worldLayer.worldToTileXY(body.x, body.y);
-      const localPost = this.findPostAtTileLocation(tileXY.x, tileXY.y + 1);
+      const localPost = this.findPostAtTileLocation(tileXY.x, tileXY.y);
       if (this.currentPost) {
         if (!localPost || localPost.id !== this.currentPost.id) {
           this.currentPost.label?.setVisible(false);
         }
-      } else if (localPost) {
+      } 
+      if (localPost) {
         this.postInstructText?.setVisible(false);
         localPost.label?.setVisible(true);
       } else {
@@ -426,7 +427,7 @@ class CoveyGameScene extends Phaser.Scene {
 
       const timeNow = Date.now();
       if (this.postKey.isDown && (!this.postKeyTimeout || timeNow - this.postKeyTimeout >= 250)) {
-        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y + 1});
+        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y + 1 });
         this.postKeyTimeout = timeNow;
       }
     }
@@ -783,6 +784,16 @@ class CoveyGameScene extends Phaser.Scene {
   }
 }
 
+interface PostSlideStates {
+  coordinate?: Coordinate,
+  post?: Post,
+}
+
+const initalPostSlideStates = {
+  coordinate: undefined,
+  post: undefined,
+}
+
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const { emitMovement, myPlayerID } = useCoveyAppState();
@@ -793,7 +804,7 @@ export default function WorldMap(): JSX.Element {
   const players = usePlayersInTown();
   // TODO
   const posts = usePosts();
-  const [postSlide, setPostSlide] = useState<PostSlideBarProps>();
+  const [postSlide, setPostSlide] = useState<PostSlideStates>(initalPostSlideStates);
 
   useEffect(() => {
     const config = {
@@ -814,18 +825,14 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
-    function postSlideReducer(newPost?: Post, newCoordinate?: Coordinate): void {
-      setPostSlide((state: PostSlideBarProps | undefined) => {
-        if (state?.post || state?.coordinate) {
-          return { post: undefined, coordinate: undefined };
-        }
-        return { post: newPost, coordinate: newCoordinate };
-      })
+    function setPostSlideReducer(post?: Post, coordinate?: Coordinate) {
+      setPostSlide({ post, coordinate });
     }
+
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, setNewConversation, myPlayerID, postSlideReducer);
+      const newGameScene = new CoveyGameScene(video, emitMovement, setNewConversation, myPlayerID, setPostSlideReducer);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -863,13 +870,14 @@ export default function WorldMap(): JSX.Element {
   }, [posts, gameScene]);
 
   const newConversationModalOpen = newConversation !== undefined;
+  const postSlideOpen = postSlide.post !== undefined || postSlide.coordinate !== undefined;
   useEffect(() => {
-    if (newConversationModalOpen) {
+    if (newConversationModalOpen || postSlideOpen) {
       video?.pauseGame();
     } else {
       video?.unPauseGame();
     }
-  }, [video, newConversationModalOpen]);
+  }, [video, newConversationModalOpen, postSlideOpen]);
 
   const newConversationModal = useMemo(() => {
     if (newConversation) {
@@ -877,10 +885,7 @@ export default function WorldMap(): JSX.Element {
       return (
         <NewConversationModal
           isOpen={newConversation !== undefined}
-          closeModal={() => {
-            video?.unPauseGame();
-            setNewConversation(undefined);
-          }}
+          closeModal={() => setNewConversation(undefined)}
           newConversation={newConversation}
         />
       );
@@ -888,19 +893,30 @@ export default function WorldMap(): JSX.Element {
     return <></>;
   }, [video, newConversation, setNewConversation]);
 
+  const postSlideBar = useMemo(() => {
+    if (postSlideOpen) {
+      if (postSlide.post !== undefined) {
+        return <ReadPost
+          post={postSlide.post}
+          closeReadPost={() => setPostSlide({ post: undefined, coordinate: undefined })} />
+      }
+      if (postSlide.coordinate !== undefined) {
+        return <CreatePost
+          coordinate={postSlide.coordinate}
+          closeCreatePost={() => setPostSlide({ post: undefined, coordinate: undefined })} />
+      }
+    }
+    return <></>;
+  }, [postSlide.coordinate, postSlide.post, postSlideOpen]);
+
   return (
     <div id='app-container'>
       {newConversationModal}
       <div id='map-container' />
       <div id='post-container'>
-        <PostSlideBar post={postSlide?.post} coordinate={postSlide?.coordinate} />
+        {postSlideBar}
       </div>
     </div>
   );
-
-  /*
-      <div id='social-container'>
-        <SocialSidebar />
-      </div>
-  */
 }
+
