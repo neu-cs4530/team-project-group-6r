@@ -27,9 +27,9 @@ export async function deletePost(coveyTownID : string, postID : string) : Promis
   return model.findByIdAndDelete(postID);
 }
 
-export async function updatePost(coveyTownID : string, postID : string, post : Post) : Promise<any> {
+export async function updatePost(coveyTownID : string, postID : string, post : any) : Promise<any> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findByIdAndUpdate(postID, post, { new : true });
+  return model.findByIdAndUpdate(postID, { $set: post }, { new : true });
 }
 
 export async function addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string) {
@@ -56,7 +56,7 @@ export async function getAllComments(coveyTownID : string, commentIDs : string[]
 
 export async function deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true } }, { new: true });
+  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '', ownerID: ''} }, { new: true });
 }
 
 export async function deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
@@ -64,9 +64,9 @@ export async function deleteCommentsUnderPost(coveyTownID : string, postID : str
   return model.deleteMany({ rootPostID: postID });
 }
 
-export async function updateComment(coveyTownID : string, commentID : string, comment : Comment) : Promise<any> {
+export async function updateComment(coveyTownID : string, commentID : string, comment : any) : Promise<any> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(commentID, comment, { new: true });
+  return model.findByIdAndUpdate(commentID, { $set: comment }, { new: true });
 }
 
 export async function addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {

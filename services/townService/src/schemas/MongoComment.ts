@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const CommentSchema = new mongoose.Schema({
-  rootPostID: String,
-  parentCommentID: String,
+  rootPostID: { type: String, immutable: true },
+  parentCommentID: { type: String, immutable: true },
   ownerID: String,
   commentContent: String,
   isDeleted: Boolean,
