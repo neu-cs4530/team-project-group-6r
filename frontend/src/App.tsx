@@ -15,7 +15,7 @@ import { io, Socket } from 'socket.io-client';
 import './App.css';
 import ConversationArea, { ServerConversationArea } from './classes/ConversationArea';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
-import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
+import TownsServiceClient, { ServerPost, TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 import Login from './components/Login/Login';
 import { ChatProvider } from './components/VideoCall/VideoFrontend/components/ChatProvider';
@@ -37,24 +37,24 @@ import VideoContext from './contexts/VideoContext';
 import { CoveyAppState } from './CoveyTypes';
 // TODO
 import PostContext from './contexts/PostContext';
-import Post, { dummyPosts } from './classes/Post';
+import Post from './classes/Post';
 
 export const MOVEMENT_UPDATE_DELAY_MS = 0;
 export const CALCULATE_NEARBY_PLAYERS_MOVING_DELAY_MS = 300;
 type CoveyAppUpdate =
   | {
-      action: 'doConnect';
-      data: {
-        userName: string;
-        townFriendlyName: string;
-        townID: string;
-        townIsPubliclyListed: boolean;
-        sessionToken: string;
-        myPlayerID: string;
-        socket: Socket;
-        emitMovement: (location: UserLocation) => void;
-      };
-    }
+    action: 'doConnect';
+    data: {
+      userName: string;
+      townFriendlyName: string;
+      townID: string;
+      townIsPubliclyListed: boolean;
+      sessionToken: string;
+      myPlayerID: string;
+      socket: Socket;
+      emitMovement: (location: UserLocation) => void;
+    };
+  }
   | { action: 'disconnect' };
 
 function defaultAppState(): CoveyAppState {
@@ -66,7 +66,7 @@ function defaultAppState(): CoveyAppState {
     sessionToken: '',
     userName: '',
     socket: null,
-    emitMovement: () => {},
+    emitMovement: () => { },
     apiClient: new TownsServiceClient(),
   };
 }
@@ -160,7 +160,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         ConversationArea.fromServerConversationArea(sa),
       );
       // TODO
-      const localPosts = initData.posts.map(sp => 
+      let localPosts = initData.posts.map(sp =>
         Post.fromServerPost(sp)
       );
       let localNearbyPlayers: Player[] = [];
@@ -240,7 +240,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       });
       socket.on('conversationDestroyed', (_conversationArea: ServerConversationArea) => {
         const existingArea = localConversationAreas.find(a => a.label === _conversationArea.label);
-        if(existingArea){
+        if (existingArea) {
           existingArea.topic = undefined;
           existingArea.occupants = [];
         }
@@ -248,6 +248,12 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         setConversationAreas(localConversationAreas);
         recalculateNearbyPlayers();
       });
+      socket.on('postCreate', (_post: ServerPost) => {
+        localPosts = localPosts.concat(Post.fromServerPost(_post));
+        setPlayersInTown(localPlayers);
+        setPosts(localPosts);
+      });
+
       dispatchAppUpdate({
         action: 'doConnect',
         data: {
