@@ -158,7 +158,7 @@ export default class PostCoveyTownController extends CoveyTownController{
     throw Error('Incorrect post owner'); 
   }
 
-  async updateComment(commentID : string, comment : Comment, token : string) : Promise<Comment> {
+  async updateComment(commentID : string, comment : any, token : string) : Promise<Comment> {
     const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
 
