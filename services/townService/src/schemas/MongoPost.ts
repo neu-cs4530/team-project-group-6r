@@ -8,8 +8,8 @@ const PostSchema = new mongoose.Schema({
   fileID: { type: String, default: '' },
   comments: { type: [String], default: [] },
   coordinates: {
-    x: { type: Number, immutable: true },
-    y: { type: Number, immutable: true }, 
+    x: Number,
+    y: Number
   },
 }, { timestamps: true });
 
