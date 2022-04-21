@@ -71,14 +71,15 @@ export default class PostCoveyTownController extends CoveyTownController{
     throw Error('Incorrect post owner/Town doesn\'t exist');
   }
 
-  async updatePost(postID : string, post : Post, token : string) : Promise<Post> {
+  async updatePost(postID : string, post: any, token : string) : Promise<Post> {
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
             
     if (postToUpdate.ownerID === playerID) {
-    // censor
-      post.postContent = this.filter.clean(post.postContent.valueOf());
-      post.title = this.filter.clean(post.title.valueOf());
+      // censor
+      if(post.postContent) { 
+        post.postContent = this.filter.clean(post.postContent.valueOf());
+      }
       const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
       this._listeners.forEach(listener => listener.onPostUpdate(result));
 

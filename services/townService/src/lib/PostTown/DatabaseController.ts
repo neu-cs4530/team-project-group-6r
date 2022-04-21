@@ -27,9 +27,9 @@ export async function deletePost(coveyTownID : string, postID : string) : Promis
   return model.findByIdAndDelete(postID);
 }
 
-export async function updatePost(coveyTownID : string, postID : string, post : Post) : Promise<any> {
+export async function updatePost(coveyTownID : string, postID : string, post : any) : Promise<any> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findByIdAndUpdate(postID, post, { new : true });
+  return model.findByIdAndUpdate(postID, { $set: post }, { new : true });
 }
 
 export async function addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string) {
