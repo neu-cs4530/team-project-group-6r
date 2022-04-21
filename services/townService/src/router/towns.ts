@@ -345,7 +345,14 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   // post a file
   app.post('/upload', upload.single('file'), async (req, res) => {
     try {
-      res.json({ file: req.file });
+      // TODO Fix
+      res.json({ 
+        isOK: true, 
+        response: {
+          fileName: req.file?.originalname,
+          size: req.file?.size,
+        }, 
+      });
     } catch (err) {
       logError(err);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -427,17 +434,6 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         });
     }
   });
-  // app.delete('/files/:id', async (req, res) => {
-  //   const obj_id = new mongoose.Types.ObjectId(req.params.id);
-  //   try {
-  //     gridfsBucket.delete(obj_id);
-  //     return res.status(StatusCodes.OK).json(obj_id);
-  //   } catch (err) {
-  //     return res.status(404).json({
-  //       err: 'File not found'
-  //     })
-  //   }
-  // });
 
   const socketServer = new io.Server(http, { cors: { origin: '*' } });
   socketServer.on('connection', townSubscriptionHandler);

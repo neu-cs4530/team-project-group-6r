@@ -172,6 +172,12 @@ export interface CommentGetRequest {
   commentID: string
 }
 
+export interface CommentsGetByPostIdRequest {
+  coveyTownID: string,
+  sessionToken: string,
+  postID: string
+}
+
 export interface CommentDeleteRequest {
   coveyTownID: string,
   sessionToken: string,
@@ -184,6 +190,16 @@ export interface CommentUpdateRequest {
   commentID: string,
   comment: ServerComment,
 }
+
+export interface FileUploadRequest {
+  file: File,
+}
+
+export interface FileUploadResponse {
+  fileName: string,
+  size: number,
+}
+
 
 export default class TownsServiceClient {
   private _axios: AxiosInstance;
@@ -260,7 +276,8 @@ export default class TownsServiceClient {
 
   // TODO: Session Token
   async deletePostById(requestData: PostDeleteRequest): Promise<void> {
-    const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`);
+    const deleteBody = {data: {sessionToken: requestData.sessionToken}}
+    const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, deleteBody);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
@@ -284,19 +301,29 @@ export default class TownsServiceClient {
 
   // TODO: Session Token
   async deleteCommentById(requestData: CommentDeleteRequest): Promise<void> {
-    const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`);
+    const deleteBody = {data: {sessionToken: requestData.sessionToken}}
+    const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`, deleteBody);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
   // TODO: Session Token
   async editComment(requestData: CommentUpdateRequest): Promise<void> {
-    const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`);
+    const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
   // TODO: Session Token
-  async getCommentsByPostID(requestData: PostGetRequest): Promise<ServerComment[]> {
+  async getCommentsByPostID(requestData: CommentsGetByPostIdRequest): Promise<ServerComment[]> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}/commentTree`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
+
+  // TODO: Session Token
+  async createFile(requestData: FileUploadRequest): Promise<FileUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', requestData.file);
+    const responseWrapper = await this._axios.post(`/upload`, formData);
+    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
+  }
+
 }
