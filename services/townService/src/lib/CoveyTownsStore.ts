@@ -1,5 +1,5 @@
-import CoveyTownController from './CoveyTownController';
 import { CoveyTownList } from '../CoveyTypes';
+import PostCoveyTownController from './PostTown/PostCoveyTownController';
 
 function passwordMatches(provided: string, expected: string): boolean {
   if (provided === expected) {
@@ -14,7 +14,7 @@ function passwordMatches(provided: string, expected: string): boolean {
 export default class CoveyTownsStore {
   private static _instance: CoveyTownsStore;
 
-  private _towns: CoveyTownController[] = [];
+  private _towns: PostCoveyTownController[] = [];
 
   /**
    * Retrieve the singleton CoveyTownsStore.
@@ -33,7 +33,7 @@ export default class CoveyTownsStore {
    * @param coveyTownID town ID to fetch
    * @returns the existing town controller, or undefined if there is no such town ID
    */
-  getControllerForTown(coveyTownID: string): CoveyTownController | undefined {
+  getControllerForTown(coveyTownID: string): PostCoveyTownController | undefined {
     return this._towns.find(town => town.coveyTownID === coveyTownID);
   }
 
@@ -56,8 +56,8 @@ export default class CoveyTownsStore {
    * @param isPubliclyListed 
    * @returns the new town controller
    */
-  createTown(friendlyName: string, isPubliclyListed: boolean): CoveyTownController {
-    const newTown = new CoveyTownController(friendlyName, isPubliclyListed);
+  createTown(friendlyName: string, isPubliclyListed: boolean): PostCoveyTownController {
+    const newTown = new PostCoveyTownController(friendlyName, isPubliclyListed, 'testID');
     this._towns.push(newTown);
     return newTown;
   }

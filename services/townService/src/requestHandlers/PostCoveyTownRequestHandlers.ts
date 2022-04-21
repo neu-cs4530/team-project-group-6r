@@ -59,7 +59,7 @@ export interface CommentUpdateRequest {
 
 export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
   if (!postTownController) {
     return {
@@ -81,7 +81,7 @@ export async function postCreateHandler(_requestData : PostCreateRequest): Promi
 export async function postGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post | unknown>> {
 
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
   const { postID } = _requestData;
 
   if (!postTownController) {
@@ -103,7 +103,7 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
 
 export async function postGetAllIDInTownHandler(_requestData : PostGetAllInTownRequest) : Promise<ResponseEnvelope<Post[] | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
   if (!postTownController) {
     return {
@@ -123,7 +123,7 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetAllInTownR
 
 export async function postGetCommentTreeHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<CommentTree[] | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
   if (!postTownController){
     return {
@@ -143,11 +143,10 @@ export async function postGetCommentTreeHandler(_requestData : PostGetRequest) :
 
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
-  const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
-  const postTownController = townController?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
 
-  if (!townController?.getSessionByToken(_requestData.sessionToken) || !postTownController){
+  if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
     return {
       isOK: false, 
       response: {}, 
@@ -169,10 +168,9 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
   const { postID } = _requestData;
   const { post } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
-  const postTownController = townController?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
-  if (!townController?.getSessionByToken(_requestData.sessionToken) || !postTownController){
+  if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
     return {
       isOK: false, 
       response: {}, 
@@ -192,7 +190,7 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
 export async function commentCreateHandler(_requestData : CommentCreateRequest): Promise<ResponseEnvelope<Comment | unknown>> {
   const { comment } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
   if (!postTownController){
     return {
@@ -214,7 +212,7 @@ export async function commentGetHandler(_requestData : CommentGetRequest) : Prom
     
   const { commentID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
   if (!postTownController){
     return {
@@ -235,10 +233,9 @@ export async function commentGetHandler(_requestData : CommentGetRequest) : Prom
 export async function commentDeleteHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment | unknown>> {
   const { commentID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
-  const postTownController = townController?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
-  if (!townController?.getSessionByToken(_requestData.sessionToken) || !postTownController){
+  if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
     return {
       isOK: false, 
       response: {}, 
@@ -258,10 +255,9 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
   const { commentID } = _requestData;
   const { comment } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
-  const postTownController = townController?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
-  if (!townController?.getSessionByToken(_requestData.sessionToken) || !postTownController){
+  if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
     return {
       isOK: false, 
       response: {}, 
@@ -281,7 +277,7 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
 export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
   const { postID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID)?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
   if (!postTownController){
     return {
@@ -302,10 +298,9 @@ export async function fileGetHandler(_requestData : PostGetRequest) : Promise<Re
 export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
   const { postID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
-  const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
-  const postTownController = townController?.postController;
+  const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
-  if (!townController?.getSessionByToken(_requestData.sessionToken) || !postTownController){
+  if (!postTownController?.getSessionByToken(_requestData.sessionToken)){
     return {
       isOK: false, 
       response: {}, 

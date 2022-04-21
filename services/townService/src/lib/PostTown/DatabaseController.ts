@@ -5,7 +5,7 @@ import PostSchema from '../../schemas/MongoPost';
 import CommentSchema from '../../schemas/MongoComment';
 import FileConnection from '../../connection';
 
-export async function createPost(coveyTownID: string, post : Post) : Promise<any> {
+export async function createPost(coveyTownID: string, post : Post) : Promise<Post> {
   const Model = mongoose.model('post', PostSchema, coveyTownID);
   const insertPost = new Model(post);
 
