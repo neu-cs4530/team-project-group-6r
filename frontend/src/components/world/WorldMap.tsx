@@ -434,7 +434,7 @@ class CoveyGameScene extends Phaser.Scene {
   }
 
   findPostAtTileLocation(x: number, y: number): Post | undefined {
-    return this.posts.find(p => p.coordinate.x === x && p.coordinate.y === y);
+    return this.posts.find(p => (p.coordinate.x === x + 1 || p.coordinate.x === x) && p.coordinate.y === y + 1);
   }
 
   create() {
