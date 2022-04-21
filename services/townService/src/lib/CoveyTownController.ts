@@ -5,7 +5,6 @@ import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import IVideoClient from './IVideoClient';
-import PostCoveyTownController from './PostTown/PostCoveyTownController';
 import TwilioVideo from './TwilioVideo';
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
@@ -55,10 +54,6 @@ export default class CoveyTownController {
     return this._conversationAreas;
   }
 
-  get postController(): PostCoveyTownController {
-    return this._postController;
-  }
-
   /** The list of players currently in the town * */
   private _players: Player[] = [];
 
@@ -69,7 +64,7 @@ export default class CoveyTownController {
   private _videoClient: IVideoClient = TwilioVideo.getInstance();
 
   /** The list of CoveyTownListeners that are subscribed to events in this town * */
-  private _listeners: CoveyTownListener[] = [];
+  protected _listeners: CoveyTownListener[] = [];
 
   /** The list of currently active ConversationAreas in this town */
   private _conversationAreas: ServerConversationArea[] = [];
@@ -84,8 +79,6 @@ export default class CoveyTownController {
 
   private _capacity: number;
 
-  private _postController: PostCoveyTownController;
-
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     // this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
     this._coveyTownID = 'testID';
@@ -93,7 +86,6 @@ export default class CoveyTownController {
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
-    this._postController = new PostCoveyTownController(this.coveyTownID, 'ownerID');
   }
 
   /**
