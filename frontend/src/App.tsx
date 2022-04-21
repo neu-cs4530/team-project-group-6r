@@ -250,10 +250,21 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       });
       socket.on('postCreate', (_post: ServerPost) => {
         localPosts = localPosts.concat(Post.fromServerPost(_post));
-        setPlayersInTown(localPlayers);
         setPosts(localPosts);
       });
-
+      socket.on('postUpdate', (_post: ServerPost) => {
+        localPosts = localPosts.map((post: Post) => {
+          if (_post._id === post.id) {
+            return Post.fromServerPost(_post);
+          } 
+            return post;
+        });
+        setPosts(localPosts);
+      });
+      socket.on('postDelete', (_post: ServerPost) => {
+        localPosts = localPosts.filter((post: Post) => post.id !== _post._id);
+        setPosts(localPosts);
+      });
       dispatchAppUpdate({
         action: 'doConnect',
         data: {

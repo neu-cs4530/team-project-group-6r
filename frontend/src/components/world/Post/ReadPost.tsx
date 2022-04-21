@@ -92,6 +92,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             description: `Post ID: ${post.id}`,
             status: 'success',
         });
+        handleEditButtonClick();
     };
 
     const editPostError = (error: string) => {
