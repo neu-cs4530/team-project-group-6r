@@ -27,13 +27,6 @@ type ConversationGameObjects = {
   conversationArea?: ConversationArea;
 };
 
-type PostGameObjects = {
-  titleText: Phaser.GameObjects.Text;
-  sprite: Phaser.GameObjects.Sprite;
-  title: string;
-  post?: Post;
-}
-
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
