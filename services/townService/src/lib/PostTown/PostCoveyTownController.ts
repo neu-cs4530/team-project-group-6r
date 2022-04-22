@@ -63,8 +63,8 @@ export default class PostCoveyTownController extends CoveyTownController{
       this._listeners.forEach(listener => listener.onPostDelete(result));
       await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
-      if (post.filename) {
-        await databaseController.deleteFile(post.filename);
+      if (post.file) {
+        await databaseController.deleteFile(post.file.filename);
       }
 
       return result;
@@ -87,10 +87,12 @@ export default class PostCoveyTownController extends CoveyTownController{
       this._listeners.forEach(listener => listener.onPostUpdate(result));
 
       //delete file if old post had a file that is being replaced
-      const oldFileName = postToUpdate.filename;
-      const newFileName = post.filename;
-      if(oldFileName !== newFileName && oldFileName) {
-        await databaseController.deleteFile(oldFileName);
+      if (postToUpdate.file) {
+        const oldFileName = postToUpdate.file.filename;
+        const newFileName = post.file.filename;
+        if(oldFileName !== newFileName && oldFileName) {
+          await databaseController.deleteFile(oldFileName);
+        }
       }
 
       return result;

@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { VStack, Input, Textarea, Button, Flex, useToast, CloseButton, Container, Text } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { Coordinate } from '../../../classes/Post';
-import { ServerPost, FileUploadResponse, PostCreateRequest, FileUploadRequest } from '../../../classes/TownsServiceClient';
+import { ServerPost, PostCreateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 
 interface CreatePostProps {
@@ -42,7 +42,6 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const [postStates, setPostStates] = useState<CreatePostStates>(initalState);
     const createPost = useApi(apiClient.createPost.bind(apiClient));
-    // const uploadFile = useApi(apiClient.createFile.bind(apiClient));
     const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -60,29 +59,13 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     const createPostCallback = (result: ServerPost) => {
         toast({
             title: 'Created post successfully',
-            description: `Post ID: ${result._id}, Title: ${result.title}`,
+            description: `Post ID: ${result._id}, Title: ${result.title}, File: ${result.file.filename}`,
             status: 'success',
         });
         closeCreatePost();
     };
 
     const createPostError = (error: string) => {
-        toast({
-            title: 'Unable to create the post',
-            description: error,
-            status: 'error',
-        });
-    };
-
-    const uploadFileCallback = (result: FileUploadResponse) => {
-        toast({
-            title: 'Uploaded file successfully',
-            description: `File Name: ${result.fileName}, Size: ${result.size}`,
-            status: 'success',
-        });
-    };
-
-    const uploadFileError = (error: string) => {
         toast({
             title: 'Unable to create the post',
             description: error,
@@ -100,6 +83,10 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
                 ownerID: userName,
                 isVisible: true,
                 coordinates: coordinate,
+                file: {
+                    filename: '',
+                    contentType: ''
+                }
             },
             file: acceptedFiles[0],
         };

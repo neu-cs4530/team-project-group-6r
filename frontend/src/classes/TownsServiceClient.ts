@@ -2,14 +2,14 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
-import { Coordinate } from './Post';
+import { Coordinate, ServerFile } from './Post';
 
 export type ServerPost = {
   _id?: string,
   title: string,
   postContent: string,
   ownerID: string,
-  filename?: string,
+  file: ServerFile,
   isVisible: boolean,
   comments?: string[],
   coordinates: Coordinate,
@@ -197,8 +197,12 @@ export interface FileUploadRequest {
 }
 
 export interface FileUploadResponse {
-  fileName: string,
+  file: ServerFile,
   size: number,
+}
+
+export interface FileGetRequest {
+  filename?: string,
 }
 
 

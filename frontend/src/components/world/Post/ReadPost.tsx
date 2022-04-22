@@ -4,13 +4,18 @@ import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest } from '../../../classes/TownsServiceClient';
+import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 import useComments from '../../../hooks/useComments';
 
 interface ReadPostProps {
     post: Post;
     closeReadPost: () => void;
+}
+
+interface MimeTypeProps {
+    mimetype: string;
+    source: string;
 }
 
 type CreatePostStates = {
@@ -137,6 +142,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
 
     useEffect(() => {
         socket?.emit('postOpen', post);
+        console.log(post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
@@ -146,6 +152,39 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     useEffect(() => {
         getCommentsWrapper();
     }, [getCommentsWrapper]);
+
+    function MultiMediaDisplay({ mimetype, source }: MimeTypeProps): JSX.Element {
+        const mediaType = mimetype.split('/')[0];
+        switch (mediaType) {
+            case 'video':
+                return <video width="320" height="240" controls>
+                    <source src={source} type={mimetype}/>
+                    Your browser does not support the video tag.
+                    <track kind="captions"/>
+                </video>
+                break;
+            case 'audio':
+                return <audio controls>
+                    <source src={source} type={mimetype}/>
+                    Your browser does not support the audio tag.
+                    <track kind="captions"/>
+                </audio>
+                break;
+            case 'image':
+                return <img src={source} alt="Not available"/>
+                break;
+            case 'text':
+            case 'application':
+                return <embed src={source} width= "500" height= "375" type={mimetype}/>
+                break;
+
+            case "":
+                return <></>
+                break;
+            default:
+                return <Text>File type is not supported!</Text>
+        }
+    }
 
     const postBody = useMemo(() => {
         if (state.edit) {
@@ -165,6 +204,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 size='md'>
                 {post.title}
             </Heading>
+            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType}/>
             <Text fontSize='md'
                 maxHeight='145px'
                 overflow='auto'
@@ -172,11 +212,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 fontFamily='Arial'
                 paddingRight='5px'>
                 {post.postContent}
-                {post.filename}
             </Text>
         </>);
-    }, [post.postContent, post.title, state.content, state.edit]);
-
+    }, [post.file, post.postContent, post.title, state.content, state.edit]);
     return (
         <VStack padding={5}
             height='100%'
