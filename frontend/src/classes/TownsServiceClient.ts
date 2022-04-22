@@ -9,7 +9,7 @@ export type ServerPost = {
   title: string,
   postContent: string,
   ownerID: string,
-  fileID?: string,
+  filename?: string,
   isVisible: boolean,
   comments?: string[],
   coordinates: Coordinate,

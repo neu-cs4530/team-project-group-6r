@@ -3,7 +3,7 @@ export type ServerPost = {
     title: string,
     postContent: string,
     ownerID: string,
-    fileID?: string,
+    filename?: string,
     isVisible: boolean,
     comments?: string[],
     coordinates: Coordinate,
@@ -69,7 +69,7 @@ export default class Post {
 
     private _ownerID: string;
 
-    private _fileID?: string;
+    private _filename?: string;
 
     private _isVisible: boolean;
 
@@ -89,7 +89,7 @@ export default class Post {
 
     constructor(title: string, postContent: string,
         ownerID: string, isVisible: boolean, coordinate: Coordinate,
-        comments?: string[], id?: string, fileID?: string, createAt?: Date, updateAt?: Date) {
+        comments?: string[], id?: string, filename?: string, createAt?: Date, updateAt?: Date) {
         this._id = id;
         this._title = title;
         this._postContent = postContent;
@@ -168,7 +168,7 @@ export default class Post {
             { ...this._coordinates },
             this._comments?.concat([]),
             this._id,
-            this._fileID,
+            this._filename,
             this._createAt,
             this._updateAt,
         );
@@ -185,7 +185,7 @@ export default class Post {
             serverPost.coordinates,
             serverPost.comments,
             serverPost._id,
-            serverPost.fileID,
+            serverPost.filename,
             serverPost.createdAt,
             serverPost.updatedAt,
         );
