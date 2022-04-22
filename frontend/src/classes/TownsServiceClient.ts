@@ -197,8 +197,12 @@ export interface FileUploadRequest {
 }
 
 export interface FileUploadResponse {
-  fileName: string,
+  filename: string,
   size: number,
+}
+
+export interface FileGetRequest {
+  filename?: string,
 }
 
 
@@ -322,6 +326,12 @@ export default class TownsServiceClient {
   // TODO: Session Token
   async getCommentsByPostID(requestData: CommentsGetByPostIdRequest): Promise<ServerComment[]> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}/commentTree`);
+    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
+  }
+
+  // TODO: Session Token
+  async getImageByFilename(requestData: FileGetRequest): Promise<any> {
+    const responseWrapper = await this._axios.get(`/image/${requestData.fileName}`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 }

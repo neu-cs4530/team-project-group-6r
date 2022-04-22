@@ -4,7 +4,7 @@ import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest } from '../../../classes/TownsServiceClient';
+import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 import useComments from '../../../hooks/useComments';
 
@@ -29,6 +29,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
     const editPost = useApi(apiClient.editPost.bind(apiClient));
+    const getFile = useApi(apiClient.getImageByFilename.bind(apiClient));
     const toast = useToast();
 
     function calculateHourDifference(): number | string {
@@ -103,6 +104,18 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
+    const getFileCallback = (arg: any) => {
+        console.log(arg);
+    };
+
+    const getFileError = (error: string) => {
+        toast({
+            title: 'Unable to get the file',
+            description: error,
+            status: 'error',
+        });
+    };
+
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
             coveyTownID: currentTownID,
@@ -136,12 +149,16 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     };
 
     useEffect(() => {
+        const request: FileGetRequest = {
+            filename: post.filename,
+        };
+        getFile.request(request, getFileCallback, editPostError);
         socket?.emit('postOpen', post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
         }
-    }, [post, setComments, socket]);
+    }, [editPostError, getFile, post, setComments, socket]);
 
     useEffect(() => {
         getCommentsWrapper();
