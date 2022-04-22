@@ -50,7 +50,7 @@ const storage = new GridFsStorage({
 const upload = multer({ storage });
 
 
-addTownRoutes(server, app, upload);
+export const ServerSocket = addTownRoutes(server, app, upload);
 
 const newTown = CoveyTownsStore.getInstance().createTown('ChengTown', true);
 console.log(newTown);

@@ -6,6 +6,8 @@ import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import { ConversationAreaCreateRequest, ServerConversationArea } from '../client/TownsServiceClient';
 import { Post } from '../types/PostTown/post';
+import { ServerSocket } from '../server';
+import { CommentTree } from '../types/PostTown/comment';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -186,10 +188,10 @@ export function townUpdateHandler(requestData: TownUpdateRequest): ResponseEnvel
  * * Ask the TownController to create the conversation area
  * @param _requestData Conversation area create request
  */
-export function conversationAreaCreateHandler(_requestData: ConversationAreaCreateRequest) : ResponseEnvelope<Record<string, null>> {
+export function conversationAreaCreateHandler(_requestData: ConversationAreaCreateRequest): ResponseEnvelope<Record<string, null>> {
   const townsStore = CoveyTownsStore.getInstance();
   const townController = townsStore.getControllerForTown(_requestData.coveyTownID);
-  if (!townController?.getSessionByToken(_requestData.sessionToken)){
+  if (!townController?.getSessionByToken(_requestData.sessionToken)) {
     return {
       isOK: false, response: {}, message: `Unable to create conversation area ${_requestData.conversationArea.label} with topic ${_requestData.conversationArea.topic}`,
     };
@@ -224,22 +226,22 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('townClosing');
       socket.disconnect(true);
     },
-    onConversationAreaDestroyed(conversation: ServerConversationArea){
+    onConversationAreaDestroyed(conversation: ServerConversationArea) {
       socket.emit('conversationDestroyed', conversation);
     },
-    onConversationAreaUpdated(conversation: ServerConversationArea){
+    onConversationAreaUpdated(conversation: ServerConversationArea) {
       socket.emit('conversationUpdated', conversation);
     },
-    onChatMessage(message: ChatMessage){
+    onChatMessage(message: ChatMessage) {
       socket.emit('chatMessage', message);
     },
-    onPostCreate(post: Post){
+    onPostCreate(post: Post) {
       socket.emit('postCreate', post);
     },
-    onPostUpdate(post: Post){
+    onPostUpdate(post: Post) {
       socket.emit('postUpdate', post);
     },
-    onPostDelete(post: Post){
+    onPostDelete(post: Post) {
       socket.emit('postDelete', post);
     },
   };
@@ -286,4 +288,16 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on('playerMovement', (movementData: UserLocation) => {
     townController.updatePlayerLocation(s.player, movementData);
   });
+
+  socket.on('postOpen', (post: Post) => {
+    socket.join(`Post: ${post._id}`);
+  });
+
+  socket.on('postClose', (post: Post) => {
+    socket.leave(`Post: ${post._id}`);
+  });
+}
+
+export function emitCommentUpdate(postID: string, comments: CommentTree[]) {
+  ServerSocket.to(`Post: ${postID}`).emit('commentUpdate', comments);
 }

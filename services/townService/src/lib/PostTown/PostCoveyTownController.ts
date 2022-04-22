@@ -3,6 +3,7 @@ import { Post } from '../../types/PostTown/post';
 import { Comment, CommentTree } from '../../types/PostTown/comment';
 import * as databaseController from './DatabaseController';
 import CoveyTownController from '../CoveyTownController';
+import { emitCommentUpdate } from '../../requestHandlers/CoveyTownRequestHandlers';
 
 export default class PostCoveyTownController extends CoveyTownController{
 
@@ -111,6 +112,9 @@ export default class PostCoveyTownController extends CoveyTownController{
     } else {
       await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
     }
+    // TODO: remove the cheese
+    const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
+    emitCommentUpdate(comment.rootPostID, comments);
         
     return result;
   }
@@ -159,7 +163,9 @@ export default class PostCoveyTownController extends CoveyTownController{
         
     if (comment.ownerID === playerID) {
       const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
-
+      // TODO: remove the cheese
+      const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
+      emitCommentUpdate(comment.rootPostID, comments);
       return result;
     }
 
@@ -175,7 +181,9 @@ export default class PostCoveyTownController extends CoveyTownController{
     // censor
       comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
       const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
-            
+      // TODO: remove the cheese
+      const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
+      emitCommentUpdate(comment.rootPostID, comments);
       return result;
     }
 
