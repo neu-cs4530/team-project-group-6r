@@ -143,12 +143,19 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   /**
    * Creates a post
    */
-  app.post('/towns/:townID/post', express.json(), async (req, res) => {
+  app.post('/towns/:townID/post', express.json(), upload.single('file'), async (req, res) => {
     try {
+      let parsedReq = JSON.parse(req.body.post); 
+      let postToSend = parsedReq.post;
+      if (req.file) {
+        postToSend = { ...postToSend, filename: req.file.filename}
+      }
+      console.log(parsedReq);
+      console.log(postToSend);
       const result = await postCreateHandler({
         coveyTownID: req.params.townID,
-        sessionToken: req.body.sessionToken,
-        post: req.body.post,
+        sessionToken: parsedReq.sessionToken,
+        post: postToSend,
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {
@@ -243,8 +250,12 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   /**
    * Update a post
    */
-  app.patch('/towns/:townID/post/:postID', express.json(), async (req, res) => {
+  app.patch('/towns/:townID/post/:postID', express.json(), upload.single('file'), async (req, res) => {
     try {
+      let postToSend = req.body.post
+      if (req.file) {
+        postToSend = { ...postToSend, fileID: req.file.filename}
+      }
       const result = await postUpdateHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken,
@@ -342,32 +353,6 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
     }
   });
 
-  // post a file
-  app.post('/upload', upload.single('file'), async (req, res) => {
-    try {
-      if (req.file !== undefined) {
-        res.status(StatusCodes.OK).json({
-          isOK: true,
-          response: {
-            fileName: req.file?.originalname,
-            size: req.file?.size,
-          },
-        });
-      } else {
-        res.status(StatusCodes.OK).json({
-          isOK: false,
-          message: 'Failed to upload the file',
-        });
-      }
-    } catch (err) {
-      logError(err);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  });
-
   // get all files (test route)
   app.get('/files', async (_req, res) => {
     const { gfs } = FileConnection.getInstance();
@@ -385,12 +370,12 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   }); 
 
   // get one file
-  app.get('/towns/:townID/files/:postID', async (req, res) => {
+  app.get('/towns/:townID/files/:filename', async (req, res) => {
     try {
       const result = await fileGetHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken,
-        postID: req.params.postID,
+        postID: req.params.filename,
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {
@@ -403,17 +388,16 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   });
 
   // get and stream image (test route)
-  app.get('/image/:id', async (req, res) => {
+  app.get('/image/:filename', async (req, res) => {
     const { gfs } = FileConnection.getInstance();
     const { gridfsBucket } = FileConnection.getInstance();
-    const objId = new mongoose.Types.ObjectId(req.params.id);
-    gfs.files.findOne({ _id: objId }, (_err, file) => {
+    gfs.files.findOne({ filename: req.params.filename }, (_err, file) => {
       if (!file || file.length === 0) {
         res.status(404).json({
           err: 'No file exist',
         });
       } else if (file.contentType.startsWith("image/")) {
-        const readStream = gridfsBucket.openDownloadStream(objId);
+        const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
         readStream.pipe(res);
       } else {
         res.status(404).json({
@@ -424,12 +408,12 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   });
 
   // delete file
-  app.delete('/towns/:townID/files/:postID', async (req, res) => {
+  app.delete('/towns/:townID/files/:filename', async (req, res) => {
     try {
       const result = await fileDeleteHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken,
-        postID: req.params.postID,
+        postID: req.params.filename,
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {
