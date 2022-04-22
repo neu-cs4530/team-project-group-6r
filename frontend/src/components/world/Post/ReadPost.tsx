@@ -175,7 +175,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 {post.filename}
             </Text>
         </>);
-    }, [post.postContent, post.title, state.content, state.edit]);
+    }, [post.filename, post.postContent, post.title, state.content, state.edit]);
 
     return (
         <VStack padding={5}

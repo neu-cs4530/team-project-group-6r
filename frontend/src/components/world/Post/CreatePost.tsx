@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { VStack, Input, Textarea, Button, Flex, useToast, CloseButton, Container, Text } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { Coordinate } from '../../../classes/Post';
-import { ServerPost, FileUploadResponse, PostCreateRequest, FileUploadRequest } from '../../../classes/TownsServiceClient';
+import { ServerPost, PostCreateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 
 interface CreatePostProps {
@@ -67,22 +67,6 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     };
 
     const createPostError = (error: string) => {
-        toast({
-            title: 'Unable to create the post',
-            description: error,
-            status: 'error',
-        });
-    };
-
-    const uploadFileCallback = (result: FileUploadResponse) => {
-        toast({
-            title: 'Uploaded file successfully',
-            description: `File Name: ${result.fileName}, Size: ${result.size}`,
-            status: 'success',
-        });
-    };
-
-    const uploadFileError = (error: string) => {
         toast({
             title: 'Unable to create the post',
             description: error,
