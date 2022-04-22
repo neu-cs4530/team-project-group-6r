@@ -159,21 +159,25 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             case 'video':
                 return <video width="320" height="240" controls>
                     <source src={source} type={mimetype}/>
-                    <track kind="caption"/>
                     Your browser does not support the video tag.
+                    <track kind="captions"/>
                 </video>
                 break;
             case 'audio':
                 return <audio controls>
                     <source src={source} type={mimetype}/>
-                    <track kind="caption"/>
                     Your browser does not support the audio tag.
+                    <track kind="captions"/>
                 </audio>
                 break;
             case 'image':
                 return <img src={source} alt="Not available"/>
                 break;
-            
+            case 'text':
+            case 'application':
+                return <embed src={source} width= "500" height= "375" type={mimetype}/>
+                break;
+
             case "":
                 return <></>
                 break;
