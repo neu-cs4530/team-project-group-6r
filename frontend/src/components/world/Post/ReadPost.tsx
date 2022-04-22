@@ -172,6 +172,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 fontFamily='Arial'
                 paddingRight='5px'>
                 {post.postContent}
+                {post.filename}
             </Text>
         </>);
     }, [post.postContent, post.title, state.content, state.edit]);

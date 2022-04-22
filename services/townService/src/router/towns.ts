@@ -254,7 +254,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
     try {
       let postToSend = req.body.post
       if (req.file) {
-        postToSend = { ...postToSend, fileID: req.file.filename}
+        postToSend = { ...postToSend, filename: req.file.filename}
       }
       const result = await postUpdateHandler({
         coveyTownID: req.params.townID,

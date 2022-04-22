@@ -137,6 +137,10 @@ export default class Post {
         return this._updateAt;
     }
 
+    get filename() {
+        return this._filename;
+    }
+
     toServerPost(): ServerPost {
         return {
             _id: this._id,
