@@ -134,6 +134,7 @@ export interface PostCreateRequest {
   coveyTownID: string,
   sessionToken: string,
   post: ServerPost,
+  file?: File
 }
 
 export interface PostGetRequest {
@@ -258,7 +259,13 @@ export default class TownsServiceClient {
 
   // TODO: Session Token
   async createPost(requestData: PostCreateRequest): Promise<ServerPost> {
-    const responseWrapper = await this._axios.post(`/towns/${requestData.coveyTownID}/post`, requestData);
+    const formData = new FormData();
+    if (requestData.file) formData.append('file', requestData.file);
+    formData.append('post', JSON.stringify({
+      sessionToken: requestData.sessionToken,
+      post: requestData.post,
+    }));
+    const responseWrapper = await this._axios.post(`/towns/${requestData.coveyTownID}/post`, formData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
@@ -317,13 +324,4 @@ export default class TownsServiceClient {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}/commentTree`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
-
-  // TODO: Session Token
-  async createFile(requestData: FileUploadRequest): Promise<FileUploadResponse> {
-    const formData = new FormData();
-    formData.append('file', requestData.file);
-    const responseWrapper = await this._axios.post(`/upload`, formData);
-    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
-  }
-
 }

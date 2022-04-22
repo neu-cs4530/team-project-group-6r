@@ -165,8 +165,7 @@ export async function postDeleteHandler(_requestData : PostGetRequest) : Promise
 }
 
 export async function postUpdateHandler(_requestData : PostUpdateRequest) : Promise<ResponseEnvelope<Post | unknown>> {
-  const { postID } = _requestData;
-  const { post } = _requestData;
+  const { postID, post } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
 
@@ -304,11 +303,11 @@ export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise
     return {
       isOK: false, 
       response: {}, 
-      message: `Unable to delete file with post ID ${_requestData.postID} in town ${_requestData.coveyTownID}`,
+      message: `Unable to delete file with filename ${_requestData.postID} in town ${_requestData.coveyTownID}`,
     };
   }
 
-  const result = await postTownController.deleteFile(postID, _requestData.sessionToken);
+  const result = await postTownController.deleteFile(postID);
 
   return {
     isOK: true,

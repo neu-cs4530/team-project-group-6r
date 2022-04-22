@@ -42,7 +42,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const [postStates, setPostStates] = useState<CreatePostStates>(initalState);
     const createPost = useApi(apiClient.createPost.bind(apiClient));
-    const uploadFile = useApi(apiClient.createFile.bind(apiClient));
+    // const uploadFile = useApi(apiClient.createFile.bind(apiClient));
     const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -91,7 +91,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     };
 
     const handleCommitButtonClick = async () => {
-        const postRequest: PostCreateRequest = {
+        const postRequest : PostCreateRequest = {
             coveyTownID: currentTownID,
             sessionToken,
             post: {
@@ -100,20 +100,17 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
                 ownerID: userName,
                 isVisible: true,
                 coordinates: coordinate,
-            }
+            },
+            file: acceptedFiles[0],
         };
-        if (acceptedFiles[0] !== undefined) {
-            const fileRequest: FileUploadRequest = { file: acceptedFiles[0], };
-            uploadFile.request(fileRequest, uploadFileCallback, uploadFileError);
-        }
         createPost.request(postRequest, createPostCallback, createPostError);
     };
 
     useEffect(() => {
-        if ((createPost.data !== undefined || uploadFile.data !== undefined) && !createPost.loading && !uploadFile.loading) {
+        if ((createPost.data !== undefined) && !createPost.loading) {
             closeCreatePost();
         }
-    }, [closeCreatePost, createPost.data, createPost.loading, uploadFile.data, uploadFile.loading]);
+    }, [closeCreatePost, createPost.data, createPost.loading]);
 
     return (
         <VStack
@@ -162,7 +159,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
                 width='100%'
                 direction='row'
                 justify='flex-end'>
-                <Button isLoading={createPost.loading || uploadFile.loading} loadingText="Committing" onClick={handleCommitButtonClick}>Commit</Button>
+                <Button isLoading={createPost.loading} loadingText="Committing" onClick={handleCommitButtonClick}>Commit</Button>
             </Flex>
         </VStack>
     );

@@ -3,6 +3,7 @@ import { Post } from '../../types/PostTown/post';
 import { Comment, CommentTree } from '../../types/PostTown/comment';
 import * as databaseController from './DatabaseController';
 import CoveyTownController from '../CoveyTownController';
+import { emitCommentUpdate } from '../../requestHandlers/CoveyTownRequestHandlers';
 
 export default class PostCoveyTownController extends CoveyTownController{
 
@@ -29,7 +30,9 @@ export default class PostCoveyTownController extends CoveyTownController{
 
     if (post.title) {
       // censor
-      post.postContent = this.filter.clean(post.postContent.valueOf());
+      if(post.postContent) {
+        post.postContent = this.filter.clean(post.postContent.valueOf());
+      }
       post.title = this.filter.clean(post.title.valueOf());
       const result: Post = await databaseController.createPost(this.coveyTownID, post);
       this._listeners.forEach(listener => listener.onPostCreate(result));
@@ -60,8 +63,8 @@ export default class PostCoveyTownController extends CoveyTownController{
       this._listeners.forEach(listener => listener.onPostDelete(result));
       await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
-      if (post.fileID) {
-        await databaseController.deleteFile(post.fileID);
+      if (post.filename) {
+        await databaseController.deleteFile(post.filename);
       }
 
       return result;
@@ -83,6 +86,13 @@ export default class PostCoveyTownController extends CoveyTownController{
       const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
       this._listeners.forEach(listener => listener.onPostUpdate(result));
 
+      //delete file if old post had a file that is being replaced
+      const oldFileName = postToUpdate.filename;
+      const newFileName = post.filename;
+      if(oldFileName !== newFileName && oldFileName) {
+        await databaseController.deleteFile(oldFileName);
+      }
+
       return result;
     }
 
@@ -102,6 +112,9 @@ export default class PostCoveyTownController extends CoveyTownController{
     } else {
       await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
     }
+    // TODO: remove the cheese
+    const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
+    emitCommentUpdate(comment.rootPostID, comments);
         
     return result;
   }
@@ -150,7 +163,9 @@ export default class PostCoveyTownController extends CoveyTownController{
         
     if (comment.ownerID === playerID) {
       const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
-
+      // TODO: remove the cheese
+      const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
+      emitCommentUpdate(comment.rootPostID, comments);
       return result;
     }
 
@@ -166,7 +181,9 @@ export default class PostCoveyTownController extends CoveyTownController{
     // censor
       comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
       const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
-            
+      // TODO: remove the cheese
+      const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
+      emitCommentUpdate(comment.rootPostID, comments);
       return result;
     }
 
@@ -174,17 +191,12 @@ export default class PostCoveyTownController extends CoveyTownController{
     throw Error('Incorrect post owner');
   }
 
-  async getFile(postID : string) : Promise<any> {
-    return databaseController.getFile(postID);
+  async getFile(filename : string) : Promise<any> {
+    return await databaseController.getFile(filename);
   }
 
-  async deleteFile(postID : string, playerID: string) : Promise<any> {
-    const post : Post = await databaseController.getPost(this.coveyTownID, postID);
-    if (post.ownerID === playerID && post.fileID) {
-      const result : any = await databaseController.deleteFile(post.fileID);
-      return result;
-    }
-
-    throw Error('Incorrect post owner/No file found');
+  async deleteFile(filename : string) : Promise<any> {
+    const result : any = await databaseController.deleteFile(filename);
+    return result;
   }
 }

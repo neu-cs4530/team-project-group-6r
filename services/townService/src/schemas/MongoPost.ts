@@ -5,7 +5,7 @@ const PostSchema = new mongoose.Schema({
   postContent: String,
   ownerID: { type: String, immutable: true },
   isVisible: Boolean,
-  fileID: { type: String, default: '' },
+  filename: { type: String, default: '' },
   comments: { type: [String], default: [] },
   coordinates: {
     x: Number,

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
-import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Input, Textarea } from '@chakra-ui/react';
+import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, ServerPost } from '../../../classes/TownsServiceClient';
+import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
+import useComments from '../../../hooks/useComments';
 
 interface ReadPostProps {
     post: Post;
@@ -13,7 +14,6 @@ interface ReadPostProps {
 }
 
 type CreatePostStates = {
-    title: string;
     content: string;
     edit: boolean,
 }
@@ -21,11 +21,11 @@ type CreatePostStates = {
 // Post should be rerender when post is updated through socket
 export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.Element {
     const [state, setState] = useState<CreatePostStates>({
-        title: post.title,
         content: post.postContent,
         edit: false,
     });
-    const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
+    const { userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
+    const { comments, setComments } = useComments();
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
     const editPost = useApi(apiClient.editPost.bind(apiClient));
@@ -47,7 +47,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
 
     const handleEditButtonClick = () => {
         setState(prev => ({
-            title: post.title,
             content: post.postContent,
             edit: !prev.edit,
         }));
@@ -59,6 +58,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             description: `Post ID: ${post.id}, Posted By: ${post.ownerId}, Comments: ${result.length}`,
             status: 'success',
         });
+        if (setComments) setComments(result);
     };
 
     const getCommentsError = (error: string) => {
@@ -92,6 +92,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             description: `Post ID: ${post.id}`,
             status: 'success',
         });
+        handleEditButtonClick();
     };
 
     const editPostError = (error: string) => {
@@ -128,12 +129,19 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             postID: post.id || '',
             post: {
                 ...post.toServerPost(),
-                title: state.title,
-                postContent: state.content,
+                postContent: state.content || '',
             },
         };
         editPost.request(request, editPostCallback, editPostError);
     };
+
+    useEffect(() => {
+        socket?.emit('postOpen', post);
+        return () => {
+            socket?.emit('postClose', post);
+            if (setComments) setComments([]);
+        }
+    }, [post, setComments, socket]);
 
     useEffect(() => {
         getCommentsWrapper();
@@ -142,11 +150,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     const postBody = useMemo(() => {
         if (state.edit) {
             return (<>
-                <Input
-                    placeholder='Title'
-                    size='md'
-                    value={state.title}
-                    onChange={({ target }) => handleTextInputChange(target.value, 'title')} />
                 <Textarea
                     placeholder='Text (optional)'
                     resize='vertical'
@@ -171,7 +174,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 {post.postContent}
             </Text>
         </>);
-    }, [post.postContent, post.title, state.content, state.edit, state.title]);
+    }, [post.postContent, post.title, state.content, state.edit]);
 
     return (
         <VStack padding={5}
@@ -208,7 +211,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 </HStack>
             </VStack>
             <CreateComment postID={post.id || ''} />
-            <Comments comments={getComments.data || []} />
+            <Comments comments={comments} />
         </VStack>
     );
 }

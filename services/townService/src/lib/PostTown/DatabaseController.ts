@@ -74,14 +74,22 @@ export async function addCommentToParentComment(coveyTownID : string, parentComm
   return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID } } );
 }
 
-export async function getFile(fileID: string) : Promise<any> {
+export async function getFile(filename: string) : Promise<any> {
   const { gfs } = FileConnection.getInstance();
-  const objId = new mongoose.Types.ObjectId(fileID);
-  return gfs.files.findOne({ _id: objId });
+  return gfs.files.findOne({ filename: filename });
 }
 
-export async function deleteFile(fileID: string): Promise<any> {
-  const { gridfsBucket } = FileConnection.getInstance();
-  const objId = new mongoose.Types.ObjectId(fileID);
-  return gridfsBucket.delete(objId);
+export async function deleteFile(filename: string): Promise<any> {
+  const { gfs, gridfsBucket } = FileConnection.getInstance();
+  gfs.files.findOne({ filename: filename }, (err, result) => {
+    if(err) {
+      throw Error('Can\'t find file')
+    }
+
+    if(result?._id) {
+      return gridfsBucket.delete(result?._id);
+    } else{
+      throw Error('Can\'t find file id')
+    }
+  });
 }

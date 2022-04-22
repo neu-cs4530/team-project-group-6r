@@ -41,7 +41,7 @@ const storage = new GridFsStorage({
       const filename = buf.toString('hex') + path.extname(file.originalname);
       const fileInfo = {
         filename,
-        bucketName: 'uploads',
+        bucketName: 'uploads'
       };
       return resolve(fileInfo);
     });
@@ -50,7 +50,7 @@ const storage = new GridFsStorage({
 const upload = multer({ storage });
 
 
-addTownRoutes(server, app, upload);
+export const ServerSocket = addTownRoutes(server, app, upload);
 
 const newTown = CoveyTownsStore.getInstance().createTown('ChengTown', true);
 console.log(newTown);

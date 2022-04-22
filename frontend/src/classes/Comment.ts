@@ -1,13 +1,25 @@
 export type ServerComment = {
-    commentID: string,
+    _id?: string,
     rootPostID: string,
     parentCommentID: string,
     ownerID: string,
     commentContent: string,
     isDeleted: boolean,
-    comments?: string[],
+    comments?: ServerComment[],
     createdAt? : Date,
-    updatedAt? : Date,
+    updatedAt? : Date
 }
 
-export default class Comment {}
+type Comment = {
+    _id?: string,
+    rootPostID: string,
+    parentCommentID: string,
+    ownerID: string,
+    commentContent: string,
+    isDeleted: boolean,
+    comments?: ServerComment[],
+    createdAt? : Date,
+    updatedAt? : Date
+}
+
+export default Comment;

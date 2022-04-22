@@ -27,13 +27,6 @@ type ConversationGameObjects = {
   conversationArea?: ConversationArea;
 };
 
-type PostGameObjects = {
-  titleText: Phaser.GameObjects.Text;
-  sprite: Phaser.GameObjects.Sprite;
-  title: string;
-  post?: Post;
-}
-
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -91,14 +84,14 @@ class CoveyGameScene extends Phaser.Scene {
   private _onGameReadyListeners: Callback[] = [];
 
   // TODO
-  private setPostSlide: (newPost?: Post, newCoordinate?: Coordinate) => void;
+  private setPostSlide: (postID?: string, newCoordinate?: Coordinate) => void;
 
   constructor(
     video: Video,
     emitMovement: (loc: UserLocation) => void,
     setNewConversation: (conv: ConversationArea) => void,
     myPlayerID: string,
-    setPostSlide: (newPost?: Post, newCoordinate?: Coordinate) => void,
+    setPostSlide: (postID?: string, newCoordinate?: Coordinate) => void,
   ) {
     super('PlayGame');
     this.video = video;
@@ -293,7 +286,7 @@ class CoveyGameScene extends Phaser.Scene {
       const label = this.add.text(
         this.game.scale.width / 2,
         20,
-        `You've stepped on a post, press 'P' to open:\n\tTitle ${mPost.title}\n\tOwner: ${mPost.ownerId}\n\tComments: ${mPost.comments?.length || 0}\n\tCreated at: ${mPost.createAt}\n\tUpdated at: ${mPost.updateAt}`,
+        `You've stepped on a post, press 'P' to open:\n\tTitle ${mPost.title}\n\tOwner: ${mPost.ownerId}\n\tCreated at: ${mPost.createAt}\n\tUpdated at: ${mPost.updateAt}`,
         { color: '#000000', backgroundColor: '#FFFFFF' },
       )
         .setScrollFactor(0)
@@ -427,7 +420,7 @@ class CoveyGameScene extends Phaser.Scene {
 
       const timeNow = Date.now();
       if (this.postKey.isDown && (!this.postKeyTimeout || timeNow - this.postKeyTimeout >= 250)) {
-        this.setPostSlide(localPost, { x: tileXY.x, y: tileXY.y + 1 });
+        this.setPostSlide(localPost?.id, { x: tileXY.x, y: tileXY.y + 1 });
         this.postKeyTimeout = timeNow;
       }
     }
@@ -786,12 +779,12 @@ class CoveyGameScene extends Phaser.Scene {
 
 interface PostSlideStates {
   coordinate?: Coordinate,
-  post?: Post,
+  postID?: string,
 }
 
 const initalPostSlideStates = {
   coordinate: undefined,
-  post: undefined,
+  postID: undefined,
 }
 
 export default function WorldMap(): JSX.Element {
@@ -825,10 +818,9 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
-    function setPostSlideReducer(post?: Post, coordinate?: Coordinate) {
-      setPostSlide({ post, coordinate });
+    function setPostSlideReducer(postID?: string, coordinate?: Coordinate) {
+      setPostSlide({ postID, coordinate });
     }
-
 
     const game = new Phaser.Game(config);
     if (video) {
@@ -870,7 +862,7 @@ export default function WorldMap(): JSX.Element {
   }, [posts, gameScene]);
 
   const newConversationModalOpen = newConversation !== undefined;
-  const postSlideOpen = postSlide.post !== undefined || postSlide.coordinate !== undefined;
+  const postSlideOpen = postSlide.postID !== undefined || postSlide.coordinate !== undefined;
   useEffect(() => {
     if (newConversationModalOpen || postSlideOpen) {
       video?.pauseGame();
@@ -893,21 +885,23 @@ export default function WorldMap(): JSX.Element {
     return <></>;
   }, [video, newConversation, setNewConversation]);
 
+  const selectedPost: Post | undefined = useMemo(() => posts.find(post => post.id === postSlide.postID), [postSlide.postID, posts]);
+
   const postSlideBar = useMemo(() => {
     if (postSlideOpen) {
-      if (postSlide.post !== undefined) {
+      if (selectedPost !== undefined) {
         return <ReadPost
-          post={postSlide.post}
-          closeReadPost={() => setPostSlide({ post: undefined, coordinate: undefined })} />
+          post={selectedPost}
+          closeReadPost={() => setPostSlide({ postID: undefined, coordinate: undefined })} />
       }
       if (postSlide.coordinate !== undefined) {
         return <CreatePost
           coordinate={postSlide.coordinate}
-          closeCreatePost={() => setPostSlide({ post: undefined, coordinate: undefined })} />
+          closeCreatePost={() => setPostSlide({ postID: undefined, coordinate: undefined })} />
       }
     }
     return <></>;
-  }, [postSlide.coordinate, postSlide.post, postSlideOpen]);
+  }, [postSlide.coordinate, postSlideOpen, selectedPost]);
 
   return (
     <div id='app-container'>
