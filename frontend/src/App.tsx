@@ -38,6 +38,8 @@ import { CoveyAppState } from './CoveyTypes';
 // TODO
 import PostContext from './contexts/PostContext';
 import Post from './classes/Post';
+import CommentContext from './contexts/CommentContext';
+import Comment, { ServerComment } from './classes/Comment';
 
 export const MOVEMENT_UPDATE_DELAY_MS = 0;
 export const CALCULATE_NEARBY_PLAYERS_MOVING_DELAY_MS = 300;
@@ -135,6 +137,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [conversationAreas, setConversationAreas] = useState<ConversationArea[]>([]);
   // TODO: setPosts should be called when socket onPostAdded/onPostEditted/onPostDeleted
   const [posts, setPosts] = useState<Post[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
@@ -169,7 +172,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       setNearbyPlayers(localNearbyPlayers);
       // TODO
       setPosts(localPosts);
-
 
       const recalculateNearbyPlayers = () => {
         const newNearbyPlayers = calculateNearbyPlayers(localPlayers, currentLocation);
@@ -250,10 +252,25 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       });
       socket.on('postCreate', (_post: ServerPost) => {
         localPosts = localPosts.concat(Post.fromServerPost(_post));
-        setPlayersInTown(localPlayers);
         setPosts(localPosts);
       });
-
+      socket.on('postUpdate', (_post: ServerPost) => {
+        localPosts = localPosts.map((post: Post) => {
+          if (_post._id === post.id) {
+            return Post.fromServerPost(_post);
+          }
+          return post;
+        });
+        setPosts(localPosts);
+      });
+      socket.on('postDelete', (_post: ServerPost) => {
+        localPosts = localPosts.filter((post: Post) => post.id !== _post._id);
+        setPosts(localPosts);
+      });
+      socket.on('commentUpdate', (_comments: ServerComment[]) => {
+        // TODO
+        setComments(_comments);
+      });
       dispatchAppUpdate({
         action: 'doConnect',
         data: {
@@ -313,7 +330,9 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
               <NearbyPlayersContext.Provider value={nearbyPlayers}>
                 <ConversationAreasContext.Provider value={conversationAreas}>
                   <PostContext.Provider value={posts}>
-                    {page}
+                    <CommentContext.Provider value={{ 'comments': comments, 'setComments': setComments }}>
+                      {page}
+                    </CommentContext.Provider>
                   </PostContext.Provider>
                 </ConversationAreasContext.Provider>
               </NearbyPlayersContext.Provider>
