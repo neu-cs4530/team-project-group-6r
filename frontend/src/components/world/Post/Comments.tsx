@@ -16,6 +16,8 @@ export default function Comments({ comments }: CommentsProps): JSX.Element {
         }
     }
 
+    console.log(comments);
+
     function buildComments(): JSX.Element[] {
         const result: JSX.Element[] = [];
         comments.forEach(c => buildCommentsRecursive(c, 0, result));

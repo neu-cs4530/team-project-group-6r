@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
-import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Input, Textarea } from '@chakra-ui/react';
+import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
 import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
+import useComments from '../../../hooks/useComments';
 
 interface ReadPostProps {
     post: Post;
@@ -23,7 +24,8 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         content: post.postContent,
         edit: false,
     });
-    const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
+    const { userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
+    const { comments, setComments } = useComments();
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
     const editPost = useApi(apiClient.editPost.bind(apiClient));
@@ -56,6 +58,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             description: `Post ID: ${post.id}, Posted By: ${post.ownerId}, Comments: ${result.length}`,
             status: 'success',
         });
+        if (setComments) setComments(result);
     };
 
     const getCommentsError = (error: string) => {
@@ -133,6 +136,14 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     };
 
     useEffect(() => {
+        socket?.emit('postOpen', post);
+        return () => {
+            socket?.emit('postClose', post);
+            if (setComments) setComments([]);
+        }
+    }, [post, setComments, socket]);
+
+    useEffect(() => {
         getCommentsWrapper();
     }, [getCommentsWrapper]);
 
@@ -200,7 +211,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 </HStack>
             </VStack>
             <CreateComment postID={post.id || ''} />
-            <Comments comments={getComments.data || []} />
+            <Comments comments={comments} />
         </VStack>
     );
 }
