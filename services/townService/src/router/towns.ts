@@ -143,7 +143,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   /**
    * Creates a post
    */
-  app.post('/towns/:townID/post', upload.single('file'), async (req, res) => {
+  app.post('/towns/:townID/post', express.json(), upload.single('file'), async (req, res) => {
     try {
       let postToSend = req.body.post
       if (req.file) {
@@ -247,8 +247,12 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   /**
    * Update a post
    */
-  app.patch('/towns/:townID/post/:postID', express.json(), async (req, res) => {
+  app.patch('/towns/:townID/post/:postID', express.json(), upload.single('file'), async (req, res) => {
     try {
+      let postToSend = req.body.post
+      if (req.file) {
+        postToSend = { ...postToSend, fileID: req.file.filename}
+      }
       const result = await postUpdateHandler({
         coveyTownID: req.params.townID,
         sessionToken: req.body.sessionToken,
