@@ -13,6 +13,11 @@ interface ReadPostProps {
     closeReadPost: () => void;
 }
 
+interface MimeTypeProps {
+    mimetype: string;
+    source: string;
+}
+
 type CreatePostStates = {
     content: string;
     edit: boolean,
@@ -29,7 +34,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
     const editPost = useApi(apiClient.editPost.bind(apiClient));
-    const getFile = useApi(apiClient.getImageByFilename.bind(apiClient));
     const toast = useToast();
 
     function calculateHourDifference(): number | string {
@@ -104,26 +108,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
-    const getFileCallback = (arg: any) => {
-        console.log(arg);
-    };
-
-    const getFileError = (error: string) => {
-        toast({
-            title: 'Unable to get the file',
-            description: error,
-            status: 'error',
-        });
-    };
-
-    const getFileWrapper = useCallback(() => {
-        const request: FileGetRequest = {
-            filename: post.filename,
-        };
-        getFile.request(request, getFileCallback, getFileError);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [post.filename]);
-
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
             coveyTownID: currentTownID,
@@ -158,19 +142,45 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
 
     useEffect(() => {
         socket?.emit('postOpen', post);
+        console.log(post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
         }
     }, [post, setComments, socket]);
 
-    useEffect(() =>{
-        getFileWrapper();
-    }, [getFileWrapper])
-
     useEffect(() => {
         getCommentsWrapper();
     }, [getCommentsWrapper]);
+
+    function MultiMediaDisplay({ mimetype, source }: MimeTypeProps): JSX.Element {
+        const mediaType = mimetype.split('/')[0];
+        switch (mediaType) {
+            case 'video':
+                return <video width="320" height="240" controls>
+                    <source src={source} type={mimetype}/>
+                    <track kind="caption"/>
+                    Your browser does not support the video tag.
+                </video>
+                break;
+            case 'audio':
+                return <audio controls>
+                    <source src={source} type={mimetype}/>
+                    <track kind="caption"/>
+                    Your browser does not support the audio tag.
+                </audio>
+                break;
+            case 'image':
+                return <img src={source} alt="Not available"/>
+                break;
+            
+            case "":
+                return <></>
+                break;
+            default:
+                return <Text>File type is not supported!</Text>
+        }
+    }
 
     const postBody = useMemo(() => {
         if (state.edit) {
@@ -197,11 +207,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 fontFamily='Arial'
                 paddingRight='5px'>
                 {post.postContent}
-                {post.filename}
             </Text>
+            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType}/>
         </>);
-    }, [post.filename, post.postContent, post.title, state.content, state.edit]);
-
+    }, [post.file, post.postContent, post.title, state.content, state.edit]);
     return (
         <VStack padding={5}
             height='100%'

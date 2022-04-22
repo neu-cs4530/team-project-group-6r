@@ -3,12 +3,20 @@ export type ServerPost = {
     title: string,
     postContent: string,
     ownerID: string,
-    filename?: string,
+    file: {
+        filename: string,
+        contentType: string
+    }
     isVisible: boolean,
     comments?: string[],
     coordinates: Coordinate,
     createdAt?: Date,
     updatedAt?: Date
+}
+
+export type ServerFile = {
+    filename: string,
+    contentType: string
 }
 
 export type PostListener = {
@@ -21,45 +29,6 @@ export type Coordinate = {
     y: number;
 }
 
-export const dummyPosts: ServerPost[] = [
-    {
-        "coordinates": {
-            "x": 48,
-            "y": 35,
-        },
-        "comments": [],
-        "_id": "624ea8cc6e50c406f87af212",
-        "title": "Post 0",
-        "postContent": "fuck you cheng xi tsou cai ni maa de bi",
-        "ownerID": "test",
-        "isVisible": true,
-    },
-    {
-        "coordinates": {
-            "x": 40,
-            "y": 35,
-        },
-        "comments": [],
-        "_id": "624e4ac5ae40e056287afe11",
-        "title": "Post 1",
-        "postContent": "fuck you cheng xi tsou cai ni maa de bi",
-        "ownerID": "test",
-        "isVisible": true,
-    },
-    {
-        "coordinates": {
-            "x": 42,
-            "y": 30,
-        },
-        "comments": [],
-        "_id": "891ec8s56ea0c0c6f8736e71",
-        "title": "Post 2",
-        "postContent": "fuck you cheng xi tsou cai ni maa de bi",
-        "ownerID": "test",
-        "isVisible": true,
-    }
-]
-
 export default class Post {
     private _id?: string;
 
@@ -69,7 +38,7 @@ export default class Post {
 
     private _ownerID: string;
 
-    private _filename?: string;
+    private _file: ServerFile;
 
     private _isVisible: boolean;
 
@@ -88,12 +57,13 @@ export default class Post {
     public label?: Phaser.GameObjects.Text;
 
     constructor(title: string, postContent: string,
-        ownerID: string, isVisible: boolean, coordinate: Coordinate,
-        comments?: string[], id?: string, filename?: string, createAt?: Date, updateAt?: Date) {
+        ownerID: string, isVisible: boolean, coordinate: Coordinate, file: ServerFile,
+        comments?: string[], id?: string, createAt?: Date, updateAt?: Date) {
         this._id = id;
         this._title = title;
         this._postContent = postContent;
         this._ownerID = ownerID;
+        this._file = file;
         this._isVisible = isVisible;
         this._comments = comments;
         this._coordinates = coordinate;
@@ -137,8 +107,8 @@ export default class Post {
         return this._updateAt;
     }
 
-    get filename() {
-        return this._filename;
+    get file() {
+        return this._file;
     }
 
     toServerPost(): ServerPost {
@@ -150,6 +120,7 @@ export default class Post {
             isVisible: this._isVisible,
             comments: this._comments,
             coordinates: this._coordinates,
+            file: this._file,
             createdAt: this._createAt,
             updatedAt: this._updateAt,
         };
@@ -170,12 +141,13 @@ export default class Post {
             this._ownerID,
             this._isVisible,
             { ...this._coordinates },
+            { ...this._file },
             this._comments?.concat([]),
             this._id,
-            this._filename,
             this._createAt,
             this._updateAt,
         );
+        
         this._listeners.forEach(listener => ret.addListener(listener));
         return ret;
     }
@@ -187,9 +159,9 @@ export default class Post {
             serverPost.ownerID,
             serverPost.isVisible,
             serverPost.coordinates,
+            serverPost.file,
             serverPost.comments,
             serverPost._id,
-            serverPost.filename,
             serverPost.createdAt,
             serverPost.updatedAt,
         );

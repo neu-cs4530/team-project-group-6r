@@ -2,14 +2,14 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
-import { Coordinate } from './Post';
+import { Coordinate, ServerFile } from './Post';
 
 export type ServerPost = {
   _id?: string,
   title: string,
   postContent: string,
   ownerID: string,
-  filename?: string,
+  file: ServerFile,
   isVisible: boolean,
   comments?: string[],
   coordinates: Coordinate,
@@ -197,7 +197,7 @@ export interface FileUploadRequest {
 }
 
 export interface FileUploadResponse {
-  filename: string,
+  file: ServerFile,
   size: number,
 }
 
@@ -326,12 +326,6 @@ export default class TownsServiceClient {
   // TODO: Session Token
   async getCommentsByPostID(requestData: CommentsGetByPostIdRequest): Promise<ServerComment[]> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}/commentTree`);
-    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
-  }
-
-  // TODO: Session Token
-  async getImageByFilename(requestData: FileGetRequest): Promise<any> {
-    const responseWrapper = await this._axios.get(`/image/${requestData.fileName}`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 }

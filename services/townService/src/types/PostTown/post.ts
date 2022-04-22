@@ -3,7 +3,10 @@ export interface Post {
   title: string,
   postContent: string,
   ownerID: string,
-  filename?: string,
+  file?: {
+    filename: string,
+    contentType: string
+  }
   isVisible: boolean,
   comments?: string[],
   coordinates: {

@@ -42,7 +42,6 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const [postStates, setPostStates] = useState<CreatePostStates>(initalState);
     const createPost = useApi(apiClient.createPost.bind(apiClient));
-    // const uploadFile = useApi(apiClient.createFile.bind(apiClient));
     const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
         noClick: true,
         noKeyboard: true,
@@ -60,7 +59,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     const createPostCallback = (result: ServerPost) => {
         toast({
             title: 'Created post successfully',
-            description: `Post ID: ${result._id}, Title: ${result.title}`,
+            description: `Post ID: ${result._id}, Title: ${result.title}, File: ${result.file.filename}`,
             status: 'success',
         });
         closeCreatePost();
@@ -84,6 +83,10 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
                 ownerID: userName,
                 isVisible: true,
                 coordinates: coordinate,
+                file: {
+                    filename: '',
+                    contentType: ''
+                }
             },
             file: acceptedFiles[0],
         };
