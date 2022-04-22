@@ -55,13 +55,20 @@ export default class PostCoveyTownController extends CoveyTownController{
 		return expiredPosts;
 	}
 
+	private async didPostNotCollide(newX: number, newY: number): Promise<boolean> {
+		const postsInTown: Post[] = await this.getAllPostInTown();
+		const didCollide: Post | undefined = postsInTown.find(post => post.coordinates.x == newX && post.coordinates.y == newY)
+
+		return didCollide === undefined ? true : false;
+	}
+
   // Add
   async createPost(post : Post) : Promise<Post> {
     // Area collision?
     // Create the post
     // Invoke the listener
 
-    if (post.title) {
+    if (post.title && this.didPostNotCollide(post.coordinates.x, post.coordinates.y)) {
       // censor
       if(post.postContent) {
         post.postContent = this.filter.clean(post.postContent.valueOf());
