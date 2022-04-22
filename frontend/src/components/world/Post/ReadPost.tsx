@@ -116,6 +116,14 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
+    const getFileWrapper = useCallback(() => {
+        const request: FileGetRequest = {
+            filename: post.filename,
+        };
+        getFile.request(request, getFileCallback, getFileError);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [post.filename]);
+
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
             coveyTownID: currentTownID,
@@ -149,16 +157,16 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     };
 
     useEffect(() => {
-        const request: FileGetRequest = {
-            filename: post.filename,
-        };
-        getFile.request(request, getFileCallback, editPostError);
         socket?.emit('postOpen', post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
         }
-    }, [editPostError, getFile, post, setComments, socket]);
+    }, [post, setComments, socket]);
+
+    useEffect(() =>{
+        getFileWrapper();
+    }, [getFileWrapper])
 
     useEffect(() => {
         getCommentsWrapper();
