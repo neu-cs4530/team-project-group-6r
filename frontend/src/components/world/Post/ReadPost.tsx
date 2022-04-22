@@ -200,6 +200,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 size='md'>
                 {post.title}
             </Heading>
+            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType}/>
             <Text fontSize='md'
                 maxHeight='145px'
                 overflow='auto'
@@ -208,7 +209,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 paddingRight='5px'>
                 {post.postContent}
             </Text>
-            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType}/>
         </>);
     }, [post.file, post.postContent, post.title, state.content, state.edit]);
     return (
