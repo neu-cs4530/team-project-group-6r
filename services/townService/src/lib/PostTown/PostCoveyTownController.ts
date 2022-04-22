@@ -15,12 +15,45 @@ export default class PostCoveyTownController extends CoveyTownController{
   /**  List of moderators that have the same privelage as the owner * */
   private readonly _moderators: string[];
 
+	private _expireTimer: ReturnType<typeof setInterval>;
+	
+
   constructor(friendlyName: string, isPubliclyListed: boolean, ownerID: string) {
     super(friendlyName, isPubliclyListed);
     this._ownerID = ownerID;
     this._moderators = [];
     this.filter = new Filter();
+		this._expireTimer = setInterval(() => this.checkExpired(), 5000);
+		console.log(this._expireTimer)
   }
+
+	private async deletePostCascade(post: Post, postID: string): Promise<Post> {
+		const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+		this._listeners.forEach(listener => listener.onPostDelete(result));
+		await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
+
+		if (post.filename) {
+			await databaseController.deleteFile(post.filename);
+		}
+
+		return result;
+	}
+ 
+	private async checkExpired(): Promise<Post[]> {
+		const postList: Post[] = await this.getAllPostInTown();
+		const expiredPosts: Post[] = postList.filter(post => {
+			const createdAt: Date = post.createdAt!;
+			const now: Date = new Date();
+			return now.getTime() > createdAt.getTime() + post.timeToLive;
+		})
+
+		expiredPosts.forEach(post => {
+			const postID: string = post._id!;
+			this.deletePostCascade(post, postID);
+		})
+		
+		return expiredPosts;
+	}
 
   // Add
   async createPost(post : Post) : Promise<Post> {
@@ -34,6 +67,10 @@ export default class PostCoveyTownController extends CoveyTownController{
         post.postContent = this.filter.clean(post.postContent.valueOf());
       }
       post.title = this.filter.clean(post.title.valueOf());
+
+			const minTTL: number = 60000;
+			const maxTTL: number = 1800000;
+			post.timeToLive = post.timeToLive < minTTL || post.timeToLive > maxTTL ? 300000 : post.timeToLive;
       const result: Post = await databaseController.createPost(this.coveyTownID, post);
       this._listeners.forEach(listener => listener.onPostCreate(result));
       return result;
@@ -149,7 +186,7 @@ export default class PostCoveyTownController extends CoveyTownController{
   }
 
   async getCommentTree(postID : string) : Promise<CommentTree[]> {
-    const post: Post = await databaseController.getPost('testID', postID);
+    const post: Post = await databaseController.getPost(this.coveyTownID, postID);
     const comments: string[] = post.comments!;
     
     const result = await this.constructCommentTree(comments);

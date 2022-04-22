@@ -5,6 +5,7 @@ export interface Post {
   ownerID: string,
   filename?: string,
   isVisible: boolean,
+  timeToLive: number,
   comments?: string[],
   coordinates: {
     x: number,

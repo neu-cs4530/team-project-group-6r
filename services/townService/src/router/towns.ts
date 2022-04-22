@@ -30,7 +30,6 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
    */
   app.post('/sessions', express.json(), async (req, res) => {
     try {
-      console.log(4444);
       const result = await townJoinHandler({
         userName: req.body.userName,
         coveyTownID: req.body.coveyTownID,
