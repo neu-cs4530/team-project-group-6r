@@ -259,6 +259,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         sessionToken: req.body.sessionToken,
         postID: req.params.postID,
         post: req.body.post,
+        deletePrevFile: req.body.deletePrevFile
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {

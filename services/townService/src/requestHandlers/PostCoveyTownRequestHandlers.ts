@@ -35,7 +35,8 @@ export interface PostUpdateRequest {
   coveyTownID : string,
   sessionToken : string,
   postID : string,
-  post : Post
+  post : Post,
+  deletePrevFile: boolean
 }
 
 export interface CommentCreateRequest {
@@ -177,7 +178,7 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
     };
   }
 
-  const result = await postTownController.updatePost(postID, post, _requestData.sessionToken);
+  const result = await postTownController.updatePost(postID, post, _requestData.deletePrevFile, _requestData.sessionToken);
 
   return {
     isOK: true,

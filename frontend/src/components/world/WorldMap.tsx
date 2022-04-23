@@ -286,7 +286,7 @@ class CoveyGameScene extends Phaser.Scene {
       const label = this.add.text(
         this.game.scale.width / 2,
         20,
-        `You've stepped on a post, press 'P' to open:\n\tTitle ${mPost.title}\n\tOwner: ${mPost.ownerId}\n\tCreated at: ${mPost.createAt}\n\tUpdated at: ${mPost.updateAt}`,
+        `You've stepped on a post, press 'p' to open:\n\tTitle ${mPost.title}\n\tOwner: ${mPost.ownerId}\n\tFile type: ${mPost.file.contentType.split('/')[0] || 'none'}`,
         { color: '#000000', backgroundColor: '#FFFFFF' },
       )
         .setScrollFactor(0)
@@ -550,7 +550,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.postInstructText = this.add.text(
       this.game.scale.width / 1.78,
       20,
-      `You've stepped on an empty tile without \na post, press 'P' to create a post`,
+      `You've stepped on an empty tile without \na post, press 'p' to create a post`,
       { color: '#000000', backgroundColor: '#FFFFFF' },
     )
       .setScrollFactor(0)
