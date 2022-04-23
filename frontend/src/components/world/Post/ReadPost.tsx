@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
+import MDEditor from '@uiw/react-md-editor';
 import useApi from './useApi';
 import useComments from '../../../hooks/useComments';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
@@ -9,7 +10,6 @@ import Comments from './Comments';
 import { PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
 import calculateTimeDifference from '../../../Util';
 import { ServerComment } from '../../../classes/Comment';
-import MDEditor from '@uiw/react-md-editor';
 
 interface ReadPostProps {
     post: Post;
@@ -217,6 +217,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
             <Text fontSize='md'
                 maxHeight='145px'
+                minHeight='145px'
                 overflow='auto'
                 overflowX='hidden'
                 fontFamily='Arial'
@@ -239,7 +240,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                         padding='10px'
                         border='2px'
                         borderWidth='0.5px'
-                        borderStyle='dashed'
+                        borderStyle='ridge'
                         borderColor='gray.500'
                         borderRadius='8px'
                         divider={<StackDivider borderColor='gray.500' />}>

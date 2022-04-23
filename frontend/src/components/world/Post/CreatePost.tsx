@@ -6,6 +6,7 @@ import useApi from './useApi';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { ServerPost, Coordinate } from '../../../classes/Post';
 import { PostCreateRequest } from '../../../classes/TownsServiceClient';
+import { calculateBytes } from '../../../Util';
 
 interface CreatePostProps {
     coordinate: Coordinate;
@@ -166,7 +167,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
                                     </Button>
                                 </div>
                                 <HStack marginTop='5px' alignItems='center'>
-                                    {state.file ? <Text fontSize='xs'>{`Name File: ${state.file.name}, Size (bytes): ${state.file.size}`}</Text> : <></>}
+                                    {state.file ? <Text fontSize='xs'>{`File Type: ${state.file.type}, Size: ${calculateBytes(state.file.size)}`}</Text> : <></>}
                                     {state.file ? <CloseButton onClick={handleRemoveFile} alignSelf='end' size='sm' /> : <></>}
                                 </HStack>
                             </Container>
