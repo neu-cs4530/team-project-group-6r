@@ -27,9 +27,9 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
     const deleteComment = useApi(apiClient.deleteCommentById.bind(apiClient));
     const toast = useToast();
 
-    function calculateHourDifference() {
-        if (comment.createdAt) {
-            return Math.round((new Date().getTime() - new Date(comment.createdAt).getTime()) / 36e5);
+    function calculateHourDifference(date: Date | undefined) {
+        if (date) {
+            return Math.round((new Date().getTime() - new Date(date).getTime()) / 36e5);
         }
         return 'unknown';
     }
@@ -71,6 +71,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             description: `Comment ID: ${comment._id}`,
             status: 'success',
         });
+        console.log(comment.updatedAt);
+        console.log(comment.createdAt);
         handleEditButtonClick();
     };
 
@@ -122,7 +124,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
         <VStack align='center' width='500px'>
             <Box alignSelf='end' width={500 - 8 * depth}>
                 <Text fontSize='xs'>
-                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()} hours ago
+                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · 
+                    {calculateHourDifference(comment.createdAt)} hours ago{comment.updatedAt !== comment.createdAt && `* (last edited ${calculateHourDifference(comment.updatedAt)} hours ago)`}
                 </Text>
                 <Flex width='100%'>
                     <HStack width='100%'>
@@ -130,10 +133,10 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
                         <VStack width='100%' align='start'>
                             {commentBody}
                             <HStack justify='end' width='100%'>
-                                {!state.edit && !state.reply ? <Button size='xs' onClick={handleReplyButtonClick}>Reply</Button> : <></>}
-                                {!state.edit && !state.reply && userName === comment.ownerID ? <Button size='xs' onClick={handleEditButtonClick}>Edit</Button> : <></>}
-                                {!state.edit && !state.reply ? <Button size='xs'>Hide</Button> : <></>}
-                                {!state.edit && !state.reply && userName === comment.ownerID ? <Button size='xs' onClick={deleteCommentWrapper}>Delete</Button> : <></>}
+                                {!state.edit && !state.reply && !comment.isDeleted ? <Button size='xs' onClick={handleReplyButtonClick}>Reply</Button> : <></>}
+                                {!state.edit && !state.reply && userName === comment.ownerID && !comment.isDeleted ? <Button size='xs' onClick={handleEditButtonClick}>Edit</Button> : <></>}
+                                {!state.edit && !state.reply && !comment.isDeleted ? <Button size='xs'>Hide</Button> : <></>}
+                                {!state.edit && !state.reply && userName === comment.ownerID && !comment.isDeleted ? <Button size='xs' onClick={deleteCommentWrapper}>Delete</Button> : <></>}
                                 {state.edit ? <Button size='xs' onClick={handleEditButtonClick}>Cancel</Button> : <></>}
                                 {state.edit ? <Button size='xs' onClick={editComentWrapper}>Commit</Button> : <></>}
                             </HStack>
