@@ -29,7 +29,14 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
 
     function calculateHourDifference() {
         if (comment.createdAt) {
-            return Math.round((new Date().getTime() - new Date(comment.createdAt).getTime()) / 36e5);
+            const milliseconds = new Date().getTime() - new Date(comment.createdAt).getTime();
+            const hours = Math.round(milliseconds / 36e5);
+            const mins = Math.round(milliseconds/ 60000);
+
+            if (hours < 1) {
+                return mins === 1 ? `${mins} minute ago` : `${mins} minutes ago`;
+            }
+            return hours === 1 ? `${hours} hour ago` : `${hours} hours ago`;
         }
         return 'unknown';
     }
@@ -122,7 +129,7 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
         <VStack align='center' width='500px'>
             <Box alignSelf='end' width={500 - 8 * depth}>
                 <Text fontSize='xs'>
-                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()} hours ago
+                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()}
                 </Text>
                 <Flex width='100%'>
                     <HStack width='100%'>
