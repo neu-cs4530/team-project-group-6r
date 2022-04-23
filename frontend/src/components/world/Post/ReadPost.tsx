@@ -217,7 +217,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
             <Text fontSize='md'
                 maxHeight='145px'
-                minHeight='145px'
                 overflow='auto'
                 overflowX='hidden'
                 fontFamily='Arial'
@@ -245,7 +244,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                         borderRadius='8px'
                         divider={<StackDivider borderColor='gray.500' />}>
                         <VStack padding='1px' align='start' width='500px'>
-                            <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)} hours ago</Text>
+                            <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)}{post.updateAt !== post.createAt && `* (last edited ${calculateTimeDifference(post.updateAt)})`}</Text>
                             {postBody}
                             <HStack width='100%'>
                                 <Text width='115px' fontSize='sm'>
