@@ -1,3 +1,6 @@
+/**
+ * Comment is piece of text that can be posted by a player in response to a post, or another comment
+ */
 export interface Comment {
   _id?: string,
   rootPostID: string,

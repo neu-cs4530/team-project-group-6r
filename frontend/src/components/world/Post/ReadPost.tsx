@@ -9,7 +9,9 @@ import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostI
 import useApi from './useApi';
 import useComments from '../../../hooks/useComments';
 
-
+/**
+ * The properties of reading a post on your screen
+ */
 interface ReadPostProps {
     post: Post;
     closeReadPost: () => void;
@@ -20,12 +22,19 @@ interface MimeTypeProps {
     source: string;
 }
 
+/**
+ * What a post looks like it can contain to you
+ */
 type CreatePostStates = {
     content: string;
     edit: boolean,
 }
 
 // Post should be rerender when post is updated through socket
+/**
+ * How a post will look to a reader
+ * @returns The jsx version of how a post looks like to someone reading it
+ */
 export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.Element {
     const [state, setState] = useState<CreatePostStates>({
         content: post.postContent,
@@ -38,6 +47,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     const editPost = useApi(apiClient.editPost.bind(apiClient));
     const toast = useToast();
 
+    /**
+     * Calculates the difference between when a post was posted and right now
+     * @returns How long its been between when the post was posted and now
+     */
     function calculateHourDifference(): number | string {
         if (post.createAt) {
             return Math.round((new Date().getTime() - new Date(post.createAt).getTime()) / 36e5);
@@ -45,6 +58,11 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         return 'unknown';
     };
 
+    /**
+     * Response for when text in the post has changed
+     * @param value The new text
+     * @param field The field being changed
+     */
     const handleTextInputChange = (value: string, field: string) => {
         setState(prev => ({
             ...prev,
@@ -52,6 +70,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         }));
     };
 
+    /**
+     * Server's response for when the edit button is pressed
+     */
     const handleEditButtonClick = () => {
         setState(prev => ({
             content: post.postContent,
@@ -59,6 +80,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         }));
     };
 
+    /**
+     * Server's response to getting comments under a post
+     * @param result The message the server sends on if the comments were gotten succesfully
+     */
     const getCommentsCallback = (result: ServerComment[]) => {
         toast({
             title: 'Retrieved post successfully',
@@ -68,6 +93,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         if (setComments) setComments(result);
     };
 
+    /**
+     * Server's response to an error being thrown in the process of getting comments under a post
+     * @param error The error caused in the process of getting comments under a post
+     */
     const getCommentsError = (error: string) => {
         toast({
             title: 'Unable to get comments for this post',
@@ -76,6 +105,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
+    /**
+     * Server's response to deleting a post
+     */
     const deletePostCallback = () => {
         toast({
             title: 'Deleted Post successfully',
@@ -85,6 +117,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         closeReadPost();
     };
 
+    /**
+     * Server's response to an error being thrown in the process of deleting a post
+     * @param error The error caused in the process of deleting a post
+     */
     const deletePostCallError = (error: string) => {
         toast({
             title: 'Unable to delete the post',
@@ -93,6 +129,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
+    /**
+     * Server's response to editing a post
+     */
     const editPostCallback = () => {
         toast({
             title: 'Edited post successfully',
@@ -102,6 +141,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         handleEditButtonClick();
     };
 
+    /**
+     * Server's response to an error being thrown in the process of editing a post
+     * @param error The error caused in the process of editing a post
+     */
     const editPostError = (error: string) => {
         toast({
             title: 'Unable to edit the post',
@@ -110,6 +153,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
+    /**
+     * Wraps the servers response to getting all comments under a post
+     */
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
             coveyTownID: currentTownID,
@@ -120,6 +166,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTownID, post.id, sessionToken]);
 
+    /**
+     * Wraps the servers response to deleting a post
+     */
     const deletePostWrapper = () => {
         const request: PostDeleteRequest = {
             coveyTownID: currentTownID,
@@ -129,6 +178,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         deletePost.request(request, deletePostCallback, deletePostCallError);
     };
 
+    /**
+     * Wraps the servers response to editing a post
+     */
     const editPostWrapper = () => {
         const request: PostUpdateRequest = {
             coveyTownID: currentTownID,
@@ -155,6 +207,9 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         getCommentsWrapper();
     }, [getCommentsWrapper]);
 
+    /**
+     * Element that displays when a file uploaded is either a video or an audio file
+     */
     function MultiMediaDisplay({ mimetype, source }: MimeTypeProps): JSX.Element {
         const mediaType = mimetype.split('/')[0];
         switch (mediaType) {

@@ -14,23 +14,35 @@ export interface ResponseEnvelope<T> {
   response?: T;
 }
 
+/**
+ * Server response to request to create a post 
+ */
 export interface PostCreateRequest {
   coveyTownID : string,
   sessionToken : string,
   post : Post
 }
 
+/**
+ * Server response to request to get a post
+ */
 export interface PostGetRequest {
   coveyTownID : string,
   sessionToken : string,
   postID : string
 }
 
+/**
+ * Server response to request to get all posts in a town
+ */
 export interface PostGetAllInTownRequest {
   coveyTownID : string,
   sessionToken : string
 }
 
+/**
+ * Server response to request to update a post
+ */
 export interface PostUpdateRequest {
   coveyTownID : string,
   sessionToken : string,
@@ -38,18 +50,27 @@ export interface PostUpdateRequest {
   post : Post
 }
 
+/**
+ * Server response to request to create a comment
+ */
 export interface CommentCreateRequest {
   coveyTownID: string,
   sessionToken: string,
   comment : Comment
 }
 
+/**
+ * Server response to request to get a comment
+ */
 export interface CommentGetRequest {
   coveyTownID : string,
   sessionToken : string,
   commentID : string
 }
 
+/**
+ * Server response to request to update a comment
+ */
 export interface CommentUpdateRequest {
   coveyTownID : string,
   sessionToken : string,
@@ -57,6 +78,11 @@ export interface CommentUpdateRequest {
   comment : Comment
 }
 
+/**
+ * Request handler to process players request to create a post
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to create a post
+ */
 export async function postCreateHandler(_requestData : PostCreateRequest): Promise<ResponseEnvelope<Post | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
@@ -78,6 +104,11 @@ export async function postCreateHandler(_requestData : PostCreateRequest): Promi
   };
 }
 
+/**
+ * Request handler to process players request to get a post
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to get a post
+ */
 export async function postGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post | unknown>> {
 
   const townsStore = CoveyTownsStore.getInstance();
@@ -101,6 +132,11 @@ export async function postGetHandler(_requestData : PostGetRequest) : Promise<Re
 
 }
 
+/**
+ * Request handler to process players request to get all posts in a town
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to get all posts
+ */
 export async function postGetAllIDInTownHandler(_requestData : PostGetAllInTownRequest) : Promise<ResponseEnvelope<Post[] | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
@@ -121,6 +157,11 @@ export async function postGetAllIDInTownHandler(_requestData : PostGetAllInTownR
   };
 }
 
+/**
+ * Request handler to process request to get the comment structure
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to get the comment structure
+ */
 export async function postGetCommentTreeHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<CommentTree[] | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
@@ -141,6 +182,11 @@ export async function postGetCommentTreeHandler(_requestData : PostGetRequest) :
   };
 }
 
+/**
+ * Request handler to process players request to delete a post
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to delete a post
+ */
 export async function postDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<Post | unknown>> {
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
@@ -164,6 +210,11 @@ export async function postDeleteHandler(_requestData : PostGetRequest) : Promise
   };
 }
 
+/**
+ * Request handler to process players request to update a post
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to update a post
+ */
 export async function postUpdateHandler(_requestData : PostUpdateRequest) : Promise<ResponseEnvelope<Post | unknown>> {
   const { postID, post } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
@@ -186,6 +237,11 @@ export async function postUpdateHandler(_requestData : PostUpdateRequest) : Prom
   };
 }
 
+/**
+ * Request handler to process players request to create a comment
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to create a comment
+ */
 export async function commentCreateHandler(_requestData : CommentCreateRequest): Promise<ResponseEnvelope<Comment | unknown>> {
   const { comment } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
@@ -207,6 +263,11 @@ export async function commentCreateHandler(_requestData : CommentCreateRequest):
   };
 }
 
+/**
+ * Request handler to process players request to get a comment
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to get a comment
+ */
 export async function commentGetHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment | unknown>> {
     
   const { commentID } = _requestData;
@@ -229,6 +290,11 @@ export async function commentGetHandler(_requestData : CommentGetRequest) : Prom
   };
 }
 
+/**
+ * Request handler to process players request to delete a comment
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to delete a comment
+ */
 export async function commentDeleteHandler(_requestData : CommentGetRequest) : Promise<ResponseEnvelope<Comment | unknown>> {
   const { commentID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
@@ -250,6 +316,11 @@ export async function commentDeleteHandler(_requestData : CommentGetRequest) : P
   };
 }
 
+/**
+ * Request handler to process players request to update a comment
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to update a comment
+ */
 export async function commentUpdateHandler(_requestData : CommentUpdateRequest) : Promise<ResponseEnvelope<Comment | unknown>> {
   const { commentID } = _requestData;
   const { comment } = _requestData;
@@ -273,6 +344,11 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
   };
 }
 
+/**
+ * Request handler to process players request to get a file
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to get a file
+ */
 export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
   const { postID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
@@ -294,6 +370,11 @@ export async function fileGetHandler(_requestData : PostGetRequest) : Promise<Re
   };
 }
 
+/**
+ * Request handler to process players request to delete a file
+ * @param _requestData An object representing the players request
+ * @returns The server's respopnse to the request to delete a file
+ */
 export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
   const { postID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();

@@ -4,6 +4,9 @@ import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
 import { Coordinate, ServerFile } from './Post';
 
+/**
+ * Server representation of a post
+ */
 export type ServerPost = {
   _id?: string,
   title: string,
@@ -17,6 +20,9 @@ export type ServerPost = {
   updatedAt?: Date
 }
 
+/**
+ * Server representation of a comment
+ */
 export type ServerComment = {
   _id?: string,
   rootPostID: string,
@@ -130,6 +136,9 @@ export type CoveyTownInfo = {
   maximumOccupancy: number
 };
 
+/**
+ * Server response to request to create a post 
+ */
 export interface PostCreateRequest {
   coveyTownID: string,
   sessionToken: string,
@@ -137,23 +146,35 @@ export interface PostCreateRequest {
   file?: File
 }
 
+/**
+ * Server response to request to get a post 
+ */
 export interface PostGetRequest {
   coveyTownID: string,
   sessionToken: string,
   postID: string
 }
 
+/**
+ * Server response to request to delete a post 
+ */
 export interface PostDeleteRequest {
   coveyTownID: string,
   sessionToken: string,
   postID: string
 }
 
+/**
+ * Server response to request to get all posts in town 
+ */
 export interface PostGetIdInTownRequest {
   coveyTownID: string,
   sessionToken: string
 }
 
+/**
+ * Server response to request to update a post 
+ */
 export interface PostUpdateRequest {
   coveyTownID: string,
   sessionToken: string,
@@ -161,30 +182,45 @@ export interface PostUpdateRequest {
   post: ServerPost,
 }
 
+/**
+ * Server response to request to create a comment 
+ */
 export interface CommentCreateRequest {
   coveyTownID: string,
   sessionToken: string,
   comment: ServerComment,
 }
 
+/**
+ * Server response to request to get a comment 
+ */
 export interface CommentGetRequest {
   coveyTownID: string,
   sessionToken: string,
   commentID: string
 }
 
+/**
+ * Server response to request to get all comments from a post 
+ */
 export interface CommentsGetByPostIdRequest {
   coveyTownID: string,
   sessionToken: string,
   postID: string
 }
 
+/**
+ * Server response to request to delete a comment 
+ */
 export interface CommentDeleteRequest {
   coveyTownID: string,
   sessionToken: string,
   commentID: string
 }
 
+/**
+ * Server response to request to update a comment 
+ */
 export interface CommentUpdateRequest {
   coveyTownID: string,
   sessionToken: string,
@@ -192,15 +228,24 @@ export interface CommentUpdateRequest {
   comment: ServerComment,
 }
 
+/**
+ * Server response to request to upload a file 
+ */
 export interface FileUploadRequest {
   file: File,
 }
 
+/**
+ * Server response to request to upload a file with a certain size 
+ */
 export interface FileUploadResponse {
   file: ServerFile,
   size: number,
 }
 
+/**
+ * Server response to request to get a file 
+ */
 export interface FileGetRequest {
   filename?: string,
 }
@@ -261,7 +306,11 @@ export default class TownsServiceClient {
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
+  /**
+   * Request handler to process players request to create a post
+   * @param requestData An object representing the players request
+   * @returns The server's respopnse to the request to create a post
+   */
   async createPost(requestData: PostCreateRequest): Promise<ServerPost> {
     const formData = new FormData();
     if (requestData.file) formData.append('file', requestData.file);
@@ -273,57 +322,93 @@ export default class TownsServiceClient {
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
+/**
+ * Request handler to process players request to get all posts
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to get all posts
+ */
   async getAllPostIds(requestData: PostGetIdInTownRequest): Promise<void> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/posts`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
-  async getPostById(requestData: PostGetRequest): Promise<void> {
+/**
+ * Request handler to process players request to get a post
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to get a post
+ */  
+async getPostById(requestData: PostGetRequest): Promise<void> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
-  async deletePostById(requestData: PostDeleteRequest): Promise<void> {
+/**
+ * Request handler to process players request to delete a post
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to delete a post
+ */  
+async deletePostById(requestData: PostDeleteRequest): Promise<void> {
     const deleteBody = {data: {sessionToken: requestData.sessionToken}}
     const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, deleteBody);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
-  async editPost(requestData: PostUpdateRequest): Promise<void> {
+/**
+ * Request handler to process players request to edit a post
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to edit a post
+ */  
+async editPost(requestData: PostUpdateRequest): Promise<void> {
     const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
-  async createComment(requestData: CommentCreateRequest): Promise<ServerComment> {
+/**
+ * Request handler to process players request to create a comment
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to create a comment
+ */  
+async createComment(requestData: CommentCreateRequest): Promise<ServerComment> {
     const responseWrapper = await this._axios.post(`/towns/${requestData.coveyTownID}/comment`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
-  async getCommentById(requestData: CommentGetRequest): Promise<void> {
+/**
+ * Request handler to process players request to get a comment
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to get a comment
+ */    
+async getCommentById(requestData: CommentGetRequest): Promise<void> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
+/**
+ * Request handler to process players request to delete a comment
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to delete a comment
+ */  
   async deleteCommentById(requestData: CommentDeleteRequest): Promise<void> {
     const deleteBody = {data: {sessionToken: requestData.sessionToken}}
     const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`, deleteBody);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
+/**
+ * Request handler to process players request to edit a comment
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to edit a comment
+ */  
   async editComment(requestData: CommentUpdateRequest): Promise<void> {
     const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/comment/${requestData.commentID}`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  // TODO: Session Token
+/**
+ * Request handler to process players request to get all comments under a post
+ * @param requestData An object representing the players request
+ * @returns The server's respopnse to the request to get all comments under a post
+ */  
   async getCommentsByPostID(requestData: CommentsGetByPostIdRequest): Promise<ServerComment[]> {
     const responseWrapper = await this._axios.get(`/towns/${requestData.coveyTownID}/post/${requestData.postID}/commentTree`);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);

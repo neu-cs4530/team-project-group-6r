@@ -1,3 +1,6 @@
+/**
+ * A comment is a response to a post; this is how the server stores it
+ */
 export type ServerComment = {
     _id?: string,
     rootPostID: string,
@@ -9,7 +12,9 @@ export type ServerComment = {
     createdAt? : Date,
     updatedAt? : Date
 }
-
+/**
+ * The UI representation of a comment on a post
+ */
 type Comment = {
     _id?: string,
     rootPostID: string,
