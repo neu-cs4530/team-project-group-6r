@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
 import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea } from '@chakra-ui/react';
-import ReactPlayer from 'react-player';
+import MDEditor from '@uiw/react-md-editor';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
@@ -184,16 +184,28 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
 
     const postBody = useMemo(() => {
         if (state.edit) {
-            return (<>
-                <Textarea
-                    placeholder='Text (optional)'
-                    resize='vertical'
-                    height='250px'
-                    width='500px'
-                    maxHeight='350px'
+            // return (<>
+            //     <Textarea
+            //         placeholder='Text (optional)'
+            //         resize='vertical'
+            //         height='250px'
+            //         width='500px'
+            //         maxHeight='350px'
+            //         value={state.content}
+            //         onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
+            // </>);
+            return (
+                <div className="container">
+                <MDEditor
                     value={state.content}
-                    onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
-            </>);
+                    onChange={( target ) => {
+                        const text = target || '';
+                        handleTextInputChange(text, 'content')
+                    }}
+                />
+                <MDEditor.Markdown source={state.content} />
+                </div>
+            );
         }
         return (<>
             <Heading as='h4'
