@@ -3,21 +3,18 @@ export type ServerPost = {
     title: string,
     postContent: string,
     ownerID: string,
-    file: {
-        filename: string,
-        contentType: string
-    }
+    file: ServerFile,
     isVisible: boolean,
     comments?: string[],
     coordinates: Coordinate,
     createdAt?: Date,
     updatedAt?: Date
-}
-
-export type ServerFile = {
+  }
+  
+  export type ServerFile = {
     filename: string,
     contentType: string
-}
+  }
 
 export type PostListener = {
     onPostChange?: (updatedPost: ServerPost) => void;

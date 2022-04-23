@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { VStack, Text, Box, HStack, Flex, Button, Textarea, useToast } from "@chakra-ui/react";
-import useCoveyAppState from '../../../hooks/useCoveyAppState';
-import { ServerComment, CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
+import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import CreateComment from "./CreateComment";
 import calculateTimeDifference from "../../../Util";
+import { ServerComment } from '../../../classes/Comment'; 
+import { CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 
 export interface CommentProps {
     comment: ServerComment;
@@ -124,10 +125,9 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
                         <VStack width='100%' align='start'>
                             {commentBody}
                             <HStack justify='end' width='100%'>
-                                {!state.edit && !state.reply ? <Button size='xs' onClick={handleReplyButtonClick}>Reply</Button> : <></>}
-                                {!state.edit && !state.reply && userName === comment.ownerID ? <Button size='xs' onClick={handleEditButtonClick}>Edit</Button> : <></>}
-                                {!state.edit && !state.reply ? <Button size='xs'>Hide</Button> : <></>}
-                                {!state.edit && !state.reply && userName === comment.ownerID ? <Button size='xs' onClick={deleteCommentWrapper}>Delete</Button> : <></>}
+                                {!state.edit && !state.reply && !comment.isDeleted ? <Button size='xs' onClick={handleReplyButtonClick}>Reply</Button> : <></>}
+                                {!state.edit && !state.reply && userName === comment.ownerID && !comment.isDeleted ? <Button size='xs' onClick={handleEditButtonClick}>Edit</Button> : <></>}
+                                {!state.edit && !state.reply && userName === comment.ownerID && !comment.isDeleted ? <Button size='xs' onClick={deleteCommentWrapper}>Delete</Button> : <></>}
                                 {state.edit ? <Button size='xs' onClick={handleEditButtonClick}>Cancel</Button> : <></>}
                                 {state.edit ? <Button size='xs' onClick={editComentWrapper}>Commit</Button> : <></>}
                             </HStack>
