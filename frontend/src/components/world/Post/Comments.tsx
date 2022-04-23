@@ -1,7 +1,7 @@
 import React from 'react';
 import { VStack, StackDivider } from '@chakra-ui/react';
 import Comment from './ReadComment';
-import { ServerComment } from '../../../classes/TownsServiceClient';
+import { ServerComment } from '../../../classes/Comment';
 
 interface CommentsProps {
     comments: ServerComment[];

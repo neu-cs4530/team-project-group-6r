@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { VStack, Text, Textarea, Button, useToast, HStack } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
-import { CommentCreateRequest, ServerComment } from '../../../classes/TownsServiceClient';
+import { ServerComment } from '../../../classes/Comment';
+import { CommentCreateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 
 export interface CreateCommentProps {
