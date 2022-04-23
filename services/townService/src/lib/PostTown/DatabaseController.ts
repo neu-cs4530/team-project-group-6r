@@ -56,7 +56,7 @@ export async function getAllComments(coveyTownID : string, commentIDs : string[]
 
 export async function deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '[removed]', ownerID: '[deleted]'} }, { new: true });
+  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '[removed]', ownerID: '[deleted]'} }, { new: true, timestamps: false });
 }
 
 export async function deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
@@ -71,7 +71,7 @@ export async function updateComment(coveyTownID : string, commentID : string, co
 
 export async function addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID } } );
+  return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID }}, {timestamps:false});
 }
 
 export async function getFile(filename: string) : Promise<any> {
