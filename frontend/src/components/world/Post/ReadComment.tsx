@@ -129,7 +129,7 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
         <VStack align='center' width='500px'>
             <Box alignSelf='end' width={500 - 8 * depth}>
                 <Text fontSize='xs'>
-                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()}
+                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()}{comment.updatedAt !== comment.createdAt && `* (last edited ${calculateHourDifference(comment.updatedAt)}`}
                 </Text>
                 <Flex width='100%'>
                     <HStack width='100%'>
