@@ -56,7 +56,7 @@ export async function getAllComments(coveyTownID : string, commentIDs : string[]
 
 export async function deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '', ownerID: ''} }, { new: true });
+  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '[removed]', ownerID: '[deleted]'} }, { new: true });
 }
 
 export async function deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {

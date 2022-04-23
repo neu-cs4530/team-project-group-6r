@@ -27,9 +27,9 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
     const deleteComment = useApi(apiClient.deleteCommentById.bind(apiClient));
     const toast = useToast();
 
-    function calculateHourDifference() {
-        if (comment.createdAt) {
-            return Math.round((new Date().getTime() - new Date(comment.createdAt).getTime()) / 36e5);
+    function calculateHourDifference(date: Date | undefined) {
+        if (date) {
+            return Math.round((new Date().getTime() - new Date(date).getTime()) / 36e5);
         }
         return 'unknown';
     }
@@ -122,7 +122,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
         <VStack align='center' width='500px'>
             <Box alignSelf='end' width={500 - 8 * depth}>
                 <Text fontSize='xs'>
-                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()} hours ago
+                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · 
+                    {calculateHourDifference(comment.createdAt)} hours ago
                 </Text>
                 <Flex width='100%'>
                     <HStack width='100%'>
