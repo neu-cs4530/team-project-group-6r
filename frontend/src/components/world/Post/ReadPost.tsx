@@ -8,6 +8,7 @@ import Comments from './Comments';
 import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 import useComments from '../../../hooks/useComments';
+import calculateTimeDifference from '../../../Util';
 
 
 interface ReadPostProps {
@@ -37,13 +38,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
     const editPost = useApi(apiClient.editPost.bind(apiClient));
     const toast = useToast();
-
-    function calculateHourDifference(): number | string {
-        if (post.createAt) {
-            return Math.round((new Date().getTime() - new Date(post.createAt).getTime()) / 36e5);
-        }
-        return 'unknown';
-    };
 
     const handleTextInputChange = (value: string, field: string) => {
         setState(prev => ({
@@ -233,7 +227,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                     direction='row'
                     justify='space-between'
                     align='center'>
-                    <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateHourDifference()} hours ago</Text>
+                    <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)}{post.updateAt !== post.createAt && `* (last edited ${calculateTimeDifference(post.updateAt)})`}</Text>
                     <CloseButton marginLeft='auto' size='lg' onClick={closeReadPost} />
                 </Flex>
                 {postBody}

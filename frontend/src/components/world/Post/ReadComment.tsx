@@ -4,6 +4,7 @@ import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { ServerComment, CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 import CreateComment from "./CreateComment";
+import calculateTimeDifference from "../../../Util";
 
 export interface CommentProps {
     comment: ServerComment;
@@ -26,20 +27,6 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
     const editComment = useApi(apiClient.editComment.bind(apiClient));
     const deleteComment = useApi(apiClient.deleteCommentById.bind(apiClient));
     const toast = useToast();
-
-    function calculateHourDifference() {
-        if (comment.createdAt) {
-            const milliseconds = new Date().getTime() - new Date(comment.createdAt).getTime();
-            const hours = Math.round(milliseconds / 36e5);
-            const mins = Math.round(milliseconds/ 60000);
-
-            if (hours < 1) {
-                return mins === 1 ? `${mins} minute ago` : `${mins} minutes ago`;
-            }
-            return hours === 1 ? `${hours} hour ago` : `${hours} hours ago`;
-        }
-        return 'unknown';
-    }
 
     const handleTextInputChange = (value: string) => {
         setState(prev => ({
@@ -129,7 +116,7 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
         <VStack align='center' width='500px'>
             <Box alignSelf='end' width={500 - 8 * depth}>
                 <Text fontSize='xs'>
-                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateHourDifference()}{comment.updatedAt !== comment.createdAt && `* (last edited ${calculateHourDifference(comment.updatedAt)}`}
+                    Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · {calculateTimeDifference(comment.createdAt)}{comment.updatedAt !== comment.createdAt && `* (last edited ${calculateTimeDifference(comment.updatedAt)})`}
                 </Text>
                 <Flex width='100%'>
                     <HStack width='100%'>
