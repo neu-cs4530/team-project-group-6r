@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
+import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Switch, Box } from '@chakra-ui/react';
 import MDEditor from '@uiw/react-md-editor';
 import useApi from './useApi';
 import useComments from '../../../hooks/useComments';
@@ -200,6 +200,8 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             //         onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
             // </>);
             return (
+                <>
+                <Text>Edit in Markdown<Switch id='markdown-toggle' /></Text>
                 <div className="container">
                 <MDEditor
                     value={state.content}
@@ -208,21 +210,22 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                         handleTextInputChange(text, 'content')
                     }}
                 />
-                <MDEditor.Markdown source={state.content} />
+                {/* <MDEditor.Markdown source={state.content} /> */}
                 </div>
+                </>
             );
         }
         return (<>
             <Heading as='h4' size='md' marginBottom='10px'>{post.title}</Heading>
-            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
-            <Text fontSize='md'
-                maxHeight='145px'
-                overflow='auto'
-                overflowX='hidden'
-                fontFamily='Arial'
-                paddingRight='5px'>
-                {post.postContent}
-            </Text>
+                <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
+                <Text fontSize='md'
+                    maxHeight='145px'
+                    overflow='auto'
+                    overflowX='hidden'
+                    fontFamily='Arial'
+                    paddingRight='5px'>
+                    {post.postContent}
+                </Text>
         </>);
     }, [post.file, post.postContent, post.title, state.content, state.edit]);
 
