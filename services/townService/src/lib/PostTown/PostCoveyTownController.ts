@@ -24,7 +24,6 @@ export default class PostCoveyTownController extends CoveyTownController{
     this._moderators = [];
     this.filter = new Filter();
 		this._expireTimer = setInterval(() => this.checkExpired(), 5000);
-		console.log(this._expireTimer)
   }
 
 	clearInterval(): void {
