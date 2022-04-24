@@ -27,6 +27,10 @@ export default class PostCoveyTownController extends CoveyTownController{
 		console.log(this._expireTimer)
   }
 
+	clearInterval(): void {
+		clearInterval(this._expireTimer);
+	}
+
 	private async deletePostCascade(post: Post, postID: string): Promise<Post> {
 		const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
 		this._listeners.forEach(listener => listener.onPostDelete(result));
@@ -156,6 +160,11 @@ export default class PostCoveyTownController extends CoveyTownController{
     } else {
       await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
     }
+
+		// add 1 minute to time to live for the root post
+		const updatedPost: Post = await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
+		this._listeners.forEach(listener => listener.onPostUpdate(updatedPost));
+
     // TODO: remove the cheese
     const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
     emitCommentUpdate(comment.rootPostID, comments);
@@ -170,7 +179,7 @@ export default class PostCoveyTownController extends CoveyTownController{
   }
 
   private async constructCommentTree(commentIDs : string[]) : Promise<CommentTree[]> {
-    const comments: Comment[] = await databaseController.getAllComments(this.coveyTownID, commentIDs);
+		const comments: Comment[] = await databaseController.getAllComments(this.coveyTownID, commentIDs);
 
     const commentTree = await Promise.all(comments.map(async (comment: Comment) => {
       const childCommentIDs = comment.comments!;
