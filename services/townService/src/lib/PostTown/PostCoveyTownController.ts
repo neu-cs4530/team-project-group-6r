@@ -32,10 +32,10 @@ export default class PostCoveyTownController extends CoveyTownController{
 
 	private async deletePostCascade(post: Post, postID: string): Promise<Post> {
 		const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
-		this._listeners.forEach(listener => listener.onPostDelete(result));
+    this._listeners.forEach(listener => listener.onPostDelete(result));
 		await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
-		if (post.file) {
+		if (post.file?.filename) {
 			await databaseController.deleteFile(post.file.filename);
 		}
 
@@ -44,11 +44,14 @@ export default class PostCoveyTownController extends CoveyTownController{
  
 	private async checkExpired(): Promise<Post[]> {
 		const postList: Post[] = await this.getAllPostInTown();
+		//console.log(postList)
 		const expiredPosts: Post[] = postList.filter(post => {
 			const createdAt: Date = post.createdAt!;
 			const now: Date = new Date();
 			return now.getTime() > createdAt.getTime() + post.timeToLive;
 		})
+
+		//console.log(expiredPosts.length)
 
 		expiredPosts.forEach(post => {
 			const postID: string = post._id!;
@@ -106,14 +109,7 @@ export default class PostCoveyTownController extends CoveyTownController{
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
            
     if (post.ownerID === playerID) {
-      const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
-      this._listeners.forEach(listener => listener.onPostDelete(result));
-      await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
-
-      if (post.file?.filename) {
-        await databaseController.deleteFile(post.file.filename);
-      }
-
+			const result = await this.deletePostCascade(post, post._id!);
       return result;
     }
 
@@ -160,6 +156,7 @@ export default class PostCoveyTownController extends CoveyTownController{
 
 		// add 1 minute to time to live for the root post
 		const updatedPost: Post = await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
+		console.log(updatedPost.timeToLive)
 		this._listeners.forEach(listener => listener.onPostUpdate(updatedPost));
 
     // TODO: remove the cheese

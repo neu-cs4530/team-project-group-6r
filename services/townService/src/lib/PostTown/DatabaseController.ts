@@ -19,7 +19,7 @@ export async function getPost(coveyTownID : string, postID : string) : Promise<a
 
 export async function getAllPostInTown(coveyTownID : string) : Promise<Post[]> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.find({});
+  return model.find();
 }
 
 export async function deletePost(coveyTownID : string, postID : string) : Promise<any> {
@@ -46,7 +46,7 @@ export async function createComment(coveyTownID : string, comment : Comment) : P
 
 export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) {
 	const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findByIdAndUpdate(rootPostID, { $inc: { timeToLive: 30000 } });
+  return model.findByIdAndUpdate({ _id: rootPostID, timeToLive: { $lte: 90000 } }, { $inc: { timeToLive: 30000 } });
 }
 
 export async function getComment(coveyTownID : string, commentID : string) : Promise<any> {
