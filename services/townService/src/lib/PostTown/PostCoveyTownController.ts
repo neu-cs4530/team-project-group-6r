@@ -26,7 +26,7 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @param isPubliclyListed Whether or not the town is public or private
    * @param ownerID The town owner's id
    */
-  constructor(friendlyName: string, isPubliclyListed: boolean, ownerID: string) {
+   constructor(friendlyName: string, isPubliclyListed: boolean, ownerID: string) {
     super(friendlyName, isPubliclyListed);
     this._ownerID = ownerID;
     this._moderators = [];

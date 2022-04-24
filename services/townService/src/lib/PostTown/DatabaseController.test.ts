@@ -24,46 +24,22 @@ describe('The database', () => {
     const server = http.createServer(app);
     beforeAll(async () => {
         svr.ServerSocket;      
-    //   const uri = 'mongodb+srv://Ezra:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
-    //   const connectToMongo = async() => {
-    //     await mongoose.connect(uri);
-    //     return mongoose;};
-    //   await connectToMongo().then(() => { console.log('MongoDB Connected') }).catch(err => console.log(err));
-    //   const upload = multer({ dest: 'uploads/' })
-
-    //   addTownRoutes(server, app, upload);
-      
-    //   server.listen(process.env.PORT || 8081, () => {
-    //     const address = server.address() as AddressInfo;
-    //     // eslint-disable-next-line no-console
-    //     console.log(`Listening on ${address.port}`);
-    //     if (id) {
-    //       CoveyTownsStore.getInstance()
-    //         .createTown(id, false);
-    //     }
-    //   });
-        });
+    });
   
     afterAll(async () => {
-     db.deleteCommentsUnderPost(id, "aaaaaaaaaaaaaaaaaaaaaaaa");
-     db.deletePost(id, "daaaaaaaaaaaaaaaaaaaaaaa");
-     db.deletePost(id, "baaaaaaaaaaaaaaaaaaaaaaa");
-     db.deletePost(id, "aaaaaaaaaaaaaaaaaaaaaaaa");     
-
-     await svr.ServerSocket.close();
-     // await mongoose.disconnect();
-     console.log('but now im in here :)');
-
+        db.deleteCommentsUnderPost(id, "aaaaaaaaaaaaaaaaaaaaaaaa");
+        db.deletePost(id, "daaaaaaaaaaaaaaaaaaaaaaa");
+        db.deletePost(id, "baaaaaaaaaaaaaaaaaaaaaaa");
+        db.deletePost(id, "aaaaaaaaaaaaaaaaaaaaaaaa");     
+        svr.ServerSocket.close();
     });
     it('can get all posts in a town devoid of them',  async () => {
-
         try {
             if(id) {
                 const ids = await db.getAllPostInTown(id);
                 expect(ids.length).toBe(0);
-             }
+            }
         } catch(err) {
-            console.log(err);
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
         }
     })
@@ -81,15 +57,11 @@ describe('The database', () => {
         }
         try {
             if(id) {
-                console.log('whattttttt');
                 await expect(db.createPost(id, posting)).resolves;
-                console.log('im in here omgggg');
              }
         } catch(err) {
-            console.log(err);
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
         }
-        console.log('no im out hereeeee');
     })
     it('can get a post',  async () => {
         const posting1:Post = {
@@ -112,7 +84,6 @@ describe('The database', () => {
                 expect(ids2.title).toBe('helloWorld');
              }
         } catch(err) {
-            console.log(err);
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
         }
     })
@@ -139,7 +110,6 @@ describe('The database', () => {
                 expect(db.getPost(id, String(ids._id))).resolves.toBeNull();
              }
         } catch(err) {
-            console.log(err);
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
         }
     })
@@ -151,7 +121,6 @@ describe('The database', () => {
                 expect(String(ids[1]._id)).toStrictEqual('aaaaaaaaaaaaaaaaaaaaaaaa');
              }
         } catch(err) {
-            console.log(err);
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
         }
     })
@@ -192,7 +161,6 @@ describe('The database', () => {
                 expect(ids4.postContent).toBe('i sure exist, still')
             }
         } catch(err) {
-            console.log(err);
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
         }
     })
@@ -212,7 +180,6 @@ describe('The database', () => {
                 if (ids._id) { await db.deleteComment(id, ids._id); }
              }
         } catch (err) {
-            console.log(err);
             expect(1).toBe(2);
         }
     })
@@ -238,7 +205,6 @@ describe('The database', () => {
                 }
              }
         } catch (err) {
-            console.log(err);
             expect(1).toBe(2);
         }
     })
@@ -281,7 +247,6 @@ describe('The database', () => {
                 }
              }
         } catch (err) {
-            console.log(err);
             expect(1).toBe(2);
         }
     })
@@ -316,7 +281,6 @@ describe('The database', () => {
                 }
              }
         } catch (err) {
-            console.log(err);
             expect(1).toBe(2);
         }
     })
@@ -364,7 +328,6 @@ describe('The database', () => {
                 }
              }
         } catch (err) {
-            console.log(err);
             expect(1).toBe(2);
         }
     })
@@ -396,37 +359,7 @@ describe('The database', () => {
                 }
              }
         } catch (err) {
-            console.log(err);
             expect(1).toBe(2);
         }
     })
-    // it('can get a file',  async () => {
-    //     const posting1:Post = {
-    //         _id: 'bbaaaaaaaaaaaaaaaaaaaaaa',
-    //         title: 'helloWorld',
-    //         postContent: 'i sure exist',
-    //         ownerID: 'uvwxyz',
-    //         file: {filename: "62650f5c11a10516cb09ded2.png", contentType: "image/png"},
-    //         isVisible: true,
-    //         coordinates: {
-    //             x: 10,
-    //             y: 10,
-    //         },
-    //         createdAt: new Date("2022-04-19T19:55:47.329Z"),
-    //         updatedAt: new Date ("2022-04-19T19:55:47.329Z"),        
-    //     }
-    //     try {
-    //         if(id) {
-    //             const ids = await db.createPost(id, posting1);
-    //             if(ids._id && ids.file) { 
-    //                 console.log(ids.file.filename);
-    //                 const fds = await db.getFile(ids.file.filename); 
-    //                 expect(fds).toBe('img');
-    //             }
-    //          }
-    //     } catch(err) {
-    //         console.log(err);
-    //         expect(1).toBe(2); //if the above code rejects the promise, this test should fail
-    //     }
-    // })
 })

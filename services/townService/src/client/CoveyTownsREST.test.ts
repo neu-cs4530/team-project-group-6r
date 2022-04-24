@@ -2,6 +2,7 @@ import assert from 'assert';
 import CORS from 'cors';
 import Express from 'express';
 import http from 'http';
+import multer from 'multer';
 import { nanoid } from 'nanoid';
 import { AddressInfo } from 'net';
 import addTownRoutes from '../router/towns';
@@ -53,8 +54,9 @@ describe('TownsServiceAPIREST', () => {
     const app = Express();
     app.use(CORS());
     server = http.createServer(app);
+    const upload = multer({ dest: 'uploads/' })
 
-    addTownRoutes(server, app);
+    addTownRoutes(server, app, upload);
     await server.listen();
     const address = server.address() as AddressInfo;
 
