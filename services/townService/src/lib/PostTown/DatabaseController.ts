@@ -67,7 +67,7 @@ export async function updatePost(coveyTownID : string, postID : string, post : a
  * @param coveyTownID The id of the town we're adding a comment in
  * @param rootPostID The id of the post we're adding a comment to
  * @param createdCommentID The id of the comment we're linking to the post
- * @returns The comment
+ * @returns The post that had a comment added to it
  */
 export async function addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string) {
   const model = mongoose.model('post', PostSchema, coveyTownID);
