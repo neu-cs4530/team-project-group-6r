@@ -1,34 +1,9 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import { ServerPlayer } from './Player';
+import { ServerPost, ServerFile } from './Post';
+import { ServerComment } from './Comment';
 import { ServerConversationArea } from './ConversationArea';
-import { Coordinate } from './Post';
-
-export type ServerPost = {
-  _id?: string,
-  title: string,
-  postContent: string,
-  ownerID: string,
-  filename?: string,
-  isVisible: boolean,
-  comments?: string[],
-  coordinates: Coordinate,
-  createdAt?: Date,
-  updatedAt?: Date
-}
-
-export type ServerComment = {
-  _id?: string,
-  rootPostID: string,
-  parentCommentID: string,
-  ownerID: string,
-  commentContent: string,
-  isDeleted: boolean,
-  comments?: ServerComment[],
-  createdAt? : Date,
-  updatedAt? : Date
-}
-
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -159,6 +134,7 @@ export interface PostUpdateRequest {
   sessionToken: string,
   postID: string,
   post: ServerPost,
+  deletePrevFile: boolean,
 }
 
 export interface CommentCreateRequest {
@@ -197,8 +173,12 @@ export interface FileUploadRequest {
 }
 
 export interface FileUploadResponse {
-  fileName: string,
+  file: ServerFile,
   size: number,
+}
+
+export interface FileGetRequest {
+  filename?: string,
 }
 
 
@@ -290,6 +270,9 @@ export default class TownsServiceClient {
 
   // TODO: Session Token
   async editPost(requestData: PostUpdateRequest): Promise<void> {
+    // Leave the file
+    // Change the file
+    // Remove the file
     const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }

@@ -15,7 +15,8 @@ import { io, Socket } from 'socket.io-client';
 import './App.css';
 import ConversationArea, { ServerConversationArea } from './classes/ConversationArea';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
-import TownsServiceClient, { ServerPost, TownJoinResponse } from './classes/TownsServiceClient';
+import Post, { ServerPost } from './classes/Post';
+import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 import Login from './components/Login/Login';
 import { ChatProvider } from './components/VideoCall/VideoFrontend/components/ChatProvider';
@@ -37,7 +38,7 @@ import VideoContext from './contexts/VideoContext';
 import { CoveyAppState } from './CoveyTypes';
 // TODO
 import PostContext from './contexts/PostContext';
-import Post from './classes/Post';
+
 import CommentContext from './contexts/CommentContext';
 import Comment, { ServerComment } from './classes/Comment';
 

@@ -1,16 +1,24 @@
-import React, { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
-import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea } from '@chakra-ui/react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
+import MDEditor from '@uiw/react-md-editor';
+import useApi from './useApi';
+import useComments from '../../../hooks/useComments';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest } from '../../../classes/TownsServiceClient';
-import useApi from './useApi';
-import useComments from '../../../hooks/useComments';
+import { PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
+import calculateTimeDifference from '../../../Util';
+import { ServerComment } from '../../../classes/Comment';
 
 interface ReadPostProps {
     post: Post;
     closeReadPost: () => void;
+}
+
+interface MimeTypeProps {
+    mimetype: string;
+    source: string;
 }
 
 type CreatePostStates = {
@@ -24,19 +32,13 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         content: post.postContent,
         edit: false,
     });
-    const { userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
+    const { currentTownFriendlyName, userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const { comments, setComments } = useComments();
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
     const editPost = useApi(apiClient.editPost.bind(apiClient));
     const toast = useToast();
-
-    function calculateHourDifference(): number | string {
-        if (post.createAt) {
-            return Math.round((new Date().getTime() - new Date(post.createAt).getTime()) / 36e5);
-        }
-        return 'unknown';
-    };
 
     const handleTextInputChange = (value: string, field: string) => {
         setState(prev => ({
@@ -131,6 +133,7 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 ...post.toServerPost(),
                 postContent: state.content || '',
             },
+            deletePrevFile: false
         };
         editPost.request(request, editPostCallback, editPostError);
     };
@@ -147,24 +150,71 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         getCommentsWrapper();
     }, [getCommentsWrapper]);
 
+    const handleCloseButtonClick = async () => {
+        onClose();
+        closeReadPost();
+    };
+
+    useEffect(() => {
+        onOpen();
+    }, [onOpen]);
+
+
+    function MultiMediaDisplay({ mimetype, source }: MimeTypeProps): JSX.Element {
+        const mediaType = mimetype.split('/')[0];
+        switch (mediaType) {
+            case 'video':
+                return <video width="320" height="240" controls>
+                    <source src={source} type={mimetype} />
+                    Your browser does not support the video tag.
+                    <track kind="captions" />
+                </video>
+            case 'audio':
+                return <audio controls>
+                    <source src={source} type={mimetype} />
+                    Your browser does not support the audio tag.
+                    <track kind="captions" />
+                </audio>
+            case 'image':
+                return <img src={source} alt="Not available" />
+            case 'text':
+            case 'application':
+                return <embed src={source} width="500" height="375" type={mimetype} />
+            case "":
+                return <></>
+            default:
+                return <Text>File type is not supported!</Text>
+        }
+    }
+
     const postBody = useMemo(() => {
         if (state.edit) {
-            return (<>
-                <Textarea
-                    placeholder='Text (optional)'
-                    resize='vertical'
-                    height='250px'
-                    width='500px'
-                    maxHeight='350px'
+            // return (<>
+            //     <Textarea
+            //         placeholder='Text (optional)'
+            //         resize='vertical'
+            //         height='250px'
+            //         width='500px'
+            //         maxHeight='350px'
+            //         value={state.content}
+            //         onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
+            // </>);
+            return (
+                <div className="container">
+                <MDEditor
                     value={state.content}
-                    onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
-            </>);
+                    onChange={( target ) => {
+                        const text = target || '';
+                        handleTextInputChange(text, 'content')
+                    }}
+                />
+                <MDEditor.Markdown source={state.content} />
+                </div>
+            );
         }
         return (<>
-            <Heading as='h4'
-                size='md'>
-                {post.title}
-            </Heading>
+            <Heading as='h4' size='md' marginBottom='10px'>{post.title}</Heading>
+            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
             <Text fontSize='md'
                 maxHeight='145px'
                 overflow='auto'
@@ -172,47 +222,47 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 fontFamily='Arial'
                 paddingRight='5px'>
                 {post.postContent}
-                {post.filename}
             </Text>
         </>);
-    }, [post.postContent, post.title, state.content, state.edit]);
+    }, [post.file, post.postContent, post.title, state.content, state.edit]);
+
 
     return (
-        <VStack padding={5}
-            height='100%'
-            border='2px'
-            borderWidth='2px'
-            borderColor='gray.500'
-            borderRadius='8px'
-            maxHeight='768px'
-            divider={<StackDivider borderColor='gray.200' />}>
-            <VStack align='start'
-                width='500px'>
-                <Flex
-                    width='100%'
-                    direction='row'
-                    justify='space-between'
-                    align='center'>
-                    <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateHourDifference()} hours ago</Text>
-                    <CloseButton marginLeft='auto' size='lg' onClick={closeReadPost} />
-                </Flex>
-                {postBody}
-                <HStack
-                    width='100%'>
-                    <Text width='115px' fontSize='sm'>
-                        {`${getComments.data?.length || 0} Comments`}
-                    </Text>
-                    <HStack justify='end' width='100%'>
-                        {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
-                        {!state.edit ? <Button size='sm'>Hide</Button> : <></>}
-                        {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Edit</Button> : <></>}
-                        {state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Cancel</Button> : <></>}
-                        {state.edit ? <Button size='sm' onClick={editPostWrapper}>Commit</Button> : <></>}
-                    </HStack>
-                </HStack>
-            </VStack>
-            <CreateComment postID={post.id || ''} />
-            <Comments comments={comments} />
-        </VStack>
+        <Modal onClose={handleCloseButtonClick} size='xl' isOpen={isOpen} scrollBehavior='inside'>
+            <ModalOverlay />
+            <ModalContent>
+                <ModalHeader>{`Post In Town: ${currentTownFriendlyName}`}</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                    <VStack
+                        height='100%'
+                        padding='10px'
+                        border='2px'
+                        borderWidth='0.5px'
+                        borderStyle='ridge'
+                        borderColor='gray.500'
+                        borderRadius='8px'
+                        divider={<StackDivider borderColor='gray.500' />}>
+                        <VStack padding='1px' align='start' width='500px'>
+                            <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)}{post.updateAt !== post.createAt && `* (last edited ${calculateTimeDifference(post.updateAt)})`}</Text>
+                            {postBody}
+                            <HStack width='100%'>
+                                <Text width='115px' fontSize='sm'>
+                                    {`${getComments.data?.length || 0} Comments`}
+                                </Text>
+                                <HStack justify='end' width='100%'>
+                                    {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
+                                    {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Edit</Button> : <></>}
+                                    {state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Cancel</Button> : <></>}
+                                    {state.edit ? <Button size='sm' onClick={editPostWrapper}>Commit</Button> : <></>}
+                                </HStack>
+                            </HStack>
+                        </VStack>
+                        <CreateComment postID={post.id || ''} />
+                        <Comments comments={comments} />
+                    </VStack>
+                </ModalBody>
+            </ModalContent>
+        </Modal>
     );
 }

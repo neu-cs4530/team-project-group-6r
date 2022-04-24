@@ -147,10 +147,8 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
       let parsedReq = JSON.parse(req.body.post); 
       let postToSend = parsedReq.post;
       if (req.file) {
-        postToSend = { ...postToSend, filename: req.file.filename}
+        postToSend = { ...postToSend, file: {filename: req.file.filename, contentType: req.file.mimetype}}
       }
-      console.log(parsedReq);
-      console.log(postToSend);
       const result = await postCreateHandler({
         coveyTownID: req.params.townID,
         sessionToken: parsedReq.sessionToken,
@@ -260,6 +258,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         sessionToken: req.body.sessionToken,
         postID: req.params.postID,
         post: req.body.post,
+        deletePrevFile: req.body.deletePrevFile
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {
@@ -395,14 +394,9 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
         res.status(404).json({
           err: 'No file exist',
         });
-      } else if (file.contentType.startsWith("image/")) {
-        const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
-        readStream.pipe(res);
-      } else {
-        res.status(404).json({
-          err: 'Not an image',
-        });
       }
+      const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
+      readStream.pipe(res);
     });
   });
 
