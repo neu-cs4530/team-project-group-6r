@@ -11,6 +11,7 @@ const PostSchema = new mongoose.Schema({
     contentType: { type: String, default: ''}
   },
   comments: { type: [String], default: [] },
+  postSkin: { type: String, default: 'POST', enum: ['POST', 'WARNING', 'TOMB', 'FLOWER'], immutable: true },
   coordinates: {
     x: Number,
     y: Number

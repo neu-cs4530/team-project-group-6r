@@ -1,3 +1,10 @@
+enum PostSkin {
+    'POST',
+    'WARNING',
+    'TOMB',
+    'FLOWER'
+}
+
 export interface Post {
   _id?: string,
   title: string,
@@ -10,6 +17,7 @@ export interface Post {
   isVisible: boolean,
   timeToLive: number,
   comments?: string[],
+  postSkin: PostSkin,
   coordinates: {
     x: number,
     y: number,

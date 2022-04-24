@@ -36,8 +36,8 @@ export default class PostCoveyTownController extends CoveyTownController{
 		this._listeners.forEach(listener => listener.onPostDelete(result));
 		await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
-		if (post.filename) {
-			await databaseController.deleteFile(post.filename);
+		if (post.file) {
+			await databaseController.deleteFile(post.file.filename);
 		}
 
 		return result;
