@@ -198,7 +198,8 @@ export default class PostCoveyTownController extends CoveyTownController{
     }
 
 		// add 1 minute to time to live for the root post, max time to live is 1.5 minutes
-		const updatedPost: Post = await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
+		await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
+		const updatedPost = await databaseController.incrementNumberOfComments(this.coveyTownID, comment.rootPostID);
 		this._listeners.forEach(listener => listener.onPostUpdate(updatedPost));
 		
     // TODO: remove the cheese

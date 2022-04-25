@@ -89,7 +89,12 @@ export async function createComment(coveyTownID : string, comment : Comment) : P
 
 export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) {
 	const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findOneAndUpdate({ _id: rootPostID, timeToLive: { $lt: 110000 } }, { $inc: { timeToLive: 30000 } }, { new : true });
+  return model.findOneAndUpdate({ _id: rootPostID, numberOfComments: { $lt: 2 } }, { $inc: { timeToLive: 30000 } }, { new : true });
+}
+
+export async function incrementNumberOfComments(coveyTownID : string, rootPostID : string) {
+	const model = mongoose.model('post', PostSchema, coveyTownID);
+  return model.findByIdAndUpdate(rootPostID, { $inc: { numberOfComments: 1 } }, { new : true });
 }
 
 /**
