@@ -21,13 +21,10 @@ export default function Comments({ comments }: CommentsProps): JSX.Element {
         comments.forEach(c => buildCommentsRecursive(c, 0, result));
         return result;
     }
-    
-    // Pull the comments 
-    // Start a socket for the comments
-    // Build the comments from the comments
+
     return (
         <VStack
-            flex='2'
+            width='100%'
             overflow='auto'
             overflowX='hidden'
             divider={<StackDivider borderColor='gray.200' />}

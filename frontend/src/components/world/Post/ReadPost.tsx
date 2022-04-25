@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
-import MDEditor from '@uiw/react-md-editor';
-import useApi from './useApi';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { Box, Text, useToast, Heading, Button, VStack, HStack, StackDivider } from '@chakra-ui/react';
 import useComments from '../../../hooks/useComments';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
+import { ServerComment } from '../../../classes/Comment';
+import { CommentsGetByPostIdRequest, PostDeleteRequest } from '../../../classes/TownsServiceClient';
+import calculateTimeDifference from '../../../Util';
+import useApi from './useApi';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
-import calculateTimeDifference from '../../../Util';
-import { ServerComment } from '../../../classes/Comment';
 
 interface ReadPostProps {
     post: Post;
+    toggleEdit: () => void;
     closeReadPost: () => void;
 }
 
@@ -21,38 +21,12 @@ interface MimeTypeProps {
     source: string;
 }
 
-type CreatePostStates = {
-    content: string;
-    edit: boolean,
-}
-
-// Post should be rerender when post is updated through socket
-export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.Element {
-    const [state, setState] = useState<CreatePostStates>({
-        content: post.postContent,
-        edit: false,
-    });
-    const { currentTownFriendlyName, userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const { comments, setComments } = useComments();
+export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostProps): JSX.Element {
+    const { userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
-    const editPost = useApi(apiClient.editPost.bind(apiClient));
+    const { comments, setComments } = useComments();
     const toast = useToast();
-
-    const handleTextInputChange = (value: string, field: string) => {
-        setState(prev => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    const handleEditButtonClick = () => {
-        setState(prev => ({
-            content: post.postContent,
-            edit: !prev.edit,
-        }));
-    };
 
     const getCommentsCallback = (result: ServerComment[]) => {
         toast({
@@ -71,39 +45,31 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         });
     };
 
-    const deletePostCallback = () => {
+    const deletePostCallback = useCallback(() => {
         toast({
             title: 'Deleted Post successfully',
             description: `Post ID: ${post.id}`,
             status: 'success',
         });
         closeReadPost();
-    };
+    }, [closeReadPost, post.id, toast]);
 
-    const deletePostCallError = (error: string) => {
+    const deletePostCallError = useCallback((error: string) => {
         toast({
             title: 'Unable to delete the post',
             description: error,
             status: 'error',
         });
-    };
+    }, [toast]);
 
-    const editPostCallback = () => {
-        toast({
-            title: 'Edited post successfully',
-            description: `Post ID: ${post.id}`,
-            status: 'success',
-        });
-        handleEditButtonClick();
-    };
-
-    const editPostError = (error: string) => {
-        toast({
-            title: 'Unable to edit the post',
-            description: error,
-            status: 'error',
-        });
-    };
+    const deletePostWrapper = useCallback(() => {
+        const request: PostDeleteRequest = {
+            coveyTownID: currentTownID,
+            sessionToken,
+            postID: post.id || '',
+        };
+        deletePost.request(request, deletePostCallback, deletePostCallError);
+    }, [currentTownID, deletePost, deletePostCallError, deletePostCallback, post.id, sessionToken]);
 
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
@@ -115,28 +81,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTownID, post.id, sessionToken]);
 
-    const deletePostWrapper = () => {
-        const request: PostDeleteRequest = {
-            coveyTownID: currentTownID,
-            sessionToken,
-            postID: post.id || '',
-        };
-        deletePost.request(request, deletePostCallback, deletePostCallError);
-    };
-
-    const editPostWrapper = () => {
-        const request: PostUpdateRequest = {
-            coveyTownID: currentTownID,
-            sessionToken,
-            postID: post.id || '',
-            post: {
-                ...post.toServerPost(),
-                postContent: state.content || '',
-            },
-            deletePrevFile: false
-        };
-        editPost.request(request, editPostCallback, editPostError);
-    };
 
     useEffect(() => {
         socket?.emit('postOpen', post);
@@ -149,16 +93,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
     useEffect(() => {
         getCommentsWrapper();
     }, [getCommentsWrapper]);
-
-    const handleCloseButtonClick = async () => {
-        onClose();
-        closeReadPost();
-    };
-
-    useEffect(() => {
-        onOpen();
-    }, [onOpen]);
-
 
     function MultiMediaDisplay({ mimetype, source }: MimeTypeProps): JSX.Element {
         const mediaType = mimetype.split('/')[0];
@@ -187,32 +121,8 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         }
     }
 
-    const postBody = useMemo(() => {
-        if (state.edit) {
-            // return (<>
-            //     <Textarea
-            //         placeholder='Text (optional)'
-            //         resize='vertical'
-            //         height='250px'
-            //         width='500px'
-            //         maxHeight='350px'
-            //         value={state.content}
-            //         onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
-            // </>);
-            return (
-                <div className="container">
-                <MDEditor
-                    value={state.content}
-                    onChange={( target ) => {
-                        const text = target || '';
-                        handleTextInputChange(text, 'content')
-                    }}
-                />
-                <MDEditor.Markdown source={state.content} />
-                </div>
-            );
-        }
-        return (<>
+    const postBody = useMemo(() => (
+        <Box width='100%'>
             <Heading as='h4' size='md' marginBottom='10px'>{post.title}</Heading>
             <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
             <Text fontSize='md'
@@ -223,46 +133,20 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 paddingRight='5px'>
                 {post.postContent}
             </Text>
-        </>);
-    }, [post.file, post.postContent, post.title, state.content, state.edit]);
-
+            <HStack justify='end' width='100%'>
+                {userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
+                {userName === post.ownerId ? <Button size='sm' onClick={toggleEdit}>Edit</Button> : <></>}
+            </HStack>
+        </Box>), [post.file?.contentType, post.file?.filename, post.ownerId, post.postContent, post.title, deletePostWrapper, toggleEdit, userName]);
 
     return (
-        <Modal onClose={handleCloseButtonClick} size='xl' isOpen={isOpen} scrollBehavior='inside'>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>{`Post In Town: ${currentTownFriendlyName}`}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                    <VStack
-                        height='100%'
-                        padding='10px'
-                        border='2px'
-                        borderWidth='0.5px'
-                        borderStyle='ridge'
-                        borderColor='gray.500'
-                        borderRadius='8px'
-                        divider={<StackDivider borderColor='gray.500' />}>
-                        <VStack padding='1px' align='start' width='500px'>
-                            <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)}{post.updateAt !== post.createAt && `* (last edited ${calculateTimeDifference(post.updateAt)})`}</Text>
-                            {postBody}
-                            <HStack width='100%'>
-                                <Text width='115px' fontSize='sm'>
-                                    {`${getComments.data?.length || 0} Comments`}
-                                </Text>
-                                <HStack justify='end' width='100%'>
-                                    {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
-                                    {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Edit</Button> : <></>}
-                                    {state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Cancel</Button> : <></>}
-                                    {state.edit ? <Button size='sm' onClick={editPostWrapper}>Commit</Button> : <></>}
-                                </HStack>
-                            </HStack>
-                        </VStack>
-                        <CreateComment postID={post.id || ''} />
-                        <Comments comments={comments} />
-                    </VStack>
-                </ModalBody>
-            </ModalContent>
-        </Modal>
-    );
+        <VStack space='5px'
+            align='start'
+            divider={<StackDivider borderColor='gray.100' />}>
+            <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)}{post.updateAt !== post.createAt && `* (last edited ${calculateTimeDifference(post.updateAt)})`}</Text>
+            {postBody}
+            <CreateComment postID={post.id || ''} />
+            <Comments comments={comments} />
+        </VStack>
+    )
 }

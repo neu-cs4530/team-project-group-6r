@@ -4,7 +4,7 @@ import useApi from './useApi';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import CreateComment from "./CreateComment";
 import calculateTimeDifference from "../../../Util";
-import { ServerComment } from '../../../classes/Comment'; 
+import { ServerComment } from '../../../classes/Comment';
 import { CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 
 export interface CommentProps {

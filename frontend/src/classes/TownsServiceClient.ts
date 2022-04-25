@@ -135,6 +135,7 @@ export interface PostUpdateRequest {
   postID: string,
   post: ServerPost,
   deletePrevFile: boolean,
+  file?: File,
 }
 
 export interface CommentCreateRequest {
