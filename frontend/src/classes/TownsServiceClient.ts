@@ -274,7 +274,14 @@ export default class TownsServiceClient {
     // Leave the file
     // Change the file
     // Remove the file
-    const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, requestData);
+    const formData = new FormData();
+    if (requestData.file) formData.append('file', requestData.file);
+    formData.append('post', JSON.stringify({
+      sessionToken: requestData.sessionToken,
+      post: requestData.post,
+      deletePrevFile: requestData.deletePrevFile
+    }));
+    const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, formData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
