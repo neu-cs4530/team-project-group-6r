@@ -1,9 +1,10 @@
-enum PostSkin {
-    'POST',
-    'WARNING',
-    'TOMB',
-    'FLOWER'
-}
+export enum PostSkin {
+  POST = 'POST',
+  CHEST = 'CHEST',
+  TOMB = 'TOMB',
+  FLOWER = 'FLOWER',
+  BOTTLE = 'BOTTLE',
+};
 
 /**
  * A Post is a type of message a player can make, that can last for several hours, and be commented on by everybody in the town

@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import { PostSkin } from '../types/PostTown/post';
+
+const postSkins = Object.values(PostSkin);
 
 /**
  * The mongo schema of a post
@@ -15,7 +18,7 @@ const PostSchema = new mongoose.Schema({
     contentType: { type: String, default: ''}
   },
   comments: { type: [String], default: [] },
-  postSkin: { type: String, default: 'POST', enum: ['POST', 'WARNING', 'TOMB', 'FLOWER'], immutable: true },
+  postSkin: { type: String, default: 'POST', enum: postSkins, immutable: true },
   coordinates: {
     x: Number,
     y: Number

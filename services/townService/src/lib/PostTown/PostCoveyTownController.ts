@@ -1,9 +1,10 @@
 import Filter from 'bad-words';
-import { Post } from '../../types/PostTown/post';
+import { Post, PostSkin } from '../../types/PostTown/post';
 import { Comment, CommentTree } from '../../types/PostTown/comment';
 import * as databaseController from './DatabaseController';
 import CoveyTownController from '../CoveyTownController';
 import { emitCommentUpdate } from '../../requestHandlers/CoveyTownRequestHandlers';
+
 
 /**
  * Controls communication between mongodb and coveytown
