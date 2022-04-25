@@ -4,6 +4,8 @@ export enum PostSkin {
   TOMB = 'TOMB',
   FLOWER = 'FLOWER',
   BOTTLE = 'BOTTLE',
+  FISH = 'FISH',
+  BALLON = 'BALLON',
 };
 
 /**
