@@ -52,17 +52,17 @@ export default interface CoveyTownListener {
    * Called when a post is created by a user
    * @param post the new post
    */
-   onPostCreate(post: Post): void;
+  onPostCreate(post: Post): void;
 
-     /**
+  /**
    * Called when a post is updated by a user
    * @param post the updated post
    */
   onPostUpdate(post: Post): void;
 
-        /**
+  /**
    * Called when a post is deleted by a user
    * @param post the deleted post
    */
-   onPostDelete(post: Post): void;
+  onPostDelete(post: Post): void;
 }

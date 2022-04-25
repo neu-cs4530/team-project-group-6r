@@ -54,7 +54,7 @@ describe('TownsServiceAPIREST', () => {
     const app = Express();
     app.use(CORS());
     server = http.createServer(app);
-    const upload = multer({ dest: 'uploads/' })
+    const upload = multer({ dest: 'uploads/' });
 
     addTownRoutes(server, app, upload);
     await server.listen();

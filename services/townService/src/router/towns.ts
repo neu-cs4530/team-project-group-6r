@@ -30,6 +30,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
    */
   app.post('/sessions', express.json(), async (req, res) => {
     try {
+      console.log(4444);
       const result = await townJoinHandler({
         userName: req.body.userName,
         coveyTownID: req.body.coveyTownID,
@@ -144,10 +145,10 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
    */
   app.post('/towns/:townID/post', express.json(), upload.single('file'), async (req, res) => {
     try {
-      let parsedReq = JSON.parse(req.body.post); 
+      const parsedReq = JSON.parse(req.body.post); 
       let postToSend = parsedReq.post;
       if (req.file) {
-        postToSend = { ...postToSend, file: {filename: req.file.filename, contentType: req.file.mimetype}}
+        postToSend = { ...postToSend, file: { filename: req.file.filename, contentType: req.file.mimetype } };
       }
       const result = await postCreateHandler({
         coveyTownID: req.params.townID,
@@ -249,25 +250,23 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
    */
   app.patch('/towns/:townID/post/:postID', express.json(), upload.single('file'), async (req, res) => {
     try {
-      //case: Not uploading file + not deleting a prev file
-      let parsedReq = JSON.parse(req.body.post); 
+      // case: Not uploading file + not deleting a prev file
+      const parsedReq = JSON.parse(req.body.post); 
       let postToSend = parsedReq.post;
-      //case: Uploading file + deleting prev file
-      //case: Uploading file + not deleting a prev file
+      // case: Uploading file + deleting prev file
+      // case: Uploading file + not deleting a prev file
       if (req.file) {
-        postToSend = { ...postToSend, file: { filename: req.file.filename, contentType: req.file.mimetype}}
-      //case: Not uploading file + deleting a prev file
+        postToSend = { ...postToSend, file: { filename: req.file.filename, contentType: req.file.mimetype } };
+      // case: Not uploading file + deleting a prev file
       } else if (!req.file && parsedReq.deletePrevFile) {
-        postToSend = { ...postToSend, file: { filename: '', contentType: ''}}
+        postToSend = { ...postToSend, file: { filename: '', contentType: '' } };
       }
-
-      console.log(parsedReq)
       const result = await postUpdateHandler({
         coveyTownID: req.params.townID,
         sessionToken: parsedReq.sessionToken,
         postID: req.params.postID,
         post: postToSend,
-        deletePrevFile: parsedReq.deletePrevFile
+        deletePrevFile: parsedReq.deletePrevFile,
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {

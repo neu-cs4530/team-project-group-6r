@@ -1,8 +1,8 @@
 enum PostSkin {
-    'POST',
-    'WARNING',
-    'TOMB',
-    'FLOWER'
+  POST = 'POST',
+  WARNING = 'WARNING',
+  TOMB = 'TOMB',
+  FLOWER = 'FLOWER',
 }
 
 /**

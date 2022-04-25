@@ -6,7 +6,7 @@ import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import { ConversationAreaCreateRequest, ServerConversationArea } from '../client/TownsServiceClient';
 import { Post } from '../types/PostTown/post';
-import { ServerSocket } from '../server';
+import ServerSocket from '../ServerSocket';
 import { CommentTree } from '../types/PostTown/comment';
 
 /**
@@ -116,7 +116,7 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
   const newPlayer = new Player(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
   const posts = await coveyTownController.getAllPostInTown();
-  console.log(posts)
+  console.log(posts);
   console.log(coveyTownController.getSessionByToken(newSession.sessionToken));
   assert(newSession.videoToken);
   return {
@@ -297,13 +297,4 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on('postClose', (post: Post) => {
     socket.leave(`Post: ${post._id}`);
   });
-}
-
-/**
- * Adapter designed to let server know when comments have been updated
- * @param postID The id of the post the comment is attached to
- * @param comments The comments being updated
- */
-export function emitCommentUpdate(postID: string, comments: CommentTree[]) {
-  ServerSocket.to(`Post: ${postID}`).emit('commentUpdate', comments);
 }

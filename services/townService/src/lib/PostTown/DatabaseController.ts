@@ -88,12 +88,12 @@ export async function createComment(coveyTownID : string, comment : Comment) : P
 }
 
 export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) {
-	const model = mongoose.model('post', PostSchema, coveyTownID);
+  const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findOneAndUpdate({ _id: rootPostID, numberOfComments: { $lt: 2 } }, { $inc: { timeToLive: 30000 } }, { new : true });
 }
 
 export async function incrementNumberOfComments(coveyTownID : string, rootPostID : string) {
-	const model = mongoose.model('post', PostSchema, coveyTownID);
+  const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findByIdAndUpdate(rootPostID, { $inc: { numberOfComments: 1 } }, { new : true });
 }
 
@@ -127,7 +127,7 @@ export async function getAllComments(coveyTownID : string, commentIDs : string[]
  */
 export async function deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '[removed]', ownerID: '[deleted]'} }, { new: true, timestamps: false });
+  return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '[removed]', ownerID: '[deleted]' } }, { new: true, timestamps: false });
 }
 
 /**
@@ -162,7 +162,7 @@ export async function updateComment(coveyTownID : string, commentID : string, co
  */
 export async function addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID }}, { new : true, timestamps: false}, );
+  return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID } }, { new : true, timestamps: false } );
 }
 
 /**
@@ -172,7 +172,7 @@ export async function addCommentToParentComment(coveyTownID : string, parentComm
  */
 export async function getFile(filename: string) : Promise<any> {
   const { gfs } = FileConnection.getInstance();
-  return gfs.files.findOne({ filename: filename });
+  return gfs.files.findOne({ filename });
 }
 
 /**
@@ -181,24 +181,20 @@ export async function getFile(filename: string) : Promise<any> {
  */
 export async function deleteFile(filename: string): Promise<any> {
   const { gfs, gridfsBucket } = FileConnection.getInstance();
-  gfs.files.findOne({ filename: filename }, (err: any, result: any) => {
-    if(err) {
-      throw Error('Can\'t find file')
+  gfs.files.findOne({ filename }, (err: any, result: any) => {
+    if (err) {
+      throw Error('Can\'t find file');
     }
 
-    if(result?._id) {
+    if (result?._id) {
       return gridfsBucket.delete(result?._id);
-    } else{
-      throw Error('Can\'t find file id')
-    }
+    } 
+    throw Error('Can\'t find file id');
+    
   });
 }
 
 export async function clearCollections(): Promise<any> {
-	try {	
-		const collections = await mongoose.connection.db.listCollections().toArray();
-		collections.map(collection => collection.name).forEach(async collectionName => mongoose.connection.db.dropCollection(collectionName));
-	} catch (error) {
-		throw(error);
-	}
+  const collections = await mongoose.connection.db.listCollections().toArray();
+  collections.map(collection => collection.name).forEach(async collectionName => mongoose.connection.db.dropCollection(collectionName));
 }
