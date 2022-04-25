@@ -111,8 +111,9 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @param token The player's (who is trying to update the post) session token
    * @returns The updated post
    */
-  async updatePost(postID : string, post: any, token : string) : Promise<Post> {
+  async updatePost(postID : string, post: any, deletePrevFile: boolean, token : string) : Promise<Post> {
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+    delete post.comments;
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
             
     if (postToUpdate.ownerID === playerID) {
@@ -124,12 +125,8 @@ export default class PostCoveyTownController extends CoveyTownController{
       this._listeners.forEach(listener => listener.onPostUpdate(result));
 
       //delete file if old post had a file that is being replaced
-      if (postToUpdate.file) {
-        const oldFileName = postToUpdate.file.filename;
-        const newFileName = post.file.filename;
-        if(oldFileName !== newFileName && oldFileName) {
-          await databaseController.deleteFile(oldFileName);
-        }
+      if (deletePrevFile && postToUpdate.file?.filename) {
+        await databaseController.deleteFile(postToUpdate.file.filename);
       }
 
       return result;

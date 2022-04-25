@@ -372,7 +372,9 @@ async editPost(requestData: PostUpdateRequest): Promise<void> {
       post: requestData.post,
       deletePrevFile: requestData.deletePrevFile
     }));
+    console.log(requestData);
     const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, formData);
+    console.log(responseWrapper)
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
