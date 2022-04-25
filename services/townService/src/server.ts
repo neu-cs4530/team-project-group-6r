@@ -23,13 +23,8 @@ const server = http.createServer(app);
 
 const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
 
-const connectToMongo = async() => {
-        await mongoose.connect(uri);
-        return await mongoose.connect(uri);//.then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
-        ;};
-
-connectToMongo();
-// mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
+// const conn = mongoose.createConnection(uri);
+mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
 
 mongoose.connection.once('open', () => {
   FileConnection.createInstance();
@@ -56,9 +51,6 @@ const upload = multer({ storage });
 
 
 export const ServerSocket = addTownRoutes(server, app, upload);
-
-const newTown = CoveyTownsStore.getInstance().createTown('ChengTown', true);
-//console.log(newTown);
 
 server.listen(process.env.PORT || 8081, () => {
   const address = server.address() as AddressInfo;

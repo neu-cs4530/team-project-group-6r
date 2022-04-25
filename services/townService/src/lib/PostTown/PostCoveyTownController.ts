@@ -205,7 +205,7 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The comments and their structure
    */
   async getCommentTree(postID : string) : Promise<CommentTree[]> {
-    const post: Post = await databaseController.getPost('testID', postID);
+    const post: Post = await databaseController.getPost(this.coveyTownID, postID);
     const comments: string[] = post.comments!;
     
     const result = await this.constructCommentTree(comments);
