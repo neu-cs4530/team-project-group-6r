@@ -3,7 +3,6 @@ import io from 'socket.io';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import { Multer } from 'multer';
-import mongoose from 'mongoose';
 import {
   conversationAreaCreateHandler,
   townCreateHandler, townDeleteHandler,

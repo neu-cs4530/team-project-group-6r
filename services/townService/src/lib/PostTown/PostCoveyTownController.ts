@@ -43,9 +43,9 @@ export default class PostCoveyTownController extends CoveyTownController{
   private async deletePostCascade(post: Post, postID: string): Promise<Post> {
     const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
     this._listeners.forEach(listener => {
-			listener.onPostDelete(result)
-			console.log(555455554)
-		});
+      listener.onPostDelete(result);
+      console.log(555455554);
+    });
     await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
     if (post.file?.filename) {
@@ -64,7 +64,7 @@ export default class PostCoveyTownController extends CoveyTownController{
       return now.getTime() > createdAt.getTime() + post.timeToLive;
     });
 
-    console.log(expiredPosts.length)
+    console.log(expiredPosts.length);
 
     expiredPosts.forEach(async post => {
       const postID: string = post._id!;
