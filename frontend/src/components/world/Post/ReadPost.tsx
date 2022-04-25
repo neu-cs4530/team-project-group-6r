@@ -142,10 +142,10 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
 
     const postBody = useMemo(() => (
         <Box width='100%'>
-            <Heading as='h4' size='mds' marginBottom='10px'>{post.title}</Heading>
-            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
-            <Text fontSize='sm'
-                maxHeight='180px'
+            <Heading as='h4' size='md' marginBottom='10px'>{post.title}</Heading>
+            <MultiMediaDisplay source={`${process.env.REACT_APP_TOWNS_SERVICE_URL}/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
+            <Text fontSize='md'
+                maxHeight='145px'
                 overflow='auto'
                 overflowX='hidden'
                 fontFamily='Arial'
