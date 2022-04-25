@@ -1,18 +1,17 @@
-/* eslint-disable react/jsx-props-no-spreading */
-import React, { useEffect, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { VStack, Input, Textarea, Button, useToast, CloseButton, Container, Text, HStack, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
-import useApi from './useApi';
+import React, { useState, useMemo } from 'react';
+import { VStack, HStack, Input, Textarea, Text, CloseButton, useToast, Button } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
-import { ServerPost, Coordinate } from '../../../classes/Post';
+import { Coordinate, ServerPost } from '../../../classes/Post';
 import { PostCreateRequest } from '../../../classes/TownsServiceClient';
 import { calculateBytes } from '../../../Util';
+import FileForm from './FileForm';
+import useApi from './useApi';
 
 /**
  * The properties of creating a post
  */
 interface CreatePostProps {
-    coordinate: Coordinate;
+    coordinates: Coordinate;
     closeCreatePost: () => void;
 }
 
@@ -20,7 +19,7 @@ interface CreatePostProps {
  * What a post can contain, a title and some content
  */
 type CreatePostStates = {
-    title: string;
+    title: string,
     content: string;
     file?: File,
 }
@@ -34,49 +33,18 @@ const initalState = {
     file: undefined,
 }
 
-/**
- * JSON version of how a post should look visually
- */
-const dropZoneStyle = {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    padding: '20px',
-    borderWidth: 2,
-    borderRadius: 2,
-    borderColor: '#eeeeee',
-    borderStyle: 'dashed',
-    backgroundColor: '#fafafa',
-    color: '#bdbdbd',
-    outline: 'none',
-    transition: 'border .24s ease-in-out'
-};
-
-/**
- * The jsx element version of a post
- * @returns The jsx element of a post
- */
-export default function CreatePost({ coordinate, closeCreatePost }: CreatePostProps): JSX.Element {
-    const { userName, currentTownFriendlyName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
-    const { isOpen, onOpen, onClose } = useDisclosure()
+export default function CreatePost({ coordinates, closeCreatePost }: CreatePostProps): JSX.Element {
+    const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const [state, setState] = useState<CreatePostStates>(initalState);
     const createPost = useApi(apiClient.createPost.bind(apiClient));
     const toast = useToast();
 
-    const handleDropFile = (files: File[]) => {
+    const handleTextInputChange = (value: string, field: string) => {
         setState((prev: CreatePostStates) => ({
             ...prev,
-            file: files[0],
+            [field]: value,
         }));
     };
-
-    const { getRootProps, getInputProps, open } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        maxFiles: 1,
-        onDrop: handleDropFile,
-    });
 
     const handleRemoveFile = () => {
         setState((prev: CreatePostStates) => ({
@@ -90,12 +58,12 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
      * @param value The new text
      * @param field The field being changed
      */
-    const handleTextInputChange = (value: string, field: string) => {
+    const handleAddFile: (file: File) => void = (file) => {
         setState((prev: CreatePostStates) => ({
             ...prev,
-            [field]: value,
+            file,
         }));
-    };
+    }
 
     /**
      * Server's response to creating a post
@@ -125,7 +93,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
     /**
      * Server's response for when the commit (basically, submit your post) button is pressed
      */
-    const handleCommitButtonClick = async () => {
+    const createPostWrapper = async () => {
         const postRequest: PostCreateRequest = {
             coveyTownID: currentTownID,
             sessionToken,
@@ -134,7 +102,7 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
                 postContent: state.content,
                 ownerID: userName,
                 isVisible: true,
-                coordinates: coordinate,
+                coordinates,
                 file: {
                     filename: '',
                     contentType: ''
@@ -145,69 +113,39 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
         createPost.request(postRequest, createPostCallback, createPostError);
     };
 
-    const handleCloseButtonClick = async () => {
-        onClose();
-        closeCreatePost();
-    };
-
-    useEffect(() => {
-        onOpen();
-    }, [onOpen]);
-
-    useEffect(() => {
-        if ((createPost.data !== undefined) && !createPost.loading) {
-            closeCreatePost();
+    const fileFooter = useMemo(() => {
+        if (state.file) {
+            return (
+                <HStack alignItems='center' width='100%'>
+                    <Text fontSize='xs'>{`File Type: ${state.file.type}, Size: ${calculateBytes(state.file.size)}`}</Text>
+                    <CloseButton onClick={handleRemoveFile} alignSelf='end' size='sm' />
+                </HStack>
+            )
         }
-    }, [closeCreatePost, createPost.data, createPost.loading]);
+        return <></>;
+    }, [state.file]);
 
     return (
-        <Modal onClose={handleCloseButtonClick} size='xl' isOpen={isOpen}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>{`Post To Town: ${currentTownFriendlyName}`}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                    <VStack
-                        height='100%'
-                        padding='10px'
-                        border='2px'
-                        borderWidth='0.5px'
-                        borderStyle='dashed'
-                        borderColor='gray.500'
-                        borderRadius='8px'>
-                        <VStack>
-                            <Text alignSelf='start'>Post as <Text display='inline' color='tomato'>u/{userName}</Text></Text>
-                            <Input
-                                placeholder='Title'
-                                size='md'
-                                value={state.title}
-                                onChange={({ target }) => handleTextInputChange(target.value, 'title')} />
-                            <Textarea
-                                placeholder='Text (optional)'
-                                resize='vertical'
-                                height='250px'
-                                width='475px'
-                                maxHeight='450px'
-                                value={state.content}
-                                onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
-                            <Container>
-                                <div {...getRootProps({ style: dropZoneStyle })}>
-                                    <input {...getInputProps()} />
-                                    <Text display='inline'>Drag & Drop a file</Text>
-                                    <Button display='inline' variant='outline' colorScheme='teal' size='xs' onClick={open} >
-                                        Open File Dialog
-                                    </Button>
-                                </div>
-                                <HStack marginTop='5px' alignItems='center'>
-                                    {state.file ? <Text fontSize='xs'>{`File Type: ${state.file.type}, Size: ${calculateBytes(state.file.size)}`}</Text> : <></>}
-                                    {state.file ? <CloseButton onClick={handleRemoveFile} alignSelf='end' size='sm' /> : <></>}
-                                </HStack>
-                            </Container>
-                            <Button alignSelf='end' marginRight='100px' size='md' colorScheme="gray" isLoading={createPost.loading} loadingText="Committing" onClick={handleCommitButtonClick}>Commit</Button>
-                        </VStack>
-                    </VStack>
-                </ModalBody>
-            </ModalContent>
-        </Modal>
+        <VStack space='5px'>
+            <Text alignSelf='start' fontSize='sm'>Post as <Text display='inline' color='gray.400'>u/{userName}</Text></Text>
+            <Input
+                placeholder='Title'
+                size='md'
+                value={state.title}
+                onChange={({ target }) => handleTextInputChange(target.value, 'title')} />
+            <Textarea
+                placeholder='Text (optional)'
+                resize='vertical'
+                height='250px'
+                maxHeight='450px'
+                value={state.content}
+                onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
+            <FileForm setFile={handleAddFile} />
+            {fileFooter}
+            <HStack justify='end' width='100%'>
+                <Button size='sm' onClick={closeCreatePost}>Cancel</Button>
+                <Button size='sm' colorScheme="gray" isLoading={createPost.loading} loadingText="Committing" onClick={createPostWrapper}>Commit</Button>
+            </HStack>
+        </VStack>
     );
 }

@@ -180,6 +180,9 @@ export interface PostUpdateRequest {
   sessionToken: string,
   postID: string,
   post: ServerPost,
+  deletePrevFile: boolean,
+  file?: File,
+
 }
 
 /**
@@ -352,14 +355,24 @@ async deletePostById(requestData: PostDeleteRequest): Promise<void> {
     const responseWrapper = await this._axios.delete(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, deleteBody);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
-
-/**
+  
+  /**
  * Request handler to process players request to edit a post
  * @param requestData An object representing the players request
  * @returns The server's respopnse to the request to edit a post
  */  
 async editPost(requestData: PostUpdateRequest): Promise<void> {
-    const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, requestData);
+    // Leave the file
+    // Change the file
+    // Remove the file
+    const formData = new FormData();
+    if (requestData.file) formData.append('file', requestData.file);
+    formData.append('post', JSON.stringify({
+      sessionToken: requestData.sessionToken,
+      post: requestData.post,
+      deletePrevFile: requestData.deletePrevFile
+    }));
+    const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, formData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 

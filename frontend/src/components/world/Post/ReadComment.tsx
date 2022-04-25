@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { VStack, Text, Box, HStack, Flex, Button, Textarea, useToast } from "@chakra-ui/react";
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
-import { ServerComment, CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 import CreateComment from "./CreateComment";
+import calculateTimeDifference from "../../../Util";
+import { ServerComment } from '../../../classes/Comment';
+import { CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
+
 
 /**
  * The properties of reading a comment on your screen

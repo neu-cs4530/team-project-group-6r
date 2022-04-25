@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
-import { VStack, HStack, StackDivider, Text, Heading, Button, useToast, Flex, CloseButton, Textarea } from '@chakra-ui/react';
-import ReactPlayer from 'react-player';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { Box, Text, useToast, Heading, Button, VStack, HStack, StackDivider } from '@chakra-ui/react';
+import useComments from '../../../hooks/useComments';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
+import { ServerComment } from '../../../classes/Comment';
+import { CommentsGetByPostIdRequest, PostDeleteRequest } from '../../../classes/TownsServiceClient';
+import calculateTimeDifference from '../../../Util';
+import useApi from './useApi';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
-import { ServerComment, PostDeleteRequest, PostUpdateRequest, CommentsGetByPostIdRequest, FileGetRequest } from '../../../classes/TownsServiceClient';
-import useApi from './useApi';
-import useComments from '../../../hooks/useComments';
 
 /**
  * The properties of reading a post on your screen
  */
 interface ReadPostProps {
     post: Post;
+    toggleEdit: () => void;
     closeReadPost: () => void;
 }
 
@@ -22,68 +24,13 @@ interface MimeTypeProps {
     source: string;
 }
 
-/**
- * What a post looks like it can contain to you
- */
-type CreatePostStates = {
-    content: string;
-    edit: boolean,
-}
-
-// Post should be rerender when post is updated through socket
-/**
- * How a post will look to a reader
- * @returns The jsx version of how a post looks like to someone reading it
- */
-export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.Element {
-    const [state, setState] = useState<CreatePostStates>({
-        content: post.postContent,
-        edit: false,
-    });
+export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostProps): JSX.Element {
     const { userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
-    const { comments, setComments } = useComments();
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
     const deletePost = useApi(apiClient.deletePostById.bind(apiClient));
-    const editPost = useApi(apiClient.editPost.bind(apiClient));
+    const { comments, setComments } = useComments();
     const toast = useToast();
 
-    /**
-     * Calculates the difference between when a post was posted and right now
-     * @returns How long its been between when the post was posted and now
-     */
-    function calculateHourDifference(): number | string {
-        if (post.createAt) {
-            return Math.round((new Date().getTime() - new Date(post.createAt).getTime()) / 36e5);
-        }
-        return 'unknown';
-    };
-
-    /**
-     * Response for when text in the post has changed
-     * @param value The new text
-     * @param field The field being changed
-     */
-    const handleTextInputChange = (value: string, field: string) => {
-        setState(prev => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    /**
-     * Server's response for when the edit button is pressed
-     */
-    const handleEditButtonClick = () => {
-        setState(prev => ({
-            content: post.postContent,
-            edit: !prev.edit,
-        }));
-    };
-
-    /**
-     * Server's response to getting comments under a post
-     * @param result The message the server sends on if the comments were gotten succesfully
-     */
     const getCommentsCallback = (result: ServerComment[]) => {
         toast({
             title: 'Retrieved post successfully',
@@ -104,58 +51,41 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
             status: 'error',
         });
     };
-
+  
     /**
      * Server's response to deleting a post
      */
-    const deletePostCallback = () => {
+    const deletePostCallback = useCallback(() => {
+
         toast({
             title: 'Deleted Post successfully',
             description: `Post ID: ${post.id}`,
             status: 'success',
         });
         closeReadPost();
-    };
+    }, [closeReadPost, post.id, toast]);
 
     /**
      * Server's response to an error being thrown in the process of deleting a post
      * @param error The error caused in the process of deleting a post
      */
-    const deletePostCallError = (error: string) => {
+    const deletePostCallError = useCallback((error: string) => {
         toast({
             title: 'Unable to delete the post',
             description: error,
             status: 'error',
         });
-    };
+    }, [toast]);
 
-    /**
-     * Server's response to editing a post
-     */
-    const editPostCallback = () => {
-        toast({
-            title: 'Edited post successfully',
-            description: `Post ID: ${post.id}`,
-            status: 'success',
-        });
-        handleEditButtonClick();
-    };
+    const deletePostWrapper = useCallback(() => {
+        const request: PostDeleteRequest = {
+            coveyTownID: currentTownID,
+            sessionToken,
+            postID: post.id || '',
+        };
+        deletePost.request(request, deletePostCallback, deletePostCallError);
+    }, [currentTownID, deletePost, deletePostCallError, deletePostCallback, post.id, sessionToken]);
 
-    /**
-     * Server's response to an error being thrown in the process of editing a post
-     * @param error The error caused in the process of editing a post
-     */
-    const editPostError = (error: string) => {
-        toast({
-            title: 'Unable to edit the post',
-            description: error,
-            status: 'error',
-        });
-    };
-
-    /**
-     * Wraps the servers response to getting all comments under a post
-     */
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
             coveyTownID: currentTownID,
@@ -166,33 +96,6 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTownID, post.id, sessionToken]);
 
-    /**
-     * Wraps the servers response to deleting a post
-     */
-    const deletePostWrapper = () => {
-        const request: PostDeleteRequest = {
-            coveyTownID: currentTownID,
-            sessionToken,
-            postID: post.id || '',
-        };
-        deletePost.request(request, deletePostCallback, deletePostCallError);
-    };
-
-    /**
-     * Wraps the servers response to editing a post
-     */
-    const editPostWrapper = () => {
-        const request: PostUpdateRequest = {
-            coveyTownID: currentTownID,
-            sessionToken,
-            postID: post.id || '',
-            post: {
-                ...post.toServerPost(),
-                postContent: state.content || '',
-            },
-        };
-        editPost.request(request, editPostCallback, editPostError);
-    };
 
     useEffect(() => {
         socket?.emit('postOpen', post);
@@ -243,25 +146,10 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
         }
     }
 
-    const postBody = useMemo(() => {
-        if (state.edit) {
-            return (<>
-                <Textarea
-                    placeholder='Text (optional)'
-                    resize='vertical'
-                    height='250px'
-                    width='500px'
-                    maxHeight='350px'
-                    value={state.content}
-                    onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
-            </>);
-        }
-        return (<>
-            <Heading as='h4'
-                size='md'>
-                {post.title}
-            </Heading>
-            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType}/>
+    const postBody = useMemo(() => (
+        <Box width='100%'>
+            <Heading as='h4' size='md' marginBottom='10px'>{post.title}</Heading>
+            <MultiMediaDisplay source={`http://localhost:8081/image/${post.file?.filename}`} mimetype={post.file?.contentType} />
             <Text fontSize='md'
                 maxHeight='145px'
                 overflow='auto'
@@ -270,44 +158,20 @@ export default function ReadPost({ post, closeReadPost }: ReadPostProps): JSX.El
                 paddingRight='5px'>
                 {post.postContent}
             </Text>
-        </>);
-    }, [post.file, post.postContent, post.title, state.content, state.edit]);
+            <HStack justify='end' width='100%'>
+                {userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
+                {userName === post.ownerId ? <Button size='sm' onClick={toggleEdit}>Edit</Button> : <></>}
+            </HStack>
+        </Box>), [post.file?.contentType, post.file?.filename, post.ownerId, post.postContent, post.title, deletePostWrapper, toggleEdit, userName]);
+
     return (
-        <VStack padding={5}
-            height='100%'
-            border='2px'
-            borderWidth='2px'
-            borderColor='gray.500'
-            borderRadius='8px'
-            maxHeight='768px'
-            divider={<StackDivider borderColor='gray.200' />}>
-            <VStack align='start'
-                width='500px'>
-                <Flex
-                    width='100%'
-                    direction='row'
-                    justify='space-between'
-                    align='center'>
-                    <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateHourDifference()} hours ago</Text>
-                    <CloseButton marginLeft='auto' size='lg' onClick={closeReadPost} />
-                </Flex>
-                {postBody}
-                <HStack
-                    width='100%'>
-                    <Text width='115px' fontSize='sm'>
-                        {`${getComments.data?.length || 0} Comments`}
-                    </Text>
-                    <HStack justify='end' width='100%'>
-                        {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
-                        {!state.edit ? <Button size='sm'>Hide</Button> : <></>}
-                        {!state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Edit</Button> : <></>}
-                        {state.edit && userName === post.ownerId ? <Button size='sm' onClick={handleEditButtonClick}>Cancel</Button> : <></>}
-                        {state.edit ? <Button size='sm' onClick={editPostWrapper}>Commit</Button> : <></>}
-                    </HStack>
-                </HStack>
-            </VStack>
+        <VStack space='5px'
+            align='start'
+            divider={<StackDivider borderColor='gray.100' />}>
+            <Text fontSize='sm'> Posted by u/{post.ownerId} · {calculateTimeDifference(post.createAt)}{post.updateAt !== post.createAt && `* (last edited ${calculateTimeDifference(post.updateAt)})`}</Text>
+            {postBody}
             <CreateComment postID={post.id || ''} />
             <Comments comments={comments} />
         </VStack>
-    );
+    )
 }

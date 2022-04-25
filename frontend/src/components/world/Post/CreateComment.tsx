@@ -97,10 +97,8 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
     };
 
     return (
-        <VStack
-            width='500px'
-            align='start'>
-            <Text>Comment as <Text display='inline' color='tomato'>u/{userName}</Text></Text>
+        <VStack space='5px' width='100%'>
+            <Text alignSelf='start' fontSize='sm'>Comment as <Text display='inline' color='gray.400'>u/{userName}</Text></Text>
             <Textarea height='140'
                 resize='none'
                 placeholder='What are your thoughts?'
