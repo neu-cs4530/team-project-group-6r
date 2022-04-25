@@ -171,7 +171,7 @@ export async function getFile(filename: string) : Promise<any> {
  */
 export async function deleteFile(filename: string): Promise<any> {
   const { gfs, gridfsBucket } = FileConnection.getInstance();
-  gfs.files.findOne({ filename: filename }, (err, result) => {
+  gfs.files.findOne({ filename: filename }, (err: any, result: any) => {
     if(err) {
       throw Error('Can\'t find file')
     }
