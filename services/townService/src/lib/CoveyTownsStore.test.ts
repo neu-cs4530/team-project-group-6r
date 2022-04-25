@@ -4,6 +4,7 @@ import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
 import { ServerConversationArea } from '../client/TownsServiceClient';
 import { ChatMessage } from '../CoveyTypes';
+import { Post } from '../types/PostTown/post';
 
 const mockCoveyListenerTownDestroyed = jest.fn();
 const mockCoveyListenerOtherFns = jest.fn();
@@ -28,6 +29,15 @@ function mockCoveyListener(): CoveyTownListener {
     },
     onChatMessage(message: ChatMessage){
       mockCoveyListenerOtherFns(message);
+    },
+    onPostCreate(post: Post): void {
+        mockCoveyListenerOtherFns(post);
+    },
+    onPostUpdate(post: Post): void {
+        mockCoveyListenerOtherFns(post);
+    },
+    onPostDelete(post: Post): void {
+        mockCoveyListenerOtherFns(post);
     },
   };
 }

@@ -194,6 +194,9 @@ export async function deleteFile(filename: string): Promise<any> {
   });
 }
 
+/**
+ * Clears everything from the mongodb
+ */
 export async function clearCollections(): Promise<any> {
 	try {	
 		const collections = await mongoose.connection.db.listCollections().toArray();
