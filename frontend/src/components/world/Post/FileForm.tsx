@@ -25,6 +25,9 @@ const dropZoneStyle = {
     transition: 'border .24s ease-in-out'
 };
 
+/**
+ * The JSX element for the file drop zone
+ */
 export default function FileForm({ setFile }: FileFormProps): JSX.Element {
 
     const handleDropFile = (files: File[]) => {

@@ -87,11 +87,23 @@ export async function createComment(coveyTownID : string, comment : Comment) : P
   return insertComment.save();
 }
 
+/**
+ * Adds an expiration time to a post
+ * @param coveyTownID The id of the town we have the post in
+ * @param rootPostID The id of the post in question
+ * @returns The updated post
+ */
 export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) {
 	const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findOneAndUpdate({ _id: rootPostID, numberOfComments: { $lt: 2 } }, { $inc: { timeToLive: 30000 } }, { new : true });
 }
 
+/**
+ * Increases the system value for number of comments on a post
+ * @param coveyTownID The id of the town we're in
+ * @param rootPostID The id of the post in question
+ * @returns The updated post
+ */
 export async function incrementNumberOfComments(coveyTownID : string, rootPostID : string) {
 	const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findByIdAndUpdate(rootPostID, { $inc: { numberOfComments: 1 } }, { new : true });
@@ -194,6 +206,9 @@ export async function deleteFile(filename: string): Promise<any> {
   });
 }
 
+/**
+ * Clears the entire mongo collection
+ */
 export async function clearCollections(): Promise<any> {
 	try {	
 		const collections = await mongoose.connection.db.listCollections().toArray();

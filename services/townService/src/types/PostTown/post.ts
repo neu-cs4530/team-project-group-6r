@@ -1,4 +1,4 @@
-enum PostSkin {
+export enum PostSkin {
     'POST',
     'WARNING',
     'TOMB',

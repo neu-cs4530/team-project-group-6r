@@ -23,7 +23,7 @@ app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 const server = http.createServer(app);
 
-const uri = process.env.MONGODB_URI;
+const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';//process.env.MONGODB_URI;
 export let ServerSocket: Server;
 // const conn = mongoose.createConnection(uri);
 

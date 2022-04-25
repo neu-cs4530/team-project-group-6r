@@ -13,11 +13,9 @@ export interface Comment {
   updatedAt? : Date
 }
 
-// export interface CommentTree {
-//     comment: Comment,
-//     comments: CommentTree[]
-// };
-
+/**
+ * A CommentTree is a list of comments, with structure corresponding to root comments and replies
+ */
 export interface CommentTree {
   _id?: string,
   rootPostID: string,

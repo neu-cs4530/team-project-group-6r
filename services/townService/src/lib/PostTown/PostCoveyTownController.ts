@@ -40,6 +40,12 @@ export default class PostCoveyTownController extends CoveyTownController{
 		clearInterval(this._expireTimer);
 	}
 
+    /**
+     * Deletes the post and everything associated with the post
+     * @param post The post we're deleting
+     * @param postID The id of the post we're deleting
+     * @returns The result of the deleted post
+     */
 	private async deletePostCascade(post: Post, postID: string): Promise<Post> {
 		const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
     this._listeners.forEach(listener => listener.onPostDelete(result));
@@ -52,6 +58,10 @@ export default class PostCoveyTownController extends CoveyTownController{
 		return result;
 	}
  
+    /**
+     * Checks to see if a post has hit its experation date
+     * @returns The list of posts that have expired
+     */
 	private async checkExpired(): Promise<Post[]> {
 		const postList: Post[] = await this.getAllPostInTown();
 		//console.log(postList)
@@ -71,6 +81,12 @@ export default class PostCoveyTownController extends CoveyTownController{
 		return expiredPosts;
 	}
 
+    /**
+     * Makes sure posts arent in the same area
+     * @param newX The x coordinate of the post
+     * @param newY The y coordinate of the post
+     * @returns True if the posts don't collide, false otherwise
+     */
 	private async didPostNotCollide(newX: number, newY: number): Promise<boolean> {
 		const postsInTown: Post[] = await this.getAllPostInTown();
 		const didCollide: Post | undefined = postsInTown.find(post => post.coordinates.x == newX && post.coordinates.y == newY)
@@ -78,7 +94,6 @@ export default class PostCoveyTownController extends CoveyTownController{
 		return didCollide === undefined ? true : false;
 	}
 
-  // Add
   /**
    * Creates a post in this coveytown
    * @param post The post being created by a user

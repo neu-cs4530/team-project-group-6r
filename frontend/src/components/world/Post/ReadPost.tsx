@@ -24,6 +24,9 @@ interface MimeTypeProps {
     source: string;
 }
 
+/**
+ * JSX element for how a post looks to someone reading it
+ */
 export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostProps): JSX.Element {
     const { userName, currentTownID, sessionToken, apiClient, socket } = useCoveyAppState();
     const getComments = useApi(apiClient.getCommentsByPostID.bind(apiClient));
@@ -31,6 +34,9 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
     const { comments, setComments } = useComments();
     const toast = useToast();
 
+    /**
+     * Pulls up the comments on a post
+     */
     const getCommentsCallback = (result: ServerComment[]) => {
         toast({
             title: 'Retrieved post successfully',
@@ -77,6 +83,9 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         });
     }, [toast]);
 
+    /**
+     * Deletes a Post
+     */
     const deletePostWrapper = useCallback(() => {
         const request: PostDeleteRequest = {
             coveyTownID: currentTownID,
@@ -86,6 +95,9 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         deletePost.request(request, deletePostCallback, deletePostCallError);
     }, [currentTownID, deletePost, deletePostCallError, deletePostCallback, post.id, sessionToken]);
 
+    /**
+     * Gets the comments
+     */
     const getCommentsWrapper = useCallback(() => {
         const request: CommentsGetByPostIdRequest = {
             coveyTownID: currentTownID,

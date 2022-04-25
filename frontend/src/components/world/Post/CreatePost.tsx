@@ -113,6 +113,9 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
         createPost.request(postRequest, createPostCallback, createPostError);
     };
 
+    /**
+     * Servers response to adding a file to a post
+     */
     const fileFooter = useMemo(() => {
         if (state.file) {
             return (

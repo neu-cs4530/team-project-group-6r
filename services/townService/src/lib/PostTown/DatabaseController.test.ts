@@ -1,8 +1,7 @@
 import * as db from './DatabaseController';
-import { Post } from "../../types/PostTown/post";
+import { Post, PostSkin } from "../../types/PostTown/post";
 import { Comment } from "../../types/PostTown/comment";
 import multer, { Multer } from 'multer';
-
 import PostSchema from "../../schemas/MongoPost";
 
 import http from 'http';
@@ -53,7 +52,10 @@ describe('The database', () => {
             coordinates: {
                 x: 10,
                 y: 10,
-            }
+            },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
         }
         try {
             if(id) {
@@ -74,6 +76,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
             createdAt: new Date("2022-04-19T19:55:47.329Z"),
             updatedAt: new Date ("2022-04-19T19:55:47.329Z"),        
         }
@@ -98,6 +103,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
             createdAt: new Date("2022-04-19T19:55:47.329Z"),
             updatedAt: new Date ("2022-04-19T19:55:47.329Z"),        
         }
@@ -117,8 +125,8 @@ describe('The database', () => {
         try {
             if(id) {
                 const ids = await db.getAllPostInTown(id);
-                expect(String(ids[0]._id)).toStrictEqual('baaaaaaaaaaaaaaaaaaaaaaa');
-                expect(String(ids[1]._id)).toStrictEqual('aaaaaaaaaaaaaaaaaaaaaaaa');
+                expect(String(ids[0]._id)).toStrictEqual('aaaaaaaaaaaaaaaaaaaaaaaa');
+                expect(String(ids[1]._id)).toStrictEqual('baaaaaaaaaaaaaaaaaaaaaaa');
              }
         } catch(err) {
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
@@ -135,6 +143,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
             createdAt: new Date("2022-04-19T19:55:47.329Z"),
             updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
         }
@@ -148,6 +159,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
             createdAt: new Date("2022-04-19T19:55:47.329Z"),
             updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
         }
@@ -219,6 +233,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
             createdAt: new Date("2022-04-19T19:55:47.329Z"),
             updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
         }
@@ -296,6 +313,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
+            timeToLive: 10,
+            postSkin: <PostSkin>Object.values(PostSkin)[0],
+            numberOfComments: 0,
             createdAt: new Date("2022-04-19T19:55:47.329Z"),
             updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
         }

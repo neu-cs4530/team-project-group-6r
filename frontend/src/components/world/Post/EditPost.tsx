@@ -7,17 +7,26 @@ import { PostUpdateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 import FileForm from './FileForm';
 
+/**
+ * The properties of editing a post
+ */
 interface EditPostProps {
     post: Post;
     toggleEdit: () => void;
 }
 
+/**
+ * What editing a post entails
+ */
 type EditPostStates = {
     content: string;
     file?: File,
     deletePrevFile: boolean,
 }
 
+/**
+ * The JSX element for a post being edited
+ */
 export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Element {
     const { currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const [state, setState] = useState<EditPostStates>({
@@ -28,6 +37,10 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
     const editPost = useApi(apiClient.editPost.bind(apiClient));
     const toast = useToast();
 
+    /**
+     * Adds a file to the post
+     * @param file The file we're adding
+     */
     const handleAddFile: (file: File) => void = (file) => {
         setState((prev: EditPostStates) => ({
             ...prev,
@@ -36,6 +49,9 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         }));
     }
 
+    /**
+     * Removes a file from the post
+     */
     const handleRemoveFile = () => {
         setState((prev: EditPostStates) => ({
             ...prev,
@@ -44,6 +60,9 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         }));
     }
 
+    /**
+     * Undos deleting a file
+     */
     const hanldeUndoDeletePrevFile = () => {
         setState((prev: EditPostStates) => ({
             ...prev,
@@ -51,6 +70,9 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         }));
     }
 
+    /**
+     * Deletes a file from a post 
+     */
     const hanldeDeletePrevFile = () => {
         setState((prev: EditPostStates) => ({
             ...prev,
@@ -58,6 +80,10 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         }));
     }
 
+    /**
+     * Edits text in a post
+     * @param value The new text
+     */
     const handleTextInputChange = (value: string) => {
         setState((prev: EditPostStates) => ({
             ...prev,
@@ -65,6 +91,10 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         }));
     };
 
+    /**
+     * Server's response to editing a post
+     * @param result The message the server sends on if the post was edited succesfully
+     */
     const editPostCallback = () => {
         toast({
             title: 'Edited post successfully',
@@ -74,6 +104,10 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         toggleEdit();
     };
 
+    /**
+     * Server's response to an error being thrown in the process of editing a post
+     * @param error The error caused in the process of editing a post
+     */
     const editPostError = (error: string) => {
         toast({
             title: 'Unable to edit the post',
@@ -82,6 +116,9 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         });
     };
 
+    /**
+     * Server's response for when the edit button is pressed
+     */
     const editPostWrapper = () => {
         const request: PostUpdateRequest = {
             coveyTownID: currentTownID,
@@ -97,6 +134,9 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
         editPost.request(request, editPostCallback, editPostError);
     };
 
+    /**
+     * Servers response to adding a file to a post
+     */
     const fileFooter = useMemo(() => {
         if (state.file) {
             return (
