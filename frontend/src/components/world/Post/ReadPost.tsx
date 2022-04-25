@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { Box, Text, useToast, Heading, Button, VStack, HStack, StackDivider } from '@chakra-ui/react';
+import { Box, Text, useToast, Heading, Button, VStack, StackDivider, ButtonGroup } from '@chakra-ui/react';
 import useComments from '../../../hooks/useComments';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import Post from '../../../classes/Post';
@@ -7,6 +7,7 @@ import { ServerComment } from '../../../classes/Comment';
 import { CommentsGetByPostIdRequest, PostDeleteRequest } from '../../../classes/TownsServiceClient';
 import calculateTimeDifference from '../../../Util';
 import useApi from './useApi';
+import PopOverButton from './PopOverButton';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
 
@@ -51,7 +52,7 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
             status: 'error',
         });
     };
-  
+
     /**
      * Server's response to deleting a post
      */
@@ -94,12 +95,11 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         };
         getComments.request(request, getCommentsCallback, getCommentsError);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentTownID, post, sessionToken]);
+    }, [currentTownID, post.id, sessionToken]);
 
 
     useEffect(() => {
         socket?.emit('postOpen', post);
-        console.log(post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
@@ -118,29 +118,23 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         switch (mediaType) {
             case 'video':
                 return <video width="320" height="240" controls>
-                    <source src={source} type={mimetype}/>
+                    <source src={source} type={mimetype} />
                     Your browser does not support the video tag.
-                    <track kind="captions"/>
+                    <track kind="captions" />
                 </video>
-                break;
             case 'audio':
                 return <audio controls>
-                    <source src={source} type={mimetype}/>
+                    <source src={source} type={mimetype} />
                     Your browser does not support the audio tag.
-                    <track kind="captions"/>
+                    <track kind="captions" />
                 </audio>
-                break;
             case 'image':
-                return <img src={source} alt="Not available"/>
-                break;
+                return <img src={source} alt="Not available" />
             case 'text':
             case 'application':
-                return <embed src={source} width= "500" height= "375" type={mimetype}/>
-                break;
-
+                return <embed src={source} width="500" height="375" type={mimetype} />
             case "":
                 return <></>
-                break;
             default:
                 return <Text>File type is not supported!</Text>
         }
@@ -158,12 +152,11 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
                 paddingRight='5px'>
                 {post.postContent}
             </Text>
-            <HStack justify='end' width='100%'>
-                {userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
-                {userName === post.ownerId ? <Button size='sm' onClick={toggleEdit}>Edit</Button> : <></>}
-            </HStack>
+            <ButtonGroup justifyContent='end' width='100%' variant='outline' marginTop='10px'>
+                {userName === post.ownerId ? <PopOverButton apply={deletePostWrapper} button={<Button size='sm' colorScheme='red'>Delete</Button>} /> : <></>}
+                {userName === post.ownerId ? <Button size='sm' colorScheme='blue' onClick={toggleEdit}>Edit</Button> : <></>}
+            </ButtonGroup>
         </Box>), [post.file?.contentType, post.file?.filename, post.ownerId, post.postContent, post.title, deletePostWrapper, toggleEdit, userName]);
-
     return (
         <VStack space='5px'
             align='start'

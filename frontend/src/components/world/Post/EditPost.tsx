@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { VStack, HStack, Textarea, Input, Text, CloseButton, Button, useToast } from '@chakra-ui/react';
-import { calculateBytes } from '../../../Util';
+import { VStack, HStack, Textarea, Input, Text, CloseButton, Button, useToast, ButtonGroup } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
+import { calculateBytes } from '../../../Util';
 import Post from '../../../classes/Post';
 import { PostUpdateRequest } from '../../../classes/TownsServiceClient';
+import PopOverButton from './PopOverButton';
 import useApi from './useApi';
 import FileForm from './FileForm';
 
@@ -139,10 +140,10 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
             <HStack alignItems='center' width='100%'>
                 {fileFooter}
             </HStack>
-            <HStack justify='end' width='100%'>
+            <ButtonGroup justifyContent='end' width='100%' variant='outline'>
                 <Button size='sm' onClick={toggleEdit}>Cancel</Button>
-                <Button size='sm' colorScheme="gray" isLoading={editPost.loading} loadingText="Committing" onClick={editPostWrapper}>Commit</Button>
-            </HStack>
+                <PopOverButton apply={editPostWrapper} button={<Button size='sm' colorScheme="blue" isLoading={editPost.loading} loadingText="Committing">Commit</Button>} />
+            </ButtonGroup>
         </VStack>
     )
 }

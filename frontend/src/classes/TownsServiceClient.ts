@@ -2,38 +2,8 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import { ServerPlayer } from './Player';
 import { ServerConversationArea } from './ConversationArea';
-import { Coordinate, ServerFile } from './Post';
-
-/**
- * Server representation of a post
- */
-export type ServerPost = {
-  _id?: string,
-  title: string,
-  postContent: string,
-  ownerID: string,
-  file: ServerFile,
-  isVisible: boolean,
-  comments?: string[],
-  coordinates: Coordinate,
-  createdAt?: Date,
-  updatedAt?: Date
-}
-
-/**
- * Server representation of a comment
- */
-export type ServerComment = {
-  _id?: string,
-  rootPostID: string,
-  parentCommentID: string,
-  ownerID: string,
-  commentContent: string,
-  isDeleted: boolean,
-  comments?: ServerComment[],
-  createdAt? : Date,
-  updatedAt? : Date
-}
+import { ServerComment } from './Comment';
+import {  ServerFile, ServerPost } from './Post';
 
 
 /**
@@ -372,9 +342,7 @@ async editPost(requestData: PostUpdateRequest): Promise<void> {
       post: requestData.post,
       deletePrevFile: requestData.deletePrevFile
     }));
-    console.log(requestData);
     const responseWrapper = await this._axios.patch(`/towns/${requestData.coveyTownID}/post/${requestData.postID}`, formData);
-    console.log(responseWrapper)
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
