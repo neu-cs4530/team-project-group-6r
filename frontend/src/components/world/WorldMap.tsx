@@ -13,8 +13,7 @@ import usePlayersInTown from '../../hooks/usePlayersInTown';
 import usePosts from '../../hooks/usePosts';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
-import CreatePost from './Post/CreatePost';
-import ReadPost from './Post/ReadPost';
+import PostModal from './Post/Post';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -409,7 +408,7 @@ class CoveyGameScene extends Phaser.Scene {
         if (!localPost || localPost.id !== this.currentPost.id) {
           this.currentPost.label?.setVisible(false);
         }
-      } 
+      }
       if (localPost) {
         this.postInstructText?.setVisible(false);
         localPost.label?.setVisible(true);
@@ -873,7 +872,6 @@ export default function WorldMap(): JSX.Element {
 
   const newConversationModal = useMemo(() => {
     if (newConversation) {
-      video?.pauseGame();
       return (
         <NewConversationModal
           isOpen={newConversation !== undefined}
@@ -883,25 +881,16 @@ export default function WorldMap(): JSX.Element {
       );
     }
     return <></>;
-  }, [video, newConversation, setNewConversation]);
+  }, [newConversation, setNewConversation]);
 
   const selectedPost: Post | undefined = useMemo(() => posts.find(post => post.id === postSlide.postID), [postSlide.postID, posts]);
 
   const postSlideBar = useMemo(() => {
-    if (postSlideOpen) {
-      if (selectedPost !== undefined) {
-        return <ReadPost
-          post={selectedPost}
-          closeReadPost={() => setPostSlide({ postID: undefined, coordinate: undefined })} />
-      }
-      if (postSlide.coordinate !== undefined) {
-        return <CreatePost
-          coordinate={postSlide.coordinate}
-          closeCreatePost={() => setPostSlide({ postID: undefined, coordinate: undefined })} />
-      }
+    const closePostModal = () => {
+      setPostSlide({ postID: undefined, coordinate: undefined });
     }
-    return <></>;
-  }, [postSlide.coordinate, postSlideOpen, selectedPost]);
+    return <PostModal post={selectedPost} coordinates={postSlide.coordinate} closePostModal={closePostModal} />
+  }, [postSlide.coordinate, selectedPost]);
 
   return (
     <div id='app-container'>

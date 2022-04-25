@@ -249,16 +249,23 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
    */
   app.patch('/towns/:townID/post/:postID', express.json(), upload.single('file'), async (req, res) => {
     try {
-      let postToSend = req.body.post
+      //case: Not uploading file + not deleting a prev file
+      let parsedReq = JSON.parse(req.body.post); 
+      let postToSend = parsedReq.post;
+      //case: Uploading file + deleting prev file
+      //case: Uploading file + not deleting a prev file
       if (req.file) {
-        postToSend = { ...postToSend, filename: req.file.filename}
+        postToSend = { ...postToSend, file: { filename: req.file.filename, contentType: req.file.mimetype}}
+      //case: Not uploading file + deleting a prev file
+      } else if (!req.file && parsedReq.deletePrevFile) {
+        postToSend = { ...postToSend, file: { filename: '', contentType: ''}}
       }
       const result = await postUpdateHandler({
         coveyTownID: req.params.townID,
-        sessionToken: req.body.sessionToken,
+        sessionToken: parsedReq.sessionToken,
         postID: req.params.postID,
-        post: req.body.post,
-        deletePrevFile: req.body.deletePrevFile
+        post: postToSend,
+        deletePrevFile: parsedReq.deletePrevFile
       });
       res.status(StatusCodes.OK).json(result);
     } catch (err) {
