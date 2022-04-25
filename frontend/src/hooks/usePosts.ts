@@ -3,7 +3,6 @@ import { useContext } from 'react';
 import Post from '../classes/Post';
 import PostContext from '../contexts/PostContext';
 
-// TODO
 /**
  * Provides access to the posts in coveytown
  */

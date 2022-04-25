@@ -250,7 +250,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       });
       socket.on('postCreate', (_post: ServerPost) => {
         localPosts = localPosts.concat(Post.fromServerPost(_post));
-        console.log(_post);
         setPosts(localPosts);
       });
       socket.on('postUpdate', (_post: ServerPost) => {
