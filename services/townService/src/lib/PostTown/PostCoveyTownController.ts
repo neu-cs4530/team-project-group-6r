@@ -19,6 +19,8 @@ export default class PostCoveyTownController extends CoveyTownController{
   /**  List of moderators that have the same privelage as the owner * */
   private readonly _moderators: string[];
 
+	private _expireTimer: ReturnType<typeof setInterval>;
+
   /**
    * Creates an instnace of a PostController, which serves as the middleman between coveytown and
    * our database
@@ -31,8 +33,52 @@ export default class PostCoveyTownController extends CoveyTownController{
     this._ownerID = ownerID;
     this._moderators = [];
     this.filter = new Filter();
+		this._expireTimer = setInterval(() => this.checkExpired(), 5000);
   }
 
+	clearInterval(): void {
+		clearInterval(this._expireTimer);
+	}
+
+	private async deletePostCascade(post: Post, postID: string): Promise<Post> {
+		const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+    this._listeners.forEach(listener => listener.onPostDelete(result));
+		await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
+
+		if (post.file?.filename) {
+			await databaseController.deleteFile(post.file.filename);
+		}
+
+		return result;
+	}
+ 
+	private async checkExpired(): Promise<Post[]> {
+		const postList: Post[] = await this.getAllPostInTown();
+		//console.log(postList)
+		const expiredPosts: Post[] = postList.filter(post => {
+			const createdAt: Date = post.createdAt!;
+			const now: Date = new Date();
+			return now.getTime() > createdAt.getTime() + post.timeToLive;
+		})
+
+		//console.log(expiredPosts.length)
+
+		expiredPosts.forEach(async post => {
+			const postID: string = post._id!;
+			await this.deletePostCascade(post, postID);
+		})
+		
+		return expiredPosts;
+	}
+
+	private async didPostNotCollide(newX: number, newY: number): Promise<boolean> {
+		const postsInTown: Post[] = await this.getAllPostInTown();
+		const didCollide: Post | undefined = postsInTown.find(post => post.coordinates.x == newX && post.coordinates.y == newY)
+
+		return didCollide === undefined ? true : false;
+	}
+
+  // Add
   /**
    * Creates a post in this coveytown
    * @param post The post being created by a user
@@ -43,12 +89,17 @@ export default class PostCoveyTownController extends CoveyTownController{
     // Create the post
     // Invoke the listener
 
-    if (post.title) {
+		// if title is not null and there is no collision
+    if (post.title && this.didPostNotCollide(post.coordinates.x, post.coordinates.y)) {
       // censor
       if(post.postContent) {
         post.postContent = this.filter.clean(post.postContent.valueOf());
       }
       post.title = this.filter.clean(post.title.valueOf());
+
+			const minTTL: number = 60000;
+			const maxTTL: number = 1800000;
+			post.timeToLive = post.timeToLive < minTTL || post.timeToLive > maxTTL ? 300000 : post.timeToLive;
       const result: Post = await databaseController.createPost(this.coveyTownID, post);
       this._listeners.forEach(listener => listener.onPostCreate(result));
       return result;
@@ -89,14 +140,7 @@ export default class PostCoveyTownController extends CoveyTownController{
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
            
     if (post.ownerID === playerID) {
-      const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
-      this._listeners.forEach(listener => listener.onPostDelete(result));
-      await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
-
-      if (post.file?.filename) {
-        await databaseController.deleteFile(post.file.filename);
-      }
-
+			const result = await this.deletePostCascade(post, post._id!);
       return result;
     }
 
@@ -113,7 +157,12 @@ export default class PostCoveyTownController extends CoveyTownController{
    */
   async updatePost(postID : string, post: any, deletePrevFile: boolean, token : string) : Promise<Post> {
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+
+		// sanitize input
     delete post.comments;
+		delete post.timeToLive;
+		delete post.numberOfComments;
+		
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
             
     if (postToUpdate.ownerID === playerID) {
@@ -153,6 +202,12 @@ export default class PostCoveyTownController extends CoveyTownController{
     } else {
       await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
     }
+
+		// add 1 minute to time to live for the root post, max time to live is 1.5 minutes
+		await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
+		const updatedPost = await databaseController.incrementNumberOfComments(this.coveyTownID, comment.rootPostID);
+		this._listeners.forEach(listener => listener.onPostUpdate(updatedPost));
+		
     // TODO: remove the cheese
     const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
     emitCommentUpdate(comment.rootPostID, comments);
@@ -177,7 +232,7 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The structure of the comments, and the comments themselves
    */
   private async constructCommentTree(commentIDs : string[]) : Promise<CommentTree[]> {
-    const comments: Comment[] = await databaseController.getAllComments(this.coveyTownID, commentIDs);
+		const comments: Comment[] = await databaseController.getAllComments(this.coveyTownID, commentIDs);
 
     const commentTree = await Promise.all(comments.map(async (comment: Comment) => {
       const childCommentIDs = comment.comments!;
@@ -205,7 +260,7 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The comments and their structure
    */
   async getCommentTree(postID : string) : Promise<CommentTree[]> {
-    const post: Post = await databaseController.getPost('testID', postID);
+    const post: Post = await databaseController.getPost(this.coveyTownID, postID);
     const comments: string[] = post.comments!;
     
     const result = await this.constructCommentTree(comments);

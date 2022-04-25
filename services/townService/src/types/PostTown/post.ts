@@ -1,3 +1,10 @@
+enum PostSkin {
+    'POST',
+    'WARNING',
+    'TOMB',
+    'FLOWER'
+}
+
 /**
  * A Post is a type of message a player can make, that can last for several hours, and be commented on by everybody in the town
  */
@@ -11,7 +18,10 @@ export interface Post {
     contentType: string
   }
   isVisible: boolean,
+  timeToLive: number,
+  numberOfComments: number,
   comments?: string[],
+  postSkin: PostSkin,
   coordinates: {
     x: number,
     y: number,

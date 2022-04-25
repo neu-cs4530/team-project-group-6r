@@ -19,7 +19,10 @@
     },
     "homepage": "https://github.com/neu-se/covey.town#readme",
     "devDependencies": {
+        "@types/bad-words": "^3.0.1",
+        "@types/gridfs-stream": "^0.5.36",
         "@types/jest": "^26.0.15",
+        "@types/method-override": "^0.0.32",
         "@typescript-eslint/eslint-plugin": "^4.8.1",
         "@typescript-eslint/parser": "^4.8.1",
         "eslint": "^7.13.0",

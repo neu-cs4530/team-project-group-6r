@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { CoveyTownList } from '../CoveyTypes';
 import PostCoveyTownController from './PostTown/PostCoveyTownController';
 
@@ -57,7 +58,7 @@ export default class CoveyTownsStore {
    * @returns the new town controller
    */
   createTown(friendlyName: string, isPubliclyListed: boolean): PostCoveyTownController {
-    const newTown = new PostCoveyTownController(friendlyName, isPubliclyListed, 'testID');
+    const newTown = new PostCoveyTownController(friendlyName, isPubliclyListed, 'ownerID');
     this._towns.push(newTown);
     return newTown;
   }
@@ -97,6 +98,9 @@ export default class CoveyTownsStore {
   deleteTown(coveyTownID: string, coveyTownPassword: string): boolean {
     const existingTown = this.getControllerForTown(coveyTownID);
     if (existingTown && passwordMatches(coveyTownPassword, existingTown.townUpdatePassword)) {
+      // clear the interval for expiring posts
+      existingTown.clearInterval();
+      
       this._towns = this._towns.filter(town => town !== existingTown);
       existingTown.disconnectAllPlayers();
       return true;
