@@ -1,5 +1,5 @@
 import * as db from './DatabaseController';
-import { Post } from "../../types/PostTown/post";
+import { Post, PostSkin } from "../../types/PostTown/post";
 import { Comment } from "../../types/PostTown/comment";
 import multer, { Multer } from 'multer';
 
@@ -16,6 +16,7 @@ import mongoose from 'mongoose';
 import CoveyTownsStore from '../CoveyTownsStore';
 import * as svr from '../../server';
 import { exit } from 'process';
+import { logError } from '../../Utils';
 
 describe('The database', () => {
     const id = 'ccc';
@@ -38,6 +39,7 @@ describe('The database', () => {
             if(id) {
                 const ids = await db.getAllPostInTown(id);
                 expect(ids.length).toBe(0);
+                console.log(ids)
             }
         } catch(err) {
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
@@ -45,7 +47,6 @@ describe('The database', () => {
     })
     it('can create a post',  async () => {
         const posting:Post = {
-            _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorld',
             postContent: 'i sure exist',
             ownerID: 'uvwxyz',
@@ -53,7 +54,10 @@ describe('The database', () => {
             coordinates: {
                 x: 10,
                 y: 10,
-            }
+            },
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON
         }
         try {
             if(id) {
@@ -65,7 +69,6 @@ describe('The database', () => {
     })
     it('can get a post',  async () => {
         const posting1:Post = {
-            _id: 'baaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorld',
             postContent: 'i sure exist',
             ownerID: 'uvwxyz',
@@ -74,8 +77,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
-            createdAt: new Date("2022-04-19T19:55:47.329Z"),
-            updatedAt: new Date ("2022-04-19T19:55:47.329Z"),        
+            timeToLive: 10,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON        
         }
         try {
             if(id) {
@@ -89,7 +93,6 @@ describe('The database', () => {
     })
     it('can delete a post',  async () => {
         const posting1:Post = {
-            _id: 'caaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorlds',
             postContent: 'i sure exist',
             ownerID: 'uvwxyz',
@@ -98,8 +101,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
-            createdAt: new Date("2022-04-19T19:55:47.329Z"),
-            updatedAt: new Date ("2022-04-19T19:55:47.329Z"),        
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON         
         }
         try {
             if(id) {
@@ -126,7 +130,6 @@ describe('The database', () => {
     })
     it('can update a post',  async () => {
         const posting1:Post = {
-            _id: 'daaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorld',
             postContent: 'i sure exist',
             ownerID: 'uvwxyz',
@@ -135,11 +138,11 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
-            createdAt: new Date("2022-04-19T19:55:47.329Z"),
-            updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON   
         }
         const posting2:Post = {
-            _id: 'daaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorld',
             postContent: 'i sure exist, still',
             ownerID: 'uvwxyz',
@@ -148,8 +151,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
-            createdAt: new Date("2022-04-19T19:55:47.329Z"),
-            updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON   
         }
         try {
             if(id) {
@@ -162,6 +166,48 @@ describe('The database', () => {
             }
         } catch(err) {
             expect(1).toBe(2); //if the above code rejects the promise, this test should fail
+        }
+    })
+    it('can update a post with ',  async () => {
+        const posting1:Post = {
+            title: 'helloWorld',
+            postContent: 'i sure exist',
+            ownerID: 'uvwxyz',
+            isVisible: true,
+            coordinates: {
+                x: 10,
+                y: 10,
+            },
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON   
+        }
+        const posting2:Post = {
+            title: 'helloWorld',
+            postContent: 'i sure exist, still',
+            ownerID: 'uvwxyz',
+            isVisible: true,
+            coordinates: {
+                x: 10,
+                y: 10,
+            },
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON   
+        }
+        try {
+            if(id) {
+                const ids = await db.createPost(id, posting1);
+                const ids2 = await db.getPost(id, String(ids._id));
+                expect(ids2.postContent).toBe('i sure exist');
+                const ids3 = await db.updatePost(id, String(ids._id), {
+                    postContent: 'i sure exist, still'
+                });
+                const ids4= await db.getPost(id, String(ids._id));
+                expect(ids4.postContent).toBe('i sure exist, still')
+            }
+        } catch(err) {
+            logError(err);
         }
     })
     it('can create a comment', async () => {
@@ -210,7 +256,6 @@ describe('The database', () => {
     })
     it('can link a comment to root post', async () => {
         const posting1:Post = {
-            _id: 'eaaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorld',
             postContent: 'i sure exist',
             ownerID: 'uvwxyz',
@@ -219,8 +264,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
-            createdAt: new Date("2022-04-19T19:55:47.329Z"),
-            updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON  
         }
         const comment:Comment = {
             rootPostID: '',
@@ -286,7 +332,6 @@ describe('The database', () => {
     })
     it('can delete a comment under root posts', async () => {
         const posting1:Post = {
-            _id: 'faaaaaaaaaaaaaaaaaaaaaaa',
             title: 'helloWorld',
             postContent: 'i sure exist',
             ownerID: 'uvwxyz',
@@ -296,8 +341,9 @@ describe('The database', () => {
                 x: 10,
                 y: 10,
             },
-            createdAt: new Date("2022-04-19T19:55:47.329Z"),
-            updatedAt: new Date ("2022-04-19T19:55:47.329Z"),  
+            timeToLive: 1000000000,
+            numberOfComments: 2,
+            postSkin: PostSkin.BALLON  
         }
         const comment:Comment = {
             rootPostID: '',
