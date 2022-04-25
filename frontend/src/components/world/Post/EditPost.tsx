@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { VStack, HStack, Textarea, Input, Text, CloseButton, Button, useToast } from '@chakra-ui/react';
-import { calculateBytes } from '../../../Util';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
+import { calculateBytes } from '../../../Util';
 import Post from '../../../classes/Post';
 import { PostUpdateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';

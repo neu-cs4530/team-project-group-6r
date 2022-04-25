@@ -41,18 +41,6 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
     const toast = useToast();
 
     /**
-     * Calculates the difference between when a comment was posted and right now
-     * @param date What time it is right now
-     * @returns How long its been between when the comment was posted and now
-     */
-    function calculateHourDifference(date: Date | undefined) {
-        if (date) {
-            return Math.round((new Date().getTime() - new Date(date).getTime()) / 36e5);
-        }
-        return 'unknown';
-    }
-
-    /**
      * Response for when text in the comment has changed
      * @param value The new text
      */
@@ -110,8 +98,6 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             description: `Comment ID: ${comment._id}`,
             status: 'success',
         });
-        console.log(comment.updatedAt);
-        console.log(comment.createdAt);
         handleEditButtonClick();
     };
 
@@ -174,7 +160,7 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             <Box alignSelf='end' width={500 - 8 * depth}>
                 <Text fontSize='xs'>
                     Commented by <Text display='inline' color='cyan.500'> u/{comment.ownerID}</Text> · 
-                    {calculateHourDifference(comment.createdAt)} hours ago{comment.updatedAt !== comment.createdAt && `* (last edited ${calculateHourDifference(comment.updatedAt)} hours ago)`}
+                    {calculateTimeDifference(comment.createdAt)}{comment.updatedAt !== comment.createdAt && `* (last edited ${calculateTimeDifference(comment.updatedAt)})`}
                 </Text>
                 <Flex width='100%'>
                     <HStack width='100%'>
