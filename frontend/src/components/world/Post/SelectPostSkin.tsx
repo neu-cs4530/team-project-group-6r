@@ -32,7 +32,6 @@ export default function SelectPostSkin({ setPostSkin, postSkin }: SelectPostSkin
         <VStack bg='gray.100' padding='8px' borderRadius='5px' align='center' width="100%" spacing='5px'>
             <Image
                 boxSize='50px'
-                objectFit='cover'
                 src={postSkinPngMap[state.postSkin]}
             />
             {skinSelect()}

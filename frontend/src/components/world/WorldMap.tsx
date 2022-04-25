@@ -13,7 +13,7 @@ import usePosts from '../../hooks/usePosts';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
 import PostModal from './Post/Post';
-import { postSkinSpriteMap, PostSkinSpriteMapType } from '../../classes/Image';
+import { PostSkin, postSkinSpriteMap, PostSkinSpriteMapType } from '../../classes/Image';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -277,7 +277,7 @@ class CoveyGameScene extends Phaser.Scene {
     let { sprite } = mPost;
     if (!sprite) {
       sprite = this.physics.add
-        .sprite(0, 0, mPost.postSkin)
+        .sprite(0, 0, mPost.postSkin || PostSkin.POST)
         .setSize(25, 30)
         .setOffset(0, 24);
       const worldXY = this.worldLayer.tileToWorldXY(mPost.coordinate.x, mPost.coordinate.y);
