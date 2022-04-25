@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { VStack, HStack, Input, Textarea, Text, CloseButton, useToast, Button, ButtonGroup } from '@chakra-ui/react';
+import { VStack, HStack, Input, Textarea, Text, CloseButton, Flex, useToast, Button, ButtonGroup, Box } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { Coordinate, ServerPost } from '../../../classes/Post';
+import { PostSkin } from '../../../classes/Image';
 import { PostCreateRequest } from '../../../classes/TownsServiceClient';
 import { calculateBytes } from '../../../Util';
 import FileForm from './FileForm';
+import SelectPostSkin from './SelectPostSkin';
 import useApi from './useApi';
 
 /**
@@ -15,13 +17,15 @@ interface CreatePostProps {
     closeCreatePost: () => void;
 }
 
-/**
+/** 
  * What a post can contain, a title and some content
  */
 type CreatePostStates = {
     title: string,
     content: string;
     file?: File,
+    postSkin: PostSkin,
+    ttl: number,
 }
 
 /**
@@ -31,6 +35,8 @@ const initalState = {
     title: '',
     content: '',
     file: undefined,
+    postSkin: PostSkin.POST,
+    ttl: 300000,
 }
 
 export default function CreatePost({ coordinates, closeCreatePost }: CreatePostProps): JSX.Element {
@@ -65,14 +71,21 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
         }));
     }
 
+    const handleSelectPostSkin = (postSkin: PostSkin) => {
+        setState((prev: CreatePostStates) => ({
+            ...prev,
+            postSkin,
+        }));
+    }
+
     /**
      * Server's response to creating a post
      * @param result The message the server sends on if the post was created succesfully
      */
-    const createPostCallback = (result: ServerPost) => {
+    const createPostCallback = (arg: ServerPost) => {
         toast({
             title: 'Created post successfully',
-            description: `Post ID: ${result._id}, Title: ${result.title}, File: ${result.file.filename}`,
+            description: `Post ID: ${arg._id}, Title: ${arg.title}, File: ${arg.file.filename}`,
             status: 'success',
         });
         closeCreatePost();
@@ -106,7 +119,10 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
                 file: {
                     filename: '',
                     contentType: ''
-                }
+                },
+                timeToLive: 10000,
+                numberOfComments: 0,
+                postSkin: PostSkin.POST,
             },
             file: state.file,
         };
@@ -127,7 +143,12 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
 
     return (
         <VStack space='5px'>
-            <Text alignSelf='start' fontSize='sm'>Post as <Text display='inline' color='cyan.500'>u/{userName}</Text></Text>
+            <Flex justify='space-between' width='100%'>
+                <Text alignSelf='end' fontSize='sm'>Post as <Text display='inline' color='cyan.500'>u/{userName}</Text></Text>
+                <Box width='30%'>
+                    <SelectPostSkin postSkin={state.postSkin} setPostSkin={handleSelectPostSkin} />
+                </Box>
+            </Flex>
             <Input
                 placeholder='Title'
                 size='md'

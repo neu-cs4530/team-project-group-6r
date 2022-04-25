@@ -134,9 +134,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [playerMovementCallbacks] = useState<PlayerMovementCallback[]>([]);
   const [playersInTown, setPlayersInTown] = useState<Player[]>([]);
   const [nearbyPlayers, setNearbyPlayers] = useState<Player[]>([]);
-  // const [currentLocation, setCurrentLocation] = useState<UserLocation>({moving: false, rotation: 'front', x: 0, y: 0});
   const [conversationAreas, setConversationAreas] = useState<ConversationArea[]>([]);
-  // TODO: setPosts should be called when socket onPostAdded/onPostEditted/onPostDeleted
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
 
@@ -167,11 +165,12 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       let localPosts = initData.posts.map(sp =>
         Post.fromServerPost(sp)
       );
+      console.log(initData.posts);
+      console.log(localPosts);
       let localNearbyPlayers: Player[] = [];
       setPlayersInTown(localPlayers);
       setConversationAreas(localConversationAreas);
       setNearbyPlayers(localNearbyPlayers);
-      // TODO
       setPosts(localPosts);
 
       const recalculateNearbyPlayers = () => {
@@ -253,6 +252,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       });
       socket.on('postCreate', (_post: ServerPost) => {
         localPosts = localPosts.concat(Post.fromServerPost(_post));
+        console.log(_post);
         setPosts(localPosts);
       });
       socket.on('postUpdate', (_post: ServerPost) => {

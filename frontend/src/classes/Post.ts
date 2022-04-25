@@ -1,3 +1,5 @@
+import { PostSkin } from "./Image";
+
 /**
  * A post is a type of global message that people can see and comment upon; this is the server representation of it
  */
@@ -11,7 +13,10 @@ export type ServerPost = {
         contentType: string
     }
     isVisible: boolean,
+    timeToLive: number,
+    numberOfComments: number,
     comments?: string[],
+    postSkin: PostSkin,
     coordinates: Coordinate,
     createdAt?: Date,
     updatedAt?: Date
@@ -58,7 +63,13 @@ export default class Post {
 
     private _coordinates: Coordinate;
 
+    private _timeToLive: number;
+
+    private _numberOfComments: number;
+
     private _comments?: string[] = [];
+
+    private _postSkin: PostSkin;
 
     private _createAt?: Date;
 
@@ -72,14 +83,17 @@ export default class Post {
 
     constructor(title: string, postContent: string,
         ownerID: string, isVisible: boolean, coordinate: Coordinate, file: ServerFile,
-        comments?: string[], id?: string, createAt?: Date, updateAt?: Date) {
+        timeToLive: number, numberOfComments: number, postSkin: PostSkin, comments?: string[], id?: string, createAt?: Date, updateAt?: Date) {
         this._id = id;
         this._title = title;
         this._postContent = postContent;
         this._ownerID = ownerID;
         this._file = file;
         this._isVisible = isVisible;
+        this._timeToLive = timeToLive;
+        this._numberOfComments = numberOfComments;
         this._comments = comments;
+        this._postSkin = postSkin;
         this._coordinates = coordinate;
         this._createAt = createAt;
         this._updateAt = updateAt;
@@ -117,6 +131,10 @@ export default class Post {
         return this._createAt;
     }
 
+    get postSkin() {
+        return this._postSkin;
+    }
+
     get updateAt() {
         return this._updateAt;
     }
@@ -132,7 +150,10 @@ export default class Post {
             postContent: this._postContent,
             ownerID: this._ownerID,
             isVisible: this._isVisible,
+            timeToLive: this._timeToLive,
+            numberOfComments: this._numberOfComments,
             comments: this._comments,
+            postSkin: this._postSkin,
             coordinates: this._coordinates,
             file: this._file,
             createdAt: this._createAt,
@@ -156,6 +177,9 @@ export default class Post {
             this._isVisible,
             { ...this._coordinates },
             { ...this._file },
+            this._timeToLive,
+            this._numberOfComments,
+            this._postSkin,
             this._comments?.concat([]),
             this._id,
             this._createAt,
@@ -174,6 +198,9 @@ export default class Post {
             serverPost.isVisible,
             serverPost.coordinates,
             serverPost.file,
+            serverPost.timeToLive,
+            serverPost.numberOfComments,
+            serverPost.postSkin,
             serverPost.comments,
             serverPost._id,
             serverPost.createdAt,
