@@ -94,7 +94,7 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         };
         getComments.request(request, getCommentsCallback, getCommentsError);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentTownID, post.id, sessionToken]);
+    }, [currentTownID, post, sessionToken]);
 
 
     useEffect(() => {
