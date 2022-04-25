@@ -8,23 +8,35 @@ import { ServerPost, Coordinate } from '../../../classes/Post';
 import { PostCreateRequest } from '../../../classes/TownsServiceClient';
 import { calculateBytes } from '../../../Util';
 
+/**
+ * The properties of creating a post
+ */
 interface CreatePostProps {
     coordinate: Coordinate;
     closeCreatePost: () => void;
 }
 
+/**
+ * What a post can contain, a title and some content
+ */
 type CreatePostStates = {
     title: string;
     content: string;
     file?: File,
 }
 
+/**
+ * The initial state of a post, just empty strings
+ */
 const initalState = {
     title: '',
     content: '',
     file: undefined,
 }
 
+/**
+ * JSON version of how a post should look visually
+ */
 const dropZoneStyle = {
     flex: 1,
     display: 'flex',
@@ -41,6 +53,10 @@ const dropZoneStyle = {
     transition: 'border .24s ease-in-out'
 };
 
+/**
+ * The jsx element version of a post
+ * @returns The jsx element of a post
+ */
 export default function CreatePost({ coordinate, closeCreatePost }: CreatePostProps): JSX.Element {
     const { userName, currentTownFriendlyName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -69,6 +85,11 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
         }));
     }
 
+    /**
+     * Response for when text in the post has changed
+     * @param value The new text
+     * @param field The field being changed
+     */
     const handleTextInputChange = (value: string, field: string) => {
         setState((prev: CreatePostStates) => ({
             ...prev,
@@ -76,6 +97,10 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
         }));
     };
 
+    /**
+     * Server's response to creating a post
+     * @param result The message the server sends on if the post was created succesfully
+     */
     const createPostCallback = (result: ServerPost) => {
         toast({
             title: 'Created post successfully',
@@ -85,6 +110,10 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
         closeCreatePost();
     };
 
+    /**
+     * Server's response to an error being thrown in the process of creating a post
+     * @param error The error caused in the process of creating a post
+     */
     const createPostError = (error: string) => {
         toast({
             title: 'Unable to create the post',
@@ -93,6 +122,9 @@ export default function CreatePost({ coordinate, closeCreatePost }: CreatePostPr
         });
     };
 
+    /**
+     * Server's response for when the commit (basically, submit your post) button is pressed
+     */
     const handleCommitButtonClick = async () => {
         const postRequest: PostCreateRequest = {
             coveyTownID: currentTownID,

@@ -5,6 +5,9 @@ import { ServerComment } from '../../../classes/Comment';
 import { CommentCreateRequest } from '../../../classes/TownsServiceClient';
 import useApi from './useApi';
 
+/**
+ * The properties of creating a comment
+ */
 export interface CreateCommentProps {
     postID: string;
     commentID?: string;
@@ -13,20 +16,34 @@ export interface CreateCommentProps {
     errorCallback?: () => void;
 }
 
+/**
+ * What a comment can contain, which is just a string
+ */
 type CreateCommentStates = {
     content: string;
 }
 
+/**
+ * The initial value of a comment, an empty string
+ */
 const initalState = {
     content: '',
 }
 
+/**
+ * Helper function used by the Comment element to succesfully create a comment, and handle any errors
+ * @returns The created comment
+ */
 export default function CreateComment({ postID, commentID, cancel, successCallback, errorCallback }: CreateCommentProps) {
     const { userName, currentTownID, sessionToken, apiClient } = useCoveyAppState();
     const [commentStates, setCommentStates] = useState<CreateCommentStates>(initalState);
     const createComment = useApi(apiClient.createComment.bind(apiClient));
     const toast = useToast();
 
+    /**
+     * Response for when text in the comment has changed
+     * @param value The new text
+     */
     const handleTextInputChange = (value: string) => {
         setCommentStates((prev: CreateCommentStates) => ({
             ...prev,
@@ -34,6 +51,10 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
         }));
     };
 
+    /**
+     * Server's response to creating a comment
+     * @param result The message the server sends on if the comment was created succesfully
+     */
     const createCommentCallback = (result: ServerComment) => {
         toast({
             title: 'Created comment successfully',
@@ -44,6 +65,10 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
         setCommentStates({ content: '' });
     };
 
+    /**
+     * Server's response to an error being thrown in the process of creating a comment
+     * @param error The error caused in the process of creating a comment
+     */
     const createCommentError = (error: string) => {
         toast({
             title: 'Unable to create the comment',
@@ -53,6 +78,9 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
         if (errorCallback) errorCallback();
     };
 
+    /**
+     * Server's response for when the commit (basically, submit your comment) button is pressed
+     */
     const handleCommitButtonClick = async () => {
         const request: CommentCreateRequest = {
             coveyTownID: currentTownID,
