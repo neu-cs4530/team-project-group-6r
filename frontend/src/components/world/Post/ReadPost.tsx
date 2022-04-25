@@ -9,6 +9,7 @@ import calculateTimeDifference from '../../../Util';
 import useApi from './useApi';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
+import PopOverButton from './PopOverButton';
 
 interface ReadPostProps {
     post: Post;
@@ -134,7 +135,7 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
                 {post.postContent}
             </Text>
             <HStack justify='end' width='100%'>
-                {userName === post.ownerId ? <Button size='sm' onClick={deletePostWrapper}>Delete</Button> : <></>}
+                {userName === post.ownerId ? <PopOverButton apply={deletePostWrapper} button={<Button size='sm'>Delete</Button>} /> : <></>}
                 {userName === post.ownerId ? <Button size='sm' onClick={toggleEdit}>Edit</Button> : <></>}
             </HStack>
         </Box>), [post.file?.contentType, post.file?.filename, post.ownerId, post.postContent, post.title, deletePostWrapper, toggleEdit, userName]);

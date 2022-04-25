@@ -104,7 +104,7 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             return (
                 <Textarea
                     placeholder="Text (optional)"
-                    height='150px'
+                    height='100px'
                     width='100%'
                     value={state.content}
                     onChange={({ target }) => handleTextInputChange(target.value)}
