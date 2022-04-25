@@ -51,9 +51,6 @@ const upload = multer({ storage });
 
 export const ServerSocket = addTownRoutes(server, app, upload);
 
-const newTown = CoveyTownsStore.getInstance().createTown('ChengTown', true);
-//console.log(newTown);
-
 server.listen(process.env.PORT || 8081, () => {
   const address = server.address() as AddressInfo;
   // eslint-disable-next-line no-console

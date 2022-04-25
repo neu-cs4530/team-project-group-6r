@@ -362,7 +362,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   app.get('/files', async (_req, res) => {
     const { gfs } = FileConnection.getInstance();
 
-    gfs.files.find().toArray((_err, files) => {
+    gfs.files.find().toArray((_err: any, files: any) => {
       // Check if files
       if (!files || files.length === 0) {
         return res.status(404).json({
@@ -396,7 +396,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   app.get('/image/:filename', async (req, res) => {
     const { gfs } = FileConnection.getInstance();
     const { gridfsBucket } = FileConnection.getInstance();
-    gfs.files.findOne({ filename: req.params.filename }, (_err, file) => {
+    gfs.files.findOne({ filename: req.params.filename }, (_err: any, file: any) => {
       if (!file || file.length === 0) {
         res.status(404).json({
           err: 'No file exist',
