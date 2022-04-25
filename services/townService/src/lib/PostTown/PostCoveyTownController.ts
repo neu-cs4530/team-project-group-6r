@@ -20,9 +20,7 @@ export default class PostCoveyTownController extends CoveyTownController{
   private readonly _moderators: string[];
 
 	private _expireTimer: ReturnType<typeof setInterval>;
-	
 
-  constructor(friendlyName: string, isPubliclyListed: boolean, ownerID: string) {
   /**
    * Creates an instnace of a PostController, which serves as the middleman between coveytown and
    * our database
@@ -38,7 +36,6 @@ export default class PostCoveyTownController extends CoveyTownController{
 		this._expireTimer = setInterval(() => this.checkExpired(), 5000);
   }
 
-<<<<<<< HEAD
 	clearInterval(): void {
 		clearInterval(this._expireTimer);
 	}
@@ -66,9 +63,9 @@ export default class PostCoveyTownController extends CoveyTownController{
 
 		//console.log(expiredPosts.length)
 
-		expiredPosts.forEach(post => {
+		expiredPosts.forEach(async post => {
 			const postID: string = post._id!;
-			this.deletePostCascade(post, postID);
+			await this.deletePostCascade(post, postID);
 		})
 		
 		return expiredPosts;
@@ -82,13 +79,11 @@ export default class PostCoveyTownController extends CoveyTownController{
 	}
 
   // Add
-=======
   /**
    * Creates a post in this coveytown
    * @param post The post being created by a user
    * @returns The post that was created
    */
->>>>>>> main
   async createPost(post : Post) : Promise<Post> {
     // Area collision?
     // Create the post
@@ -202,11 +197,10 @@ export default class PostCoveyTownController extends CoveyTownController{
       await databaseController.addCommentToParentComment(this.coveyTownID, comment.parentCommentID, createdCommentID);
     }
 
-		// add 1 minute to time to live for the root post
+		// add 1 minute to time to live for the root post, max time to live is 1.5 minutes
 		const updatedPost: Post = await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
-		console.log(updatedPost.timeToLive)
 		this._listeners.forEach(listener => listener.onPostUpdate(updatedPost));
-
+		
     // TODO: remove the cheese
     const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
     emitCommentUpdate(comment.rootPostID, comments);
