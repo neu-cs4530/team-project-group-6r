@@ -89,6 +89,7 @@ export default class PostCoveyTownController extends CoveyTownController{
     // Create the post
     // Invoke the listener
 
+		// if title is not null and there is no collision
     if (post.title && this.didPostNotCollide(post.coordinates.x, post.coordinates.y)) {
       // censor
       if(post.postContent) {
@@ -157,6 +158,7 @@ export default class PostCoveyTownController extends CoveyTownController{
   async updatePost(postID : string, post: any, deletePrevFile: boolean, token : string) : Promise<Post> {
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
     delete post.comments;
+		delete post.timeToLive;
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
             
     if (postToUpdate.ownerID === playerID) {

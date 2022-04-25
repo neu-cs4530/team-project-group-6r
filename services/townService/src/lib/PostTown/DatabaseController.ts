@@ -193,3 +193,12 @@ export async function deleteFile(filename: string): Promise<any> {
     }
   });
 }
+
+export async function clearCollections(): Promise<any> {
+	try {	
+		const collections = await mongoose.connection.db.listCollections().toArray();
+		collections.map(collection => collection.name).forEach(async collectionName => mongoose.connection.db.dropCollection(collectionName));
+	} catch (error) {
+		throw(error);
+	}
+}

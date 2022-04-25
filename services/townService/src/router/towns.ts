@@ -260,6 +260,8 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
       } else if (!req.file && parsedReq.deletePrevFile) {
         postToSend = { ...postToSend, file: { filename: '', contentType: ''}}
       }
+
+      console.log(parsedReq)
       const result = await postUpdateHandler({
         coveyTownID: req.params.townID,
         sessionToken: parsedReq.sessionToken,

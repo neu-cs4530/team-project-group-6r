@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import CoveyTownsStore from './lib/CoveyTownsStore';
 import addTownRoutes from './router/towns';
 import FileConnection from './connection';
+import { clearCollections } from './lib/PostTown/DatabaseController';
 
 
 const app = Express();
@@ -26,6 +27,7 @@ const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?ret
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
 
 mongoose.connection.once('open', () => {
+  clearCollections();
   FileConnection.createInstance();
 });
 
