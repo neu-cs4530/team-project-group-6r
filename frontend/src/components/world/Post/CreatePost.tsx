@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { VStack, HStack, Input, Textarea, Text, CloseButton, useToast, Button } from '@chakra-ui/react';
+import { VStack, HStack, Input, Textarea, Text, CloseButton, useToast, Button, ButtonGroup } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { Coordinate, ServerPost } from '../../../classes/Post';
 import { PostCreateRequest } from '../../../classes/TownsServiceClient';
@@ -127,7 +127,7 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
 
     return (
         <VStack space='5px'>
-            <Text alignSelf='start' fontSize='sm'>Post as <Text display='inline' color='gray.400'>u/{userName}</Text></Text>
+            <Text alignSelf='start' fontSize='sm'>Post as <Text display='inline' color='cyan.500'>u/{userName}</Text></Text>
             <Input
                 placeholder='Title'
                 size='md'
@@ -142,10 +142,10 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
                 onChange={({ target }) => handleTextInputChange(target.value, 'content')} />
             <FileForm setFile={handleAddFile} />
             {fileFooter}
-            <HStack justify='end' width='100%'>
-                <Button size='sm' onClick={closeCreatePost}>Cancel</Button>
-                <Button size='sm' colorScheme="gray" isLoading={createPost.loading} loadingText="Committing" onClick={createPostWrapper}>Commit</Button>
-            </HStack>
+            <ButtonGroup justifyContent='end' width='100%' variant='outline'>
+                <Button size='sm' variant='outline' onClick={closeCreatePost}>Cancel</Button>
+                <Button size='sm' colorScheme='blue' isLoading={createPost.loading} loadingText="Committing" onClick={createPostWrapper}>Commit</Button>
+            </ButtonGroup>
         </VStack>
     );
 }

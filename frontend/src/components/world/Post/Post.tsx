@@ -43,11 +43,8 @@ export default function PostModal({ post, coordinates, closePostModal }: PostPro
 
 
     const header = useMemo(() => {
-        if (post) {
-            return `Post In Town: ${currentTownFriendlyName}`;
-        }
-        if (coordinates) {
-            return `Post To Town: ${currentTownFriendlyName}`;
+        if (post || coordinates) {
+            return `Town: ${currentTownFriendlyName}`;
         }
         return <></>;
     }, [coordinates, currentTownFriendlyName, post]);
@@ -74,7 +71,7 @@ export default function PostModal({ post, coordinates, closePostModal }: PostPro
             <ModalContent>
                 <ModalHeader>{header}</ModalHeader>
                 <ModalCloseButton />
-                <ModalBody>{body}</ModalBody>
+                <ModalBody paddingBottom='20px'>{body}</ModalBody>
             </ModalContent>
         </Modal>
     )
