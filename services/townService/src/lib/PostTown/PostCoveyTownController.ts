@@ -157,8 +157,12 @@ export default class PostCoveyTownController extends CoveyTownController{
    */
   async updatePost(postID : string, post: any, deletePrevFile: boolean, token : string) : Promise<Post> {
     const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
+
+		// sanitize input
     delete post.comments;
 		delete post.timeToLive;
+		delete post.numberOfComments;
+		
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
             
     if (postToUpdate.ownerID === playerID) {
