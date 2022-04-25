@@ -92,7 +92,6 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
 
     useEffect(() => {
         socket?.emit('postOpen', post);
-        console.log(post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
