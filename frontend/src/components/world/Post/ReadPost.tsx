@@ -10,6 +10,9 @@ import useApi from './useApi';
 import CreateComment from './CreateComment';
 import Comments from './Comments';
 
+/**
+ * The properties of reading a post on your screen
+ */
 interface ReadPostProps {
     post: Post;
     toggleEdit: () => void;
@@ -37,6 +40,10 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         if (setComments) setComments(result);
     };
 
+    /**
+     * Server's response to an error being thrown in the process of getting comments under a post
+     * @param error The error caused in the process of getting comments under a post
+     */
     const getCommentsError = (error: string) => {
         toast({
             title: 'Unable to get comments for this post',
@@ -44,8 +51,12 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
             status: 'error',
         });
     };
-
+  
+    /**
+     * Server's response to deleting a post
+     */
     const deletePostCallback = useCallback(() => {
+
         toast({
             title: 'Deleted Post successfully',
             description: `Post ID: ${post.id}`,
@@ -54,6 +65,10 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         closeReadPost();
     }, [closeReadPost, post.id, toast]);
 
+    /**
+     * Server's response to an error being thrown in the process of deleting a post
+     * @param error The error caused in the process of deleting a post
+     */
     const deletePostCallError = useCallback((error: string) => {
         toast({
             title: 'Unable to delete the post',
@@ -84,6 +99,7 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
 
     useEffect(() => {
         socket?.emit('postOpen', post);
+        console.log(post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
@@ -94,28 +110,37 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         getCommentsWrapper();
     }, [getCommentsWrapper]);
 
+    /**
+     * Element that displays when a file uploaded is either a video or an audio file
+     */
     function MultiMediaDisplay({ mimetype, source }: MimeTypeProps): JSX.Element {
         const mediaType = mimetype.split('/')[0];
         switch (mediaType) {
             case 'video':
                 return <video width="320" height="240" controls>
-                    <source src={source} type={mimetype} />
+                    <source src={source} type={mimetype}/>
                     Your browser does not support the video tag.
-                    <track kind="captions" />
+                    <track kind="captions"/>
                 </video>
+                break;
             case 'audio':
                 return <audio controls>
-                    <source src={source} type={mimetype} />
+                    <source src={source} type={mimetype}/>
                     Your browser does not support the audio tag.
-                    <track kind="captions" />
+                    <track kind="captions"/>
                 </audio>
+                break;
             case 'image':
-                return <img src={source} alt="Not available" />
+                return <img src={source} alt="Not available"/>
+                break;
             case 'text':
             case 'application':
-                return <embed src={source} width="500" height="375" type={mimetype} />
+                return <embed src={source} width= "500" height= "375" type={mimetype}/>
+                break;
+
             case "":
                 return <></>
+                break;
             default:
                 return <Text>File type is not supported!</Text>
         }
