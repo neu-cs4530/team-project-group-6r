@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { VStack, Select, Image } from '@chakra-ui/react';
-import { PostSkin, postNameMap, postSkinMap } from '../../../classes/Image';
+import { PostSkin, postSkinPngMap } from '../../../classes/Image';
 
 interface SelectPostSkinProps {
     setPostSkin: (postSkin: PostSkin) => void;
@@ -8,22 +8,23 @@ interface SelectPostSkinProps {
 }
 
 type SelectPostSkinStates = {
-    skin: string;
+    postSkin: PostSkin;
 }
 
 export default function SelectPostSkin({ setPostSkin, postSkin }: SelectPostSkinProps): JSX.Element {
     const [state, setState] = useState<SelectPostSkinStates>({
-        skin: postSkinMap[postSkin] || 'Post',
+        postSkin: postSkin || PostSkin.POST,
     });
 
     const handleSelectPostSkin = (skin: string) => {
-        setState({ skin });
-        setPostSkin(postNameMap[skin].num);
+        const selectedPostSkin: PostSkin = skin as PostSkin;
+        setState({ postSkin: selectedPostSkin });
+        setPostSkin(selectedPostSkin);
     };
 
     const skinSelect = () => (
         <Select size='sm' bg='cyan.10' borderColor='gray' onChange={({ target }) => handleSelectPostSkin(target.value)} placeholder='Select Post Skin'>
-            {Object.keys(postNameMap).map((key: string) => <option key={key} value={key}>{key}</option>)}
+            {Object.keys(postSkinPngMap).map((key: string) => <option key={key} value={key}>{key}</option>)}
         </Select>
     );
 
@@ -32,7 +33,7 @@ export default function SelectPostSkin({ setPostSkin, postSkin }: SelectPostSkin
             <Image
                 boxSize='50px'
                 objectFit='cover'
-                src={postNameMap[state.skin].png}
+                src={postSkinPngMap[state.postSkin]}
             />
             {skinSelect()}
         </VStack>

@@ -120,9 +120,9 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
                     filename: '',
                     contentType: ''
                 },
-                timeToLive: 10000,
+                timeToLive: 300000,
                 numberOfComments: 0,
-                postSkin: PostSkin.POST,
+                postSkin: state.postSkin,
             },
             file: state.file,
         };

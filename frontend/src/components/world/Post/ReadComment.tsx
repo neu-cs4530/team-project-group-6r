@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Text, Box, Button, Textarea, useToast, ButtonGroup } from "@chakra-ui/react";
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
-import calculateTimeDifference from "../../../Util";
+import calculateTimeDifference from '../../../Util';
 import { ServerComment } from '../../../classes/Comment';
 import { CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 import PopOverButton from './PopOverButton';

@@ -1,65 +1,51 @@
-import { bottle, tomb, post } from '../assets';
+import { bottle, tomb, post, chest, flower } from '../assets';
 
-export const postAssetPath = '../../public/assets/post/';
+export const postAssetPath = '/assets/post/';
 
 export enum PostSkin {
-    'POST',
-    'WARNING',
-    'TOMB',
-    'FLOWER',
-    'BOTTLE',
-};
-
-export interface PostNameMapType {
-    [key: string]: {
-        num: PostSkin,
-        png: string,
-    }
+    POST = 'POST',
+    CHEST = 'CHEST',
+    TOMB = 'TOMB',
+    FLOWER = 'FLOWER',
+    BOTTLE = 'BOTTLE',
 };
 
 export type PostSkinMapType = {
     [key in PostSkin]: string;
-};
+};;
 
 export type PostSkinSpriteMapType = {
-    postSkin: string;
+    postSkin: PostSkin;
     path: string;
 };
 
-export const postNameMap: PostNameMapType = {
-    'Post': {
-        num: PostSkin.POST,
-        png: post,
-    },
-    'Bottle': {
-        num: PostSkin.BOTTLE,
-        png: bottle,
-    },
-    'Tomb': {
-        num: PostSkin.TOMB,
-        png: tomb,
-    }
-};
-
-export const postSkinMap: PostSkinMapType = {
-    [PostSkin.POST]: 'Post',
-    [PostSkin.BOTTLE]: 'Bottle',
-    [PostSkin.TOMB]: 'Tomb',
-    1: "",
-    3: ""
+export const postSkinPngMap: PostSkinMapType = {
+    [PostSkin.POST]: post,
+    [PostSkin.BOTTLE]: bottle,
+    [PostSkin.TOMB]: tomb,
+    [PostSkin.CHEST]: chest,
+    [PostSkin.FLOWER]: flower
 };
 
 export const postSkinSpriteMap: PostSkinSpriteMapType[] = [
     {
-        postSkin: (PostSkin.POST).toString(10),
+        postSkin: PostSkin.POST,
         path: `${postAssetPath}post.png`,
     },
     {
-        postSkin: (PostSkin.BOTTLE).toString(10),
+        postSkin: PostSkin.BOTTLE,
         path: `${postAssetPath}bottle.png`,
     },
     {
-        postSkin: (PostSkin.TOMB).toString(10),
+        postSkin: PostSkin.TOMB,
         path: `${postAssetPath}tomb.png`,
     },
+    {
+        postSkin: PostSkin.CHEST,
+        path: `${postAssetPath}chest.png`,
+    },
+    {
+        postSkin: PostSkin.FLOWER,
+        path: `${postAssetPath}flower.png`,
+    }
 ];

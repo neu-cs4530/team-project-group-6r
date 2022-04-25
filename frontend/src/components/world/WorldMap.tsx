@@ -277,7 +277,7 @@ class CoveyGameScene extends Phaser.Scene {
     let { sprite } = mPost;
     if (!sprite) {
       sprite = this.physics.add
-        .sprite(0, 0, (mPost.postSkin).toString(10))
+        .sprite(0, 0, mPost.postSkin)
         .setSize(25, 30)
         .setOffset(0, 24);
       const worldXY = this.worldLayer.tileToWorldXY(mPost.coordinate.x, mPost.coordinate.y);

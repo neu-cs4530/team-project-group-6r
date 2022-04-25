@@ -165,8 +165,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       let localPosts = initData.posts.map(sp =>
         Post.fromServerPost(sp)
       );
-      console.log(initData.posts);
-      console.log(localPosts);
       let localNearbyPlayers: Player[] = [];
       setPlayersInTown(localPlayers);
       setConversationAreas(localConversationAreas);
