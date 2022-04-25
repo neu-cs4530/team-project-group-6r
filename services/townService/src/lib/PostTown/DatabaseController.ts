@@ -36,7 +36,7 @@ export async function getPost(coveyTownID : string, postID : string) : Promise<a
  */
 export async function getAllPostInTown(coveyTownID : string) : Promise<Post[]> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.find({});
+  return model.find({ timeToLive: { $exists: true } });
 }
 
 /**
@@ -71,7 +71,7 @@ export async function updatePost(coveyTownID : string, postID : string, post : a
  */
 export async function addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string) {
   const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findByIdAndUpdate(rootPostID, { $push: { comments: createdCommentID } } );
+  return model.findByIdAndUpdate(rootPostID, { $push: { comments: createdCommentID } }, { new : true } );
 }
 
 /**
@@ -85,6 +85,16 @@ export async function createComment(coveyTownID : string, comment : Comment) : P
   const insertComment = new Model(comment);
 
   return insertComment.save();
+}
+
+export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) {
+	const model = mongoose.model('post', PostSchema, coveyTownID);
+  return model.findOneAndUpdate({ _id: rootPostID, numberOfComments: { $lt: 2 } }, { $inc: { timeToLive: 30000 } }, { new : true });
+}
+
+export async function incrementNumberOfComments(coveyTownID : string, rootPostID : string) {
+	const model = mongoose.model('post', PostSchema, coveyTownID);
+  return model.findByIdAndUpdate(rootPostID, { $inc: { numberOfComments: 1 } }, { new : true });
 }
 
 /**
@@ -152,7 +162,7 @@ export async function updateComment(coveyTownID : string, commentID : string, co
  */
 export async function addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID }}, {timestamps:false});
+  return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID }}, { new : true, timestamps: false}, );
 }
 
 /**
@@ -182,4 +192,13 @@ export async function deleteFile(filename: string): Promise<any> {
       throw Error('Can\'t find file id')
     }
   });
+}
+
+export async function clearCollections(): Promise<any> {
+	try {	
+		const collections = await mongoose.connection.db.listCollections().toArray();
+		collections.map(collection => collection.name).forEach(async collectionName => mongoose.connection.db.dropCollection(collectionName));
+	} catch (error) {
+		throw(error);
+	}
 }

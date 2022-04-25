@@ -98,6 +98,9 @@ export default class CoveyTownsStore {
   deleteTown(coveyTownID: string, coveyTownPassword: string): boolean {
     const existingTown = this.getControllerForTown(coveyTownID);
     if (existingTown && passwordMatches(coveyTownPassword, existingTown.townUpdatePassword)) {
+      // clear the interval for expiring posts
+      existingTown.clearInterval();
+      
       this._towns = this._towns.filter(town => town !== existingTown);
       existingTown.disconnectAllPlayers();
       return true;
