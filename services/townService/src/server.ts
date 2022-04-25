@@ -22,9 +22,12 @@ app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 const server = http.createServer(app);
 
-const uri = 'mongodb+srv://Vevey:User1@coveytown.kt2xq.mongodb.net/CoveyTown?retryWrites=true&w=majority';
+const uri = process.env.MONGODB_URI;
 
-mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
+// const conn = mongoose.createConnection(uri);
+if(uri) {
+  mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
+}
 
 mongoose.connection.once('open', () => {
   clearCollections();
