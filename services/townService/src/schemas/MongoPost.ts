@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
 
+/**
+ * The mongo schema of a post
+ */
 const PostSchema = new mongoose.Schema({
   title: { type: String, immutable: true },
   postContent: String,

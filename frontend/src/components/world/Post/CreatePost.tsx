@@ -7,17 +7,26 @@ import { calculateBytes } from '../../../Util';
 import FileForm from './FileForm';
 import useApi from './useApi';
 
+/**
+ * The properties of creating a post
+ */
 interface CreatePostProps {
     coordinates: Coordinate;
     closeCreatePost: () => void;
 }
 
+/**
+ * What a post can contain, a title and some content
+ */
 type CreatePostStates = {
     title: string,
     content: string;
     file?: File,
 }
 
+/**
+ * The initial state of a post, just empty strings
+ */
 const initalState = {
     title: '',
     content: '',
@@ -51,6 +60,10 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
         }));
     }
 
+    /**
+     * Server's response to creating a post
+     * @param result The message the server sends on if the post was created succesfully
+     */
     const createPostCallback = (result: ServerPost) => {
         toast({
             title: 'Created post successfully',
@@ -60,6 +73,10 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
         closeCreatePost();
     };
 
+    /**
+     * Server's response to an error being thrown in the process of creating a post
+     * @param error The error caused in the process of creating a post
+     */
     const createPostError = (error: string) => {
         toast({
             title: 'Unable to create the post',

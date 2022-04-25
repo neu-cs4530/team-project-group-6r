@@ -1,31 +1,48 @@
+/**
+ * A post is a type of global message that people can see and comment upon; this is the server representation of it
+ */
 export type ServerPost = {
     _id?: string,
     title: string,
     postContent: string,
     ownerID: string,
-    file: ServerFile,
+    file: {
+        filename: string,
+        contentType: string
+    }
     isVisible: boolean,
     comments?: string[],
     coordinates: Coordinate,
     createdAt?: Date,
     updatedAt?: Date
-  }
-  
-  export type ServerFile = {
+}
+
+/**
+ * The server representation of a file attached to a post
+ */
+export type ServerFile = {
     filename: string,
     contentType: string
-  }
-
+}
+/**
+ * The servers listener that sees when a post/comment is made, updated, deleted, etc.
+ */
 export type PostListener = {
     onPostChange?: (updatedPost: ServerPost) => void;
     onCommentChange?: (comments: string[]) => void;
 }
 
+/**
+ * Where the post is
+ */
 export type Coordinate = {
     x: number;
     y: number;
 }
 
+/**
+ * The UI representation of a post
+ */
 export default class Post {
     private _id?: string;
 

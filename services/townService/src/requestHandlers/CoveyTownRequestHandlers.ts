@@ -298,6 +298,11 @@ export function townSubscriptionHandler(socket: Socket): void {
   });
 }
 
+/**
+ * Adapter designed to let server know when comments have been updated
+ * @param postID The id of the post the comment is attached to
+ * @param comments The comments being updated
+ */
 export function emitCommentUpdate(postID: string, comments: CommentTree[]) {
   ServerSocket.to(`Post: ${postID}`).emit('commentUpdate', comments);
 }

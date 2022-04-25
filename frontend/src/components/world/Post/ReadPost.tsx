@@ -11,6 +11,9 @@ import CreateComment from './CreateComment';
 import Comments from './Comments';
 import PopOverButton from './PopOverButton';
 
+/**
+ * The properties of reading a post on your screen
+ */
 interface ReadPostProps {
     post: Post;
     toggleEdit: () => void;
@@ -38,6 +41,10 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         if (setComments) setComments(result);
     };
 
+    /**
+     * Server's response to an error being thrown in the process of getting comments under a post
+     * @param error The error caused in the process of getting comments under a post
+     */
     const getCommentsError = (error: string) => {
         toast({
             title: 'Unable to get comments for this post',
@@ -85,6 +92,7 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
 
     useEffect(() => {
         socket?.emit('postOpen', post);
+        console.log(post);
         return () => {
             socket?.emit('postClose', post);
             if (setComments) setComments([]);
@@ -100,23 +108,29 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
         switch (mediaType) {
             case 'video':
                 return <video width="320" height="240" controls>
-                    <source src={source} type={mimetype} />
+                    <source src={source} type={mimetype}/>
                     Your browser does not support the video tag.
-                    <track kind="captions" />
+                    <track kind="captions"/>
                 </video>
+                break;
             case 'audio':
                 return <audio controls>
-                    <source src={source} type={mimetype} />
+                    <source src={source} type={mimetype}/>
                     Your browser does not support the audio tag.
-                    <track kind="captions" />
+                    <track kind="captions"/>
                 </audio>
+                break;
             case 'image':
-                return <img src={source} alt="Not available" />
+                return <img src={source} alt="Not available"/>
+                break;
             case 'text':
             case 'application':
-                return <embed src={source} width="500" height="375" type={mimetype} />
+                return <embed src={source} width= "500" height= "375" type={mimetype}/>
+                break;
+
             case "":
                 return <></>
+                break;
             default:
                 return <Text>File type is not supported!</Text>
         }
