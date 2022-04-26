@@ -51,7 +51,7 @@ export default class FileConnection {
   /**
    * Creates the file connection to mongo
    */
-  initGfsObjects() {
+  initGfsObjects(): void {
     mongoose.connection.once('open', () => {
       this._gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
         bucketName: 'uploads',

@@ -19,7 +19,6 @@ export interface Post {
   }
   isVisible: boolean,
   timeToLive: number,
-  numberOfComments: number,
   comments?: string[],
   postSkin: PostSkin,
   coordinates: {

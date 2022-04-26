@@ -6,8 +6,6 @@ import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import { ConversationAreaCreateRequest, ServerConversationArea } from '../client/TownsServiceClient';
 import { Post } from '../types/PostTown/post';
-import ServerSocket from '../ServerSocket';
-import { CommentTree } from '../types/PostTown/comment';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -116,8 +114,6 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
   const newPlayer = new Player(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
   const posts = await coveyTownController.getAllPostInTown();
-  console.log(posts);
-  console.log(coveyTownController.getSessionByToken(newSession.sessionToken));
   assert(newSession.videoToken);
   return {
     isOK: true,

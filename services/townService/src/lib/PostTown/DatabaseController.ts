@@ -24,7 +24,7 @@ export async function createPost(coveyTownID: string, post : Post) : Promise<Pos
  * @param postID The id of the post we want
  * @returns The post from the db
  */
-export async function getPost(coveyTownID : string, postID : string) : Promise<any> {
+export async function getPost(coveyTownID : string, postID : string) : Promise<Post | null> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findById(postID);
 }
@@ -45,7 +45,7 @@ export async function getAllPostInTown(coveyTownID : string) : Promise<Post[]> {
  * @param postID The id of the post we're deleting
  * @returns The post that was just deleted
  */
-export async function deletePost(coveyTownID : string, postID : string) : Promise<any> {
+export async function deletePost(coveyTownID : string, postID : string) : Promise<Post | null> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findByIdAndDelete(postID);
 }
@@ -57,7 +57,10 @@ export async function deletePost(coveyTownID : string, postID : string) : Promis
  * @param post The updated version of the post
  * @returns The updated post
  */
-export async function updatePost(coveyTownID : string, postID : string, post : any) : Promise<any> {
+// lint disabled since dynamic post fields are allowed
+/*eslint-disable */
+export async function updatePost(coveyTownID : string, postID : string, post : any) : Promise<Post | null> {
+	/* eslint-enable */
   const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findByIdAndUpdate(postID, { $set: post }, { new : true });
 }
@@ -69,7 +72,7 @@ export async function updatePost(coveyTownID : string, postID : string, post : a
  * @param createdCommentID The id of the comment we're linking to the post
  * @returns The post that had a comment added to it
  */
-export async function addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string) {
+export async function addCommentToRootPost(coveyTownID : string, rootPostID : string, createdCommentID : string): Promise<Post | null> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
   return model.findByIdAndUpdate(rootPostID, { $push: { comments: createdCommentID } }, { new : true } );
 }
@@ -87,14 +90,9 @@ export async function createComment(coveyTownID : string, comment : Comment) : P
   return insertComment.save();
 }
 
-export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) {
+export async function addTimeToPostTTL(coveyTownID : string, rootPostID : string) : Promise<Post | null> {
   const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findOneAndUpdate({ _id: rootPostID, numberOfComments: { $lt: 2 } }, { $inc: { timeToLive: 30000 } }, { new : true });
-}
-
-export async function incrementNumberOfComments(coveyTownID : string, rootPostID : string) {
-  const model = mongoose.model('post', PostSchema, coveyTownID);
-  return model.findByIdAndUpdate(rootPostID, { $inc: { numberOfComments: 1 } }, { new : true });
+  return model.findOneAndUpdate({ _id: rootPostID, numberOfComments: { $lt: 2 } }, { $inc: { timeToLive: 5000 } }, { new : true });
 }
 
 /**
@@ -103,7 +101,7 @@ export async function incrementNumberOfComments(coveyTownID : string, rootPostID
  * @param commentID The id of the comment we want
  * @returns The comment we want to get
  */
-export async function getComment(coveyTownID : string, commentID : string) : Promise<any> {
+export async function getComment(coveyTownID : string, commentID : string) : Promise<Comment | null> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
   return model.findById(commentID);
 }
@@ -125,7 +123,7 @@ export async function getAllComments(coveyTownID : string, commentIDs : string[]
  * @param commentID The id of the comment we're deleting
  * @returns The comment that was just deleted
  */
-export async function deleteComment(coveyTownID : string, commentID : string) : Promise<any> {
+export async function deleteComment(coveyTownID : string, commentID : string) : Promise<Comment | null> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
   return model.findByIdAndUpdate(commentID, { $set: { isDeleted: true, commentContent: '[removed]', ownerID: '[deleted]' } }, { new: true, timestamps: false });
 }
@@ -136,9 +134,9 @@ export async function deleteComment(coveyTownID : string, commentID : string) : 
  * @param postID The id of the post we want to delete comments from
  * @returns The post we deleted comments from
  */
-export async function deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<any> {
+export async function deleteCommentsUnderPost(coveyTownID : string, postID : string) : Promise<void> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
-  return model.deleteMany({ rootPostID: postID });
+  model.deleteMany({ rootPostID: postID });
 }
 
 /**
@@ -148,7 +146,10 @@ export async function deleteCommentsUnderPost(coveyTownID : string, postID : str
  * @param comment The updated version of the comment
  * @returns The updated comment
  */
-export async function updateComment(coveyTownID : string, commentID : string, comment : any) : Promise<any> {
+// lint disabled because dynamic comment fields are allowed, enforcement is through Mongo
+/*eslint-disable */
+export async function updateComment(coveyTownID : string, commentID : string, comment : any) : Promise<Comment | null> {
+	/* eslint-enable */
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
   return model.findByIdAndUpdate(commentID, { $set: comment }, { new: true });
 }
@@ -160,7 +161,7 @@ export async function updateComment(coveyTownID : string, commentID : string, co
  * @param createdCommentID The id of the reply comment
  * @returns The reply comment
  */
-export async function addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) {
+export async function addCommentToParentComment(coveyTownID : string, parentCommentID : string, createdCommentID : string) : Promise<Post | null> {
   const model = mongoose.model('comment', CommentSchema, coveyTownID);
   return model.findByIdAndUpdate(parentCommentID, { $push: { comments: createdCommentID } }, { new : true, timestamps: false } );
 }
@@ -170,7 +171,10 @@ export async function addCommentToParentComment(coveyTownID : string, parentComm
  * @param filename The name of the file we're getting
  * @returns The file we want to get
  */
+// lint disabled because MongoDB GFS files have ambiguous typing
+/*eslint-disable */
 export async function getFile(filename: string) : Promise<any> {
+	/* eslint-enable */
   const { gfs } = FileConnection.getInstance();
   return gfs.files.findOne({ filename });
 }
@@ -179,9 +183,12 @@ export async function getFile(filename: string) : Promise<any> {
  * Deletes a file from mongodb
  * @param filename The name of the file we want to delete
  */
+// lint disabled because MongoDB GFS files have ambiguous typing
+/*eslint-disable */
 export async function deleteFile(filename: string): Promise<any> {
   const { gfs, gridfsBucket } = FileConnection.getInstance();
   gfs.files.findOne({ filename }, (err: any, result: any) => {
+		/* eslint-enable */
     if (err) {
       throw Error('Can\'t find file');
     }
@@ -194,7 +201,7 @@ export async function deleteFile(filename: string): Promise<any> {
   });
 }
 
-export async function clearCollections(): Promise<any> {
+export async function clearCollections(): Promise<void> {
   const collections = await mongoose.connection.db.listCollections().toArray();
   collections.map(collection => collection.name).forEach(async collectionName => mongoose.connection.db.dropCollection(collectionName));
 }

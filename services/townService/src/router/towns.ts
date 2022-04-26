@@ -29,7 +29,6 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
    */
   app.post('/sessions', express.json(), async (req, res) => {
     try {
-      console.log(4444);
       const result = await townJoinHandler({
         userName: req.body.userName,
         coveyTownID: req.body.coveyTownID,
@@ -362,7 +361,10 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   app.get('/files', async (_req, res) => {
     const { gfs } = FileConnection.getInstance();
 
-    gfs.files.find().toArray((_err: any, files: any) => {
+    // lint disabled here since MongoDB file typing using GridFS is ambiguous
+    /*eslint-disable */
+    gfs.files.find().toArray((_err: unknown, files: any) => {
+    /* eslint-enable */
       // Check if files
       if (!files || files.length === 0) {
         return res.status(404).json({
@@ -396,7 +398,11 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   app.get('/image/:filename', async (req, res) => {
     const { gfs } = FileConnection.getInstance();
     const { gridfsBucket } = FileConnection.getInstance();
-    gfs.files.findOne({ filename: req.params.filename }, (_err: any, file: any) => {
+
+    // lint disabled here since MongoDB file typing using GridFS is ambiguous
+    /*eslint-disable */
+    gfs.files.findOne({ filename: req.params.filename }, (_err: unknown, file: any) => {
+    /* eslint-enable */
       if (!file || file.length === 0) {
         res.status(404).json({
           err: 'No file exist',

@@ -1,9 +1,6 @@
-import PostCoveyTownController from '../lib/PostTown/PostCoveyTownController';
 import { Post } from '../types/PostTown/post';
 import { Comment, CommentTree } from '../types/PostTown/comment';
-import PlayerSession from '../types/PlayerSession';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
-import Player from '../types/Player';
 
 /**
  * Envelope that wraps any response from the server
@@ -350,7 +347,7 @@ export async function commentUpdateHandler(_requestData : CommentUpdateRequest) 
  * @param _requestData An object representing the players request
  * @returns The server's respopnse to the request to get a file
  */
-export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+export async function fileGetHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<unknown>> {
   const { postID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);
@@ -376,7 +373,7 @@ export async function fileGetHandler(_requestData : PostGetRequest) : Promise<Re
  * @param _requestData An object representing the players request
  * @returns The server's respopnse to the request to delete a file
  */
-export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<any>> {
+export async function fileDeleteHandler(_requestData : PostGetRequest) : Promise<ResponseEnvelope<unknown>> {
   const { postID } = _requestData;
   const townsStore = CoveyTownsStore.getInstance();
   const postTownController = townsStore.getControllerForTown(_requestData.coveyTownID);

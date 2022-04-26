@@ -4,6 +4,7 @@ import { Comment, CommentTree } from '../../types/PostTown/comment';
 import * as databaseController from './DatabaseController';
 import CoveyTownController from '../CoveyTownController';
 import ServerSocket from '../../ServerSocket';
+import PlayerSession from '../../types/PlayerSession';
 
 /**
  * Controls communication between mongodb and coveytown
@@ -41,10 +42,14 @@ export default class PostCoveyTownController extends CoveyTownController{
   }
 
   private async deletePostCascade(post: Post, postID: string): Promise<Post> {
-    const result : Post = await databaseController.deletePost(this.coveyTownID, postID);
+    const result : Post | null = await databaseController.deletePost(this.coveyTownID, postID);
+
+    if (!result) {
+      throw (Error('Post is null'));
+    }
+
     this._listeners.forEach(listener => {
       listener.onPostDelete(result);
-      console.log(555455554);
     });
     await databaseController.deleteCommentsUnderPost(this.coveyTownID, postID);
 
@@ -59,15 +64,23 @@ export default class PostCoveyTownController extends CoveyTownController{
     const postList: Post[] = await this.getAllPostInTown();
     // console.log(postList)
     const expiredPosts: Post[] = postList.filter(post => {
-      const createdAt: Date = post.createdAt!;
+      if (!post.createdAt) {
+        throw (Error('Post requires created at time'));
+      }
+
+      const { createdAt } = post;
       const now: Date = new Date();
       return now.getTime() > createdAt.getTime() + post.timeToLive;
     });
 
-    console.log(expiredPosts.length);
+    // console.log(expiredPosts.length);
 
     expiredPosts.forEach(async post => {
-      const postID: string = post._id!;
+      if (!post._id) {
+        throw (Error('Post requires ID'));
+      }
+
+      const postID: string = post._id;
       await this.deletePostCascade(post, postID);
     });
 		
@@ -100,7 +113,7 @@ export default class PostCoveyTownController extends CoveyTownController{
       }
       post.title = this.filter.clean(post.title.valueOf());
 
-      const minTTL = 20000;
+      const minTTL = 0;
       const maxTTL = 60000 * 4320;
       post.timeToLive = post.timeToLive < minTTL || post.timeToLive > maxTTL ? 300000 : post.timeToLive;
       const result: Post = await databaseController.createPost(this.coveyTownID, post);
@@ -117,8 +130,11 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The post in question
    */
   async getPost(postID : string) : Promise<Post> {
-    const result : Post = await databaseController.getPost(this.coveyTownID, postID);
-    console.log(result);
+    const result : Post | null = await databaseController.getPost(this.coveyTownID, postID);
+
+    if (!result) {
+      throw (Error('Post is null'));
+    }
 			
     return result;
   }
@@ -140,11 +156,20 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The deleted post
    */
   async deletePost(postID : string, token : string) : Promise<Post> {
-    const post: Post = await databaseController.getPost(this.coveyTownID, postID);
-    const playerID: string  = this.getSessionByToken(token)!.player.userName;
+    const post: Post | null = await databaseController.getPost(this.coveyTownID, postID);
+
+    if (!post || !post._id) {
+      throw (Error('Post is null'));
+    }
+
+    const session: PlayerSession | undefined = this.getSessionByToken(token);
+    if (!session) {
+      throw (Error('Invalid session token'));
+    }
+    const playerID: string  = session.player.userName;
            
     if (post.ownerID === playerID) {
-      const result = await this.deletePostCascade(post, post._id!);
+      const result = await this.deletePostCascade(post, post._id);
       return result;
     }
 
@@ -159,9 +184,17 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @param token The player's (who is trying to update the post) session token
    * @returns The updated post
    */
-  async updatePost(postID : string, post: any, deletePrevFile: boolean, token : string) : Promise<Post> {
-    const postToUpdate: Post = await databaseController.getPost(this.coveyTownID, postID);
 
+  // lint disabled here since the post update can take in a dynamic amount of inputs, which we feel is cleaner
+  // the input is sanitized so any object being inputed is okay, typing is enforced later
+  /*eslint-disable */
+  async updatePost(postID : string, post: any, deletePrevFile: boolean, token : string) : Promise<Post> {
+	/* eslint-disable */
+    const postToUpdate: Post | null = await databaseController.getPost(this.coveyTownID, postID);
+		
+    if (!postToUpdate) {
+      throw (Error('Post is null'));
+    }
     // sanitize input
     delete post.comments;
     delete post.timeToLive;
@@ -174,7 +207,12 @@ export default class PostCoveyTownController extends CoveyTownController{
       if (post.postContent) { 
         post.postContent = this.filter.clean(post.postContent.valueOf());
       }
-      const result : Post = await databaseController.updatePost(this.coveyTownID, postID, post);
+      const result : Post | null = await databaseController.updatePost(this.coveyTownID, postID, post);
+
+			if (!result) {
+				throw(Error('Comment is null'));
+			}
+
       this._listeners.forEach(listener => listener.onPostUpdate(result));
 
       // delete file if old post had a file that is being replaced
@@ -209,8 +247,6 @@ export default class PostCoveyTownController extends CoveyTownController{
 
     // add 1 minute to time to live for the root post, max time to live is 1.5 minutes
     await databaseController.addTimeToPostTTL(this.coveyTownID, comment.rootPostID);
-    const updatedPost = await databaseController.incrementNumberOfComments(this.coveyTownID, comment.rootPostID);
-    this._listeners.forEach(listener => listener.onPostUpdate(updatedPost));
 		
     // TODO: remove the cheese
     const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
@@ -226,7 +262,11 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The comment in question
    */
   async getComment(commentID : string) : Promise<Comment> {
-    const result : Comment = await databaseController.getComment(this.coveyTownID, commentID);
+    const result : Comment | null = await databaseController.getComment(this.coveyTownID, commentID);
+
+		if (!result) {
+			throw(Error('Comment is null'));
+		}
 
     return result;
   }
@@ -265,12 +305,16 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The comments and their structure
    */
   async getCommentTree(postID : string) : Promise<CommentTree[]> {
-    const post: Post = await databaseController.getPost(this.coveyTownID, postID);
-    const comments: string[] = post.comments!;
-    
-    const result = await this.constructCommentTree(comments);
+    const post: Post | null = await databaseController.getPost(this.coveyTownID, postID);
 
-    return result;
+    if (post) {
+      const comments: string[] = post.comments!;
+   	 	const result = await this.constructCommentTree(comments);
+
+    	return result;
+    }
+    
+    throw (Error('Post is null'));
   }
 
   /**
@@ -280,11 +324,21 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The deleted comment
    */
   async deleteComment(commentID : string, token : string) : Promise<Comment> {
-    const comment: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+    const comment: Comment | null = await databaseController.getComment(this.coveyTownID, commentID);
+
+		if (!comment) {
+			throw(Error('Comment is null'));
+		}
+
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
         
     if (comment.ownerID === playerID) {
-      const result : Comment = await databaseController.deleteComment(this.coveyTownID, commentID);
+      const result : Comment | null = await databaseController.deleteComment(this.coveyTownID, commentID);
+
+			if (!result) {
+				throw(Error('Comment is null'));
+			}
+
       // TODO: remove the cheese
       const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
       const serverSocket: ServerSocket = ServerSocket.getInstance();
@@ -304,13 +358,23 @@ export default class PostCoveyTownController extends CoveyTownController{
    * @returns The updated comment
    */
   async updateComment(commentID : string, comment : any, token : string) : Promise<Comment> {
-    const commentToUpdate: Comment = await databaseController.getComment(this.coveyTownID, commentID);
+    const commentToUpdate: Comment | null = await databaseController.getComment(this.coveyTownID, commentID);
+
+		if (!commentToUpdate) {
+			throw(Error('Comment is null'));
+		}
+
     const playerID: string  = this.getSessionByToken(token)!.player.userName;
 
     if (commentToUpdate.ownerID === playerID) {
     // censor
       comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
-      const result : Comment = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+      const result : Comment | null = await databaseController.updateComment(this.coveyTownID, commentID, comment);
+
+			if (!result) {
+				throw(Error('Comment is null'));
+			}
+
       // TODO: remove the cheese
       const comments: CommentTree[] = await this.getCommentTree(result.rootPostID);
       const serverSocket: ServerSocket = ServerSocket.getInstance();

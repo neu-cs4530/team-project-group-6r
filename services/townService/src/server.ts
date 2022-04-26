@@ -31,6 +31,8 @@ if (uri === undefined) {
   throw (Error('No MongoDB URI detected'));
 }
 
+// checking for server health
+// eslint-disable-next-line no-console
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
 
 mongoose.connection.once('open', () => {

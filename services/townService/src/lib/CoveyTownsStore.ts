@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { CoveyTownList } from '../CoveyTypes';
 import PostCoveyTownController from './PostTown/PostCoveyTownController';
 
