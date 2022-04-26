@@ -99,9 +99,11 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
 
 
     useEffect(() => {
-        socket?.emit('postOpen', post);
+        socket?.on(`comments:${post.id}`, (newComments: ServerComment[]) => {
+            if (setComments) setComments(newComments);
+        })
         return () => {
-            socket?.emit('postClose', post);
+            socket?.off(`comments:${post.id}`)
             if (setComments) setComments([]);
         }
     }, [post, setComments, socket]);
