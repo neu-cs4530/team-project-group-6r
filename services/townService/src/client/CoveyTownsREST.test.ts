@@ -216,22 +216,5 @@ describe('TownsServiceAPIREST', () => {
         // the format of the exception :(
       }
     });
-    it('Admits a user to a valid public or private town', async () => {
-      const pubTown1 = await createTownForTesting(undefined, true);
-      const privTown1 = await createTownForTesting(undefined, false);
-      const res = await apiClient.joinTown({
-        userName: nanoid(),
-        coveyTownID: pubTown1.coveyTownID,
-      });
-      expect(res.coveySessionToken).toBeDefined();
-      expect(res.coveyUserID).toBeDefined();
-
-      const res2 = await apiClient.joinTown({
-        userName: nanoid(),
-        coveyTownID: privTown1.coveyTownID,
-      });
-      expect(res2.coveySessionToken).toBeDefined();
-      expect(res2.coveyUserID).toBeDefined();
-    });
   });
 });

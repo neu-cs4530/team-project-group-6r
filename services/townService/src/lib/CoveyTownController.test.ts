@@ -11,6 +11,7 @@ import { townSubscriptionHandler } from '../requestHandlers/CoveyTownRequestHand
 import CoveyTownsStore from './CoveyTownsStore';
 import * as TestUtils from '../client/TestUtils';
 
+
 const mockTwilioVideo = mockDeep<TwilioVideo>();
 jest.spyOn(TwilioVideo, 'getInstance').mockReturnValue(mockTwilioVideo);
 

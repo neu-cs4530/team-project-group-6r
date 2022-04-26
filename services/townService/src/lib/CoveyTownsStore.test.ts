@@ -2,9 +2,17 @@ import { nanoid } from 'nanoid';
 import CoveyTownsStore from './CoveyTownsStore';
 import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
+import { Post } from '../../src/types/PostTown/post';
 import { ServerConversationArea } from '../client/TownsServiceClient';
 import { ChatMessage } from '../CoveyTypes';
+import { CommentTree } from '../types/PostTown/comment';
 
+/**
+ * Note:
+ * We modified CoveyTownStore to caches a list of PostCoveyTownController instead of CoveyTownController.
+ * PostCoveyTownController is an extension to CoveyTownController. We expect all previous writtens test for the
+ * CoveyTownStore to be passed, and not new tests needed to be added, because we didn't modify the definition.
+ */
 const mockCoveyListenerTownDestroyed = jest.fn();
 const mockCoveyListenerOtherFns = jest.fn();
 
@@ -21,14 +29,26 @@ function mockCoveyListener(): CoveyTownListener {
     },
     onPlayerJoined(newPlayer: Player) {
       mockCoveyListenerOtherFns(newPlayer);
-    }, onConversationAreaDestroyed(_conversationArea : ServerConversationArea){
+    }, onConversationAreaDestroyed(_conversationArea: ServerConversationArea) {
       mockCoveyListenerOtherFns(_conversationArea);
-    }, onConversationAreaUpdated(_conversationArea: ServerConversationArea){
+    }, onConversationAreaUpdated(_conversationArea: ServerConversationArea) {
       mockCoveyListenerOtherFns(_conversationArea);
     },
-    onChatMessage(message: ChatMessage){
+    onChatMessage(message: ChatMessage) {
       mockCoveyListenerOtherFns(message);
     },
+    onPostCreate(post: Post) {
+      mockCoveyListenerOtherFns(post);
+    },
+    onPostUpdate(post: Post) {
+      mockCoveyListenerOtherFns(post);
+    },
+    onPostDelete(post: Post) {
+      mockCoveyListenerOtherFns(post);
+    },
+    onCommentUpdate(postId: string, comments: CommentTree[]) {
+      mockCoveyListenerOtherFns(postId, comments);
+    }
   };
 }
 
@@ -107,7 +127,6 @@ describe('CoveyTownsStore', () => {
 
     });
     it('Should update the town parameters', async () => {
-
       // First try with just a visiblity change
       const town = createTownForTesting();
       const { friendlyName } = town;

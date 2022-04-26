@@ -14,6 +14,7 @@ import addTownRoutes from './router/towns';
 import FileConnection from './connection';
 import { clearCollections } from './lib/PostTown/DatabaseController';
 import { Server } from 'socket.io';
+import { CommentTree } from './types/PostTown/comment';
 
 
 const app = Express();
@@ -24,8 +25,7 @@ app.set('view engine', 'ejs');
 const server = http.createServer(app);
 
 const uri = process.env.MONGODB_URI;
-export let ServerSocket: Server;
-// const conn = mongoose.createConnection(uri);
+let ServerSocket: Server;
 
 if (uri) {
   mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
@@ -66,3 +66,5 @@ server.listen(process.env.PORT || 8081, () => {
       .createTown(process.env.DEMO_TOWN_ID, false);
   }
 });
+
+export { ServerSocket }

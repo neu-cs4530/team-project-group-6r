@@ -2,6 +2,7 @@ import { ServerConversationArea } from '../client/TownsServiceClient';
 import { ChatMessage } from '../CoveyTypes';
 import Player from './Player';
 import { Post } from './PostTown/post';
+import { CommentTree } from './PostTown/comment';
 
 /**
  * A listener for player-related events in each town
@@ -34,7 +35,7 @@ export default interface CoveyTownListener {
    * Called when a conversation area is created or updated
    * @param conversationArea the conversation area that is updated or created
    */
-  onConversationAreaUpdated(conversationArea: ServerConversationArea) : void;
+  onConversationAreaUpdated(conversationArea: ServerConversationArea): void;
 
   /**
    * Called when a conversation area is destroyed
@@ -52,17 +53,25 @@ export default interface CoveyTownListener {
    * Called when a post is created by a user
    * @param post the new post
    */
-   onPostCreate(post: Post): void;
+  onPostCreate(post: Post): void;
 
-     /**
-   * Called when a post is updated by a user
-   * @param post the updated post
-   */
+  /**
+  * Called when a post is updated by a user
+  * @param post the updated post
+  */
   onPostUpdate(post: Post): void;
 
-        /**
+  /**
    * Called when a post is deleted by a user
    * @param post the deleted post
    */
-   onPostDelete(post: Post): void;
+  onPostDelete(post: Post): void;
+
+
+  /**
+   * Called when a comment is created/deleted/created
+   * @param postID the root post id of the updated comment
+   * @param comments the comments tree for the post with the given post id
+   */
+  onCommentUpdate(postId: string, comments: CommentTree[]): void;
 }
