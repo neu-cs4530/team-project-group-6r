@@ -3,19 +3,10 @@ import multer, { Multer } from 'multer';
 import { Post } from "../../types/PostTown/post";
 import { Comment } from "../../types/PostTown/comment";
 import PostCoveyTownController from './PostCoveyTownController';
-import CoveyTownsStore from '../CoveyTownsStore';
-import { AddressInfo } from 'net';
 import Express from 'express';
 import http from 'http';
 import CORS from 'cors';
-import addTownRoutes from '../../router/towns';
-import mongoose from 'mongoose';
 import * as svr from '../../server';
-
-import CoveyTownController from '../CoveyTownController';
-import Player from '../../types/Player';
-import {MongoClient} from 'MongoDB';
-import g from 'gridfs-stream';
 
 
 
@@ -27,7 +18,7 @@ describe('Post Controller tests', () => {
     const app = Express();
     app.use(CORS());
     const server = http.createServer(app);
-    beforeAll(async () => {      
+    beforeAll(async () => {    
         svr.ServerSocket;
         });
     
@@ -51,7 +42,9 @@ describe('Post Controller tests', () => {
         }
         try {
             if(id) {
+                console.log('here')
                 pid = await pctc.createPost(posting);
+                console.log('here2')
              }
         } catch(err) {
             console.log(err);
@@ -131,7 +124,7 @@ describe('Post Controller tests', () => {
                 const ids = await pctc.createPost(posting1);
                 const ids2 = await pctc.getPost(String(ids._id));
                 expect(ids2.postContent).toBe('i sure exist');
-                const ids3 = await pctc.updatePost(String(ids._id), posting2, oid);
+                const ids3 = await pctc.updatePost(String(ids._id), posting2, false, oid);
                 const ids4= await pctc.getPost(String(ids._id));
                 expect(ids4.postContent).toBe('i sure exist, still');
                 await pctc.deletePost(String(ids4._id), oid);

@@ -8,6 +8,7 @@ import * as TestUtils from './TestUtils';
 import { UserLocation } from '../CoveyTypes';
 import TownsServiceClient from './TownsServiceClient';
 import addTownRoutes from '../router/towns';
+import multer from 'multer';
 
 type TestTownData = {
   friendlyName: string, coveyTownID: string,
@@ -37,9 +38,10 @@ describe('TownServiceApiSocket', () => {
     const app = Express();
     app.use(CORS());
     server = http.createServer(app);
+    const upload = multer({ dest: 'uploads/' })
 
-    addTownRoutes(server, app);
-    server.listen();
+    addTownRoutes(server, app, upload);
+    await server.listen();
     const address = server.address() as AddressInfo;
 
     apiClient = new TownsServiceClient(`http://127.0.0.1:${address.port}`);
