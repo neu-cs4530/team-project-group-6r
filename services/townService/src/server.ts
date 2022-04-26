@@ -13,7 +13,7 @@ import { Server } from 'socket.io';
 import CoveyTownsStore from './lib/CoveyTownsStore';
 import addTownRoutes from './router/towns';
 import FileConnection from './connection';
-import { clearCollections } from './lib/PostTown/DatabaseController';
+// import { clearCollections } from './lib/PostTown/DatabaseController';
 import ServerSocket from './ServerSocket';
 
 
@@ -36,7 +36,7 @@ if (uri === undefined) {
 mongoose.connect(uri).then(() => { console.log('MongoDB Connected'); }).catch(err => console.log(err));
 
 mongoose.connection.once('open', () => {
-  clearCollections();
+  // clearCollections();
   FileConnection.createInstance();
 });
 

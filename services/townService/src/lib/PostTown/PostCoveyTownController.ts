@@ -1,5 +1,5 @@
 import Filter from 'bad-words';
-import { Post, PostSkin } from '../../types/PostTown/post';
+import { Post } from '../../types/PostTown/post';
 import { Comment, CommentTree } from '../../types/PostTown/comment';
 import * as databaseController from './DatabaseController';
 import CoveyTownController from '../CoveyTownController';
@@ -71,7 +71,7 @@ export default class PostCoveyTownController extends CoveyTownController{
 
       const { createdAt } = post;
       const now: Date = new Date();
-			console.log(post.timeToLive)
+      // console.log(post.timeToLive)
       return now.getTime() > createdAt.getTime() + post.timeToLive;
     });
 
@@ -237,7 +237,7 @@ export default class PostCoveyTownController extends CoveyTownController{
     // censor
     comment.commentContent = this.filter.clean(comment.commentContent.valueOf());
     const result : Comment = await databaseController.createComment(this.coveyTownID, comment);
-		console.log(result)
+		//console.log(result)
     // should I type cast like this, if I decide to check for string 
     // then that means the whole thing needs to be refactored
     const createdCommentID : string = result._id!;
