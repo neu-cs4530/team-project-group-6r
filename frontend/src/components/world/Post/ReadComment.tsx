@@ -3,7 +3,6 @@ import { VStack, Text, Box, HStack, Flex, Button, Textarea, useToast } from "@ch
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import useApi from './useApi';
 import CreateComment from "./CreateComment";
-import calculateTimeDifference from "../../../Util";
 import { ServerComment } from '../../../classes/Comment';
 import { CommentDeleteRequest, CommentUpdateRequest } from '../../../classes/TownsServiceClient';
 
@@ -110,8 +109,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             description: `Comment ID: ${comment._id}`,
             status: 'success',
         });
-        console.log(comment.updatedAt);
-        console.log(comment.createdAt);
+        // console.log(comment.updatedAt);
+        // console.log(comment.createdAt);
         handleEditButtonClick();
     };
 
