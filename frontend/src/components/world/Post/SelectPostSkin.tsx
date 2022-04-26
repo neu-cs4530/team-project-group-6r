@@ -18,8 +18,8 @@ export default function SelectPostSkin({ setPostSkin, postSkin }: SelectPostSkin
 
     const handleSelectPostSkin = (skin: string) => {
         const selectedPostSkin: PostSkin = skin as PostSkin;
-        setState({ postSkin: selectedPostSkin });
-        setPostSkin(selectedPostSkin);
+        setState({ postSkin: selectedPostSkin || PostSkin.POST });
+        setPostSkin(selectedPostSkin || PostSkin.POST);
     };
 
     const skinSelect = () => (

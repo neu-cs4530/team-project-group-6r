@@ -63,6 +63,8 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
           title: 'Unable to join town',
           description: 'Please select a username',
           status: 'error',
+          duration: 1000,
+          isClosable: true,
         });
         return;
       }
@@ -71,6 +73,8 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
           title: 'Unable to join town',
           description: 'Please enter a town ID',
           status: 'error',
+          duration: 1000,
+          isClosable: true,
         });
         return;
       }

@@ -87,6 +87,8 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
             title: 'Created post successfully',
             description: `Post ID: ${arg._id}, Title: ${arg.title}, File: ${arg.file.filename}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
         closeCreatePost();
     };
@@ -100,6 +102,8 @@ export default function CreatePost({ coordinates, closeCreatePost }: CreatePostP
             title: 'Unable to create the post',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         });
     };
 

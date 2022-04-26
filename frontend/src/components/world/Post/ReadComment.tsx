@@ -74,6 +74,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             title: 'Deleted comment successfully',
             description: `Comment ID: ${comment._id}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
     };
 
@@ -86,6 +88,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             title: 'Unable to delete the comment',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         })
     };
 
@@ -97,6 +101,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             title: 'Edited comment successfully',
             description: `Comment ID: ${comment._id}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
         handleEditButtonClick();
     };
@@ -110,6 +116,8 @@ export default function ReadComment({ comment, depth }: CommentProps): JSX.Eleme
             title: 'Unable to edit the comment',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         });
     };
 

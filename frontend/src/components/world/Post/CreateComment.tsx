@@ -60,6 +60,8 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
             title: 'Created comment successfully',
             description: `Comment ID: ${result._id}, Parent Post Id: ${result.rootPostID}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
         if (successCallback) successCallback();
         setCommentStates({ content: '' });
@@ -74,6 +76,8 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
             title: 'Unable to create the comment',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         });
         if (errorCallback) errorCallback();
     };

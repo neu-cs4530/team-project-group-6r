@@ -37,6 +37,8 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
             title: 'Retrieved post successfully',
             description: `Post ID: ${post.id}, Posted By: ${post.ownerId}, Comments: ${result.length}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
         if (setComments) setComments(result);
     };
@@ -50,6 +52,8 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
             title: 'Unable to get comments for this post',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         });
     };
 
@@ -57,11 +61,12 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
      * Server's response to deleting a post
      */
     const deletePostCallback = useCallback(() => {
-
         toast({
             title: 'Deleted Post successfully',
             description: `Post ID: ${post.id}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
         closeReadPost();
     }, [closeReadPost, post.id, toast]);
@@ -75,6 +80,8 @@ export default function ReadPost({ post, toggleEdit, closeReadPost }: ReadPostPr
             title: 'Unable to delete the post',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         });
     }, [toast]);
 

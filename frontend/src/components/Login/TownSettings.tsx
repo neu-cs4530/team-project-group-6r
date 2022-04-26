@@ -75,7 +75,7 @@ const TownSettings: React.FunctionComponent = () => {
         toast({
           title: 'Unable to update town',
           description: err.toString(),
-          status: 'error'
+          status: 'error',
         });
       }
     }

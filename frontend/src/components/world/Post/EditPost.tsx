@@ -71,6 +71,8 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
             title: 'Edited post successfully',
             description: `Post ID: ${post.id}`,
             status: 'success',
+            duration: 1000,
+            isClosable: true,
         });
         toggleEdit();
     };
@@ -80,6 +82,8 @@ export default function EditPost({ post, toggleEdit }: EditPostProps): JSX.Eleme
             title: 'Unable to edit the post',
             description: error,
             status: 'error',
+            duration: 1000,
+            isClosable: true,
         });
     };
 
