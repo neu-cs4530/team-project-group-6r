@@ -9,11 +9,11 @@ import useConversationAreas from '../../hooks/useConversationAreas';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import usePlayerMovement from '../../hooks/usePlayerMovement';
 import usePlayersInTown from '../../hooks/usePlayersInTown';
-// TODO
 import usePosts from '../../hooks/usePosts';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
 import PostModal from './Post/Post';
+import { PostSkin, postSkinSpriteMap, PostSkinSpriteMapType } from '../../classes/Image';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -115,7 +115,9 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.image('16_Grocery_store_32x32', '/assets/tilesets/16_Grocery_store_32x32.png');
     this.load.tilemapTiledJSON('map', '/assets/tilemaps/indoors.json');
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
-    this.load.image('comment', '/assets/post/comment.png')
+    postSkinSpriteMap.forEach((value: PostSkinSpriteMapType) => {
+      this.load.image((value.postSkin), value.path);
+    });
   }
 
   /**
@@ -275,7 +277,7 @@ class CoveyGameScene extends Phaser.Scene {
     let { sprite } = mPost;
     if (!sprite) {
       sprite = this.physics.add
-        .sprite(0, 0, 'comment')
+        .sprite(0, 0, mPost.postSkin || PostSkin.POST)
         .setSize(25, 30)
         .setOffset(0, 24);
       const worldXY = this.worldLayer.tileToWorldXY(mPost.coordinate.x, mPost.coordinate.y);

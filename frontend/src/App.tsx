@@ -134,9 +134,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [playerMovementCallbacks] = useState<PlayerMovementCallback[]>([]);
   const [playersInTown, setPlayersInTown] = useState<Player[]>([]);
   const [nearbyPlayers, setNearbyPlayers] = useState<Player[]>([]);
-  // const [currentLocation, setCurrentLocation] = useState<UserLocation>({moving: false, rotation: 'front', x: 0, y: 0});
   const [conversationAreas, setConversationAreas] = useState<ConversationArea[]>([]);
-  // TODO: setPosts should be called when socket onPostAdded/onPostEditted/onPostDeleted
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
 
@@ -171,7 +169,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       setPlayersInTown(localPlayers);
       setConversationAreas(localConversationAreas);
       setNearbyPlayers(localNearbyPlayers);
-      // TODO
       setPosts(localPosts);
 
       const recalculateNearbyPlayers = () => {

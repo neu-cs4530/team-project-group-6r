@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { VStack, Text, Textarea, Button, useToast, HStack } from '@chakra-ui/react';
+import { VStack, Text, Textarea, Button, useToast, ButtonGroup } from '@chakra-ui/react';
 import useCoveyAppState from '../../../hooks/useCoveyAppState';
 import { ServerComment } from '../../../classes/Comment';
 import { CommentCreateRequest } from '../../../classes/TownsServiceClient';
@@ -104,10 +104,10 @@ export default function CreateComment({ postID, commentID, cancel, successCallba
                 placeholder='What are your thoughts?'
                 value={commentStates.content}
                 onChange={({ target }) => handleTextInputChange(target.value)} />
-            <HStack width="100%" justify='end' align='center'>
+            <ButtonGroup justifyContent='end' width='100%' variant='outline'>
                 {cancel ? <Button size='sm' onClick={cancel}>Cancel</Button> : <></>}
-                <Button size='sm' isLoading={createComment.loading} onClick={handleCommitButtonClick}>Comment</Button>
-            </HStack>
+                <Button size='sm' colorScheme='blue' isLoading={createComment.loading} onClick={handleCommitButtonClick}>Comment</Button>
+            </ButtonGroup>
         </VStack>
     );
 }
