@@ -8,7 +8,7 @@ const PostSchema = new mongoose.Schema({
   postContent: String,
   ownerID: { type: String, immutable: true },
   isVisible: Boolean,
-  timeToLive: { type: Number, default: 5000 },
+  timeToLive: { type: Number, default: 10000 },
   file: {
     filename: { type: String, default: '' },
     contentType: { type: String, default: '' },

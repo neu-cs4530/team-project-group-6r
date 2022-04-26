@@ -94,6 +94,7 @@ export async function postCreateHandler(_requestData : PostCreateRequest): Promi
   }
 
   const { post } = _requestData;
+  console.log(post.timeToLive)
   const result = await postTownController.createPost(post);
   return {
     isOK: true,
