@@ -52,6 +52,7 @@ function mockCoveyListener(): CoveyTownListener {
   };
 }
 
+
 function createTownForTesting(friendlyNameToUse?: string, isPublic = false) {
   const friendlyName = friendlyNameToUse !== undefined ? friendlyNameToUse :
     `${isPublic ? 'Public' : 'Private'}TestingTown=${nanoid()}`;

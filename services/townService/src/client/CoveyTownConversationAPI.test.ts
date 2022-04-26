@@ -10,6 +10,8 @@ import addTownRoutes from '../router/towns';
 import * as requestHandlers from '../requestHandlers/CoveyTownRequestHandlers';
 import { createConversationForTesting } from './TestUtils';
 import TownsServiceClient, { ServerConversationArea } from './TownsServiceClient';
+import multer from 'multer';
+import PostCoveyTownController from '../lib/PostTown/PostCoveyTownController';
 
 type TestTownData = {
   friendlyName: string;
@@ -46,8 +48,9 @@ describe('Create Conversation Area API', () => {
     const app = Express();
     app.use(CORS());
     server = http.createServer(app);
+    const upload = multer({ dest: 'uploads/' })
 
-    addTownRoutes(server, app);
+    addTownRoutes(server, app, upload);
     await server.listen();
     const address = server.address() as AddressInfo;
 
@@ -72,7 +75,7 @@ describe('Create Conversation Area API', () => {
 describe('conversationAreaCreateHandler', () => {
 
   const mockCoveyTownStore = mock<CoveyTownsStore>();
-  const mockCoveyTownController = mock<CoveyTownController>();
+  const mockCoveyTownController = mock<PostCoveyTownController>();
   beforeAll(() => {
     // Set up a spy for CoveyTownsStore that will always return our mockCoveyTownsStore as the singleton instance
     jest.spyOn(CoveyTownsStore, 'getInstance').mockReturnValue(mockCoveyTownStore);
