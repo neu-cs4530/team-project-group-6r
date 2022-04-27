@@ -395,7 +395,7 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   });
 
   // get and stream image (test route)
-  app.get('/image/:filename', async (req, res) => {
+  app.get('/file/:filename', async (req, res) => {
     try {
       const { gfs } = FileConnection.getInstance();
       const { gridfsBucket } = FileConnection.getInstance();
