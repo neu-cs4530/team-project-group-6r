@@ -395,18 +395,29 @@ export default function addTownRoutes(http: Server, app: Express, upload: Multer
   });
 
   // get and stream image (test route)
-  app.get('/image/:filename', async (req, res) => {
-    const { gfs } = FileConnection.getInstance();
-    const { gridfsBucket } = FileConnection.getInstance();
-    gfs.files.findOne({ filename: req.params.filename }, (_err: any, file: any) => {
-      if (!file || file.length === 0) {
-        res.status(404).json({
-          err: 'No file exist',
-        });
-      }
-      const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
-      readStream.pipe(res);
-    });
+  app.get('/streamfile/:filename', async (req, res) => {
+    try {
+      const { gfs } = FileConnection.getInstance();
+      const { gridfsBucket } = FileConnection.getInstance();
+      gfs.files.findOne({ filename: req.params.filename }, (_err: any, file: any) => {
+        if (!file || file.length === 0) {
+          res.status(404).json({
+            err: 'No file exist',
+          });
+        }
+        const readStream = gridfsBucket.openDownloadStreamByName(req.params.filename);
+        readStream.addListener('error', () => {
+          readStream.abort();
+        })
+        readStream.pipe(res);
+      });
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({
+        message: 'Internal server error, please see log in server for more details',
+      });
+    }
   });
 
   // delete file
